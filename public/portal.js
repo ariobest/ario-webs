@@ -82,6 +82,7 @@
     $("#authSubmit").textContent=accountMode?"Already signed in":mode==="signup"?"Create account":mode==="reset"?"Send reset link":mode==="newpassword"?"Save new password":"Log in";
     $("#authSubmit").disabled=accountMode||authBusy;
     $("#authPassword").autocomplete=mode==="signup"||mode==="newpassword"?"new-password":"current-password";
+    $("#authEmail").readOnly=accountMode;$("#authUsername").readOnly=accountMode;
     $("#resendConfirmation").hidden=mode!=="signup";
     $("#forgotPassword").hidden=mode!=="login";
     $("#authModeSwitch").hidden=accountMode||mode==="reset"||mode==="newpassword";
@@ -163,8 +164,8 @@
     $("#authForm").addEventListener("submit",handleAuth);
     const authParams=new URLSearchParams(location.search);if(authParams.get("auth")==="signup"||location.hash==="#signup")showAuth("signup");
     $("#forgotPassword").addEventListener("click",()=>{mode="reset";updateAuthMode();$("#authStatus").textContent="Enter your email and we will send a secure reset link.";});
-    $("#resendConfirmation").addEventListener("click",async()=>{if(!client)return;const email=$("#authEmail").value.trim();if(!email){$("#authStatus").textContent="Enter the email address you signed up with first.";return;}const b=$("#resendConfirmation");b.disabled=true;try{const {error}=await client.auth.resend({type:"signup",email,options:{emailRedirectTo:window.location.origin}});if(error)throw error;$("#authStatus").textContent="If confirmation is still needed, a new email has been requested. Check your inbox and spam folder.";}catch(e){$("#authStatus").textContent=e.message||"Could not resend confirmation.";}finally{b.disabled=false;}});
-    $("#signOutButton").addEventListener("click",async()=>{if(!client)return;const {error}=await client.auth.signOut();if(error){$("#authStatus").textContent=error.message;return;}await refresh(null);updateAuthMode();showToast("Signed out.");});
+    $("#resendConfirmation").addEventListener("click",async()=>{if(!client)return;const email=$("#authEmail").value.trim();if(!email){$("#authStatus").textContent="Enter the email address you signed up with first.";return;}const b=$("#resendConfirmation");b.disabled=true;try{const {error}=await client.auth.resend({type:"signup",email,options:{emailRedirectTo:window.location.origin}});if(error)throw error;$("#authStatus").textContent="If confirmation is still needed, a new email has been requested. Check your inbox and spam folder.";showToast("Confirmation email requested.","success");}catch(e){$("#authStatus").textContent=e.message||"Could not resend confirmation.";showToast(e.message||"Could not resend confirmation.","error");}finally{b.disabled=false;}});
+    $("#signOutButton").addEventListener("click",async()=>{if(!client)return;const {error}=await client.auth.signOut();if(error){$("#authStatus").textContent=error.message;showToast(error.message,"error");return;}await refresh(null);mode="login";updateAuthMode();$("#authStatus").textContent="You have signed out.";showToast("Signed out.","success");});
     $("#adminTabs").addEventListener("click",e=>{
       const b=e.target.closest("[data-admin-tab]");if(!b)return;
       if(!admin){e.preventDefault();showToast("Administrator access required.");$("#adminBackdrop").hidden=true;showAuth("login");return;}
@@ -217,7 +218,7 @@
     $("#copyImageUrl").addEventListener("click",async()=>{try{await navigator.clipboard.writeText($("#uploadedImageUrl").value);showToast("Image URL copied.");}catch{$("#uploadedImageUrl").select();document.execCommand("copy");}});
     if(client){
       client.auth.getSession().then(({data})=>refresh(data.session&&data.session.user||null));
-      client.auth.onAuthStateChange((event,session)=>{refresh(session&&session.user||null);if(session&&session.user){if(session.user.email)$("#authEmail").value=session.user.email;$("#authUsername").value=String((session.user.user_metadata&&session.user.user_metadata.username)||"");}if(event==="PASSWORD_RECOVERY"){mode="newpassword";showAuth("newpassword");$("#authStatus").textContent="Choose a new password to finish resetting your account.";}});
+      client.auth.onAuthStateChange((event,session)=>{refresh(session&&session.user||null);if(session&&session.user){if(session.user.email)$("#authEmail").value=session.user.email;$("#authUsername").value=String((session.user.user_metadata&&session.user.user_metadata.username)||"");if(mode==="signup"||mode==="login"){mode="account";updateAuthMode();$("#authStatus").textContent="You are already signed in as "+(session.user.email||"your account")+". Your account details are filled in below.";}}if(event==="PASSWORD_RECOVERY"){mode="newpassword";showAuth("newpassword");$("#authStatus").textContent="Choose a new password to finish resetting your account.";}});
       if(location.hash.includes("type=recovery")||new URLSearchParams(location.search).get("type")==="recovery"){mode="newpassword";showAuth("newpassword");$("#authStatus").textContent="Choose a new password to finish resetting your account.";}
     }else $("#authStatus").textContent="Supabase client library unavailable.";
     updateUI();
