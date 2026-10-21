@@ -67,12 +67,17 @@
   }
   function closeAuth(){ $("#authBackdrop").hidden=true;document.body.classList.remove("modal-open"); }
   function updateAuthMode(){
-    $$(".auth-mode").forEach(b=>b.classList.toggle("active",b.dataset.authMode===mode));
+    $(".auth-mode").forEach(b=>b.classList.toggle("active",b.dataset.authMode===mode));
     $("#usernameField").hidden=mode!=="signup";
-    $("#authTitle").textContent=mode==="signup"?"Create your account":"Welcome back";
-    $("#authSubtitle").textContent=mode==="signup"?"Sign up with email, username and password.":"Log in with your email and password.";
-    $("#authSubmit").textContent=mode==="signup"?"Create account":"Log in";
-    $("#authPassword").autocomplete=mode==="signup"?"new-password":"current-password";
+    $("#authPasswordField").hidden=mode==="reset";
+    $("#authPassword").required=mode!=="reset";
+    $("#authTitle").textContent=mode==="signup"?"Create your account":mode==="reset"?"Reset your password":mode==="newpassword"?"Choose a new password":"Welcome back";
+    $("#authSubtitle").textContent=mode==="signup"?"Sign up with email, username and password.":mode==="reset"?"We will email you a secure password-reset link.":mode==="newpassword"?"Choose a new password for your account.":"Log in with your email and password.";
+    $("#authSubmit").textContent=mode==="signup"?"Create account":mode==="reset"?"Send reset link":mode==="newpassword"?"Save new password":"Log in";
+    $("#authPassword").autocomplete=mode==="signup"||mode==="newpassword"?"new-password":"current-password";
+    $("#resendConfirmation").hidden=mode!=="signup";
+    $("#forgotPassword").hidden=mode!=="login";
+    $("#authModeSwitch").hidden=mode==="reset"||mode==="newpassword";
     $("#signOutButton").hidden=!user;
   }
   function updateUI(){
@@ -108,6 +113,7 @@
     event.preventDefault();if(!client){$("#authStatus").textContent="Supabase client did not load.";return;}
     const email=$("#authEmail").value.trim(),password=$("#authPassword").value,username=$("#authUsername").value.trim();
     if(mode==="signup"&&!/^[a-zA-Z0-9_.-]{3,32}$/.test(username)){ $("#authStatus").textContent="Username must be 3–32 letters, numbers, dot, dash or underscore.";return; }
+    if((mode==="reset"||mode==="newpassword")&&!email&&mode==="reset"){ $("#authStatus").textContent="Enter your account email first.";return; }
     $("#authSubmit").disabled=true;$("#authStatus").textContent="Please wait…";
     try{
       if(mode==="signup"){
@@ -115,8 +121,15 @@
         if(result.error)throw result.error;
         if(result.data.session&&result.data.user){
           await client.from("profiles").upsert({id:result.data.user.id,username:username},{onConflict:"id"});
-          await refresh(result.data.user);$("#authStatus").textContent="Account created.";
-        }else $("#authStatus").textContent="Account created. Check your email to confirm it, then log in.";
+          await refresh(result.data.user);$("#authStatus").textContent="Account created and signed in.";
+        }else { $("#resendConfirmation").hidden=false; $("#authStatus").textContent="Account created. Check your inbox and spam folder for the SunnyScripts confirmation email."; }
+      }else if(mode==="reset"){
+        const result=await client.auth.resetPasswordForEmail(email,{redirectTo:window.location.origin});
+        if(result.error)throw result.error;
+        $("#authStatus").textContent="If that account exists, a password-reset email has been requested. Check your inbox and spam folder.";
+      }else if(mode==="newpassword"){
+        const result=await client.auth.updateUser({password});if(result.error)throw result.error;
+        await refresh(result.data.user);mode="login";updateAuthMode();$("#authStatus").textContent="Password updated. You can now log in with your new password.";
       }else{
         const result=await client.auth.signInWithPassword({email,password});if(result.error)throw result.error;
         const signedInUser=result.data.user;
@@ -134,6 +147,8 @@
     $("#authBackdrop").addEventListener("click",e=>{if(e.target===$("#authBackdrop"))closeAuth();});
     $$(".auth-mode").forEach(b=>b.addEventListener("click",()=>{mode=b.dataset.authMode;updateAuthMode();}));
     $("#authForm").addEventListener("submit",handleAuth);
+    $("#forgotPassword").addEventListener("click",()=>{mode="reset";updateAuthMode();$("#authStatus").textContent="Enter your email and we will send a secure reset link.";});
+    $("#resendConfirmation").addEventListener("click",async()=>{if(!client)return;const email=$("#authEmail").value.trim();if(!email){$("#authStatus").textContent="Enter the email address you signed up with first.";return;}const b=$("#resendConfirmation");b.disabled=true;try{const {error}=await client.auth.resend({type:"signup",email,options:{emailRedirectTo:window.location.origin}});if(error)throw error;$("#authStatus").textContent="If confirmation is still needed, a new email has been requested. Check your inbox and spam folder.";}catch(e){$("#authStatus").textContent=e.message||"Could not resend confirmation.";}finally{b.disabled=false;}});
     $("#signOutButton").addEventListener("click",async()=>{if(!client)return;const {error}=await client.auth.signOut();if(error){$("#authStatus").textContent=error.message;return;}await refresh(null);updateAuthMode();showToast("Signed out.");});
     $("#adminTabs").addEventListener("click",e=>{
       const b=e.target.closest("[data-admin-tab]");if(!b)return;
@@ -187,7 +202,8 @@
     $("#copyImageUrl").addEventListener("click",async()=>{try{await navigator.clipboard.writeText($("#uploadedImageUrl").value);showToast("Image URL copied.");}catch{$("#uploadedImageUrl").select();document.execCommand("copy");}});
     if(client){
       client.auth.getSession().then(({data})=>refresh(data.session&&data.session.user||null));
-      client.auth.onAuthStateChange((_event,session)=>{refresh(session&&session.user||null);});
+      client.auth.onAuthStateChange((event,session)=>{refresh(session&&session.user||null);if(event==="PASSWORD_RECOVERY"){mode="newpassword";showAuth("newpassword");$("#authStatus").textContent="Choose a new password to finish resetting your account.";}});
+      if(location.hash.includes("type=recovery")||new URLSearchParams(location.search).get("type")==="recovery"){mode="newpassword";showAuth("newpassword");$("#authStatus").textContent="Choose a new password to finish resetting your account.";}
     }else $("#authStatus").textContent="Supabase client library unavailable.";
     updateUI();
   }
