@@ -120,3 +120,23 @@
 .public-theme-grid .theme-choice:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
 @media(max-width:850px){.public-theme-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:580px){.public-theme-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+@media(max-width:580px){
+  .nav{flex-wrap:wrap}
+  .nav nav{display:flex;order:3;flex:1 0 100%;justify-content:center;gap:8px}
+  .nav nav .nav-link{padding:8px 10px}
+}
+.public-theme-grid [data-public-theme="ocean"] .theme-preview{background:linear-gradient(135deg,#071c2a,#1698c5);color:#5edbff}
+.public-theme-grid [data-public-theme="sunset"] .theme-preview{background:linear-gradient(135deg,#21101f,#df527b);color:#ff9aaf}
+.public-theme-grid [data-public-theme="lavender"] .theme-preview{background:linear-gradient(135deg,#181326,#9465df);color:#c7a6ff}
+.public-theme-grid [data-public-theme="rose"] .theme-preview{background:linear-gradient(135deg,#24111d,#d94d91);color:#ff9fca}
+.public-theme-grid [data-public-theme="forest"] .theme-preview{background:linear-gradient(135deg,#0b1c15,#3eaa68);color:#a3e6a8}
+.public-theme-grid [data-public-theme="mint"] .theme-preview{background:linear-gradient(135deg,#0a1e1b,#42c99a);color:#9af3d1}
+.public-theme-grid [data-public-theme="cyber"] .theme-preview{background:linear-gradient(135deg,#071318,#00a99b);color:#8bffef}
+.public-theme-grid [data-public-theme="crimson"] .theme-preview{background:linear-gradient(135deg,#200e12,#df4747);color:#ff9d9d}
+.public-theme-grid [data-public-theme="gold"] .theme-preview{background:linear-gradient(135deg,#201a0b,#d9a82e);color:#f5d782}
+.public-theme-grid [data-public-theme="slate"] .theme-preview{background:linear-gradient(135deg,#111820,#8194ad);color:#f3f6fb}
+.public-theme-grid [data-public-theme="mono"] .theme-preview{background:linear-gradient(135deg,#111,#777);color:#f1f1f1}
+.public-theme-grid [data-public-theme="candy"] .theme-preview{background:linear-gradient(135deg,#241529,#e779b0);color:#ffb5d2}
+.public-theme-grid [data-public-theme="sakura"] .theme-preview{background:linear-gradient(135deg,#21141d,#e884a2);color:#ffc1d1}
+.public-theme-grid [data-public-theme="arctic"] .theme-preview{background:linear-gradient(135deg,#101d2a,#70bde8);color:#c1efff}
