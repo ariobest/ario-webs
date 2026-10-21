@@ -192,7 +192,7 @@
   $("[data-view]").forEach(button => button.addEventListener("click", () => setPage(button.dataset.view)));
   $("[data-scroll-scripts]").forEach(button => button.addEventListener("click", () => setPage("scripts")));
   window.addEventListener("popstate", () => {
-    const route = location.pathname.replace(/\\/+$/, "") || "/";
+    const route = location.pathname.replace(/\/+$/, "") || "/";
     const fromPath = route === "/themes" ? "themes" : route === "/about" ? "about" : "scripts";
     setPage(new URLSearchParams(location.search).get("view") || fromPath, false);
   });
