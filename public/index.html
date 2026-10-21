@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#8edff4">
   <meta name="description" content="SunnyScripts — a summer-themed Roblox scripts hub">
   <title>SunnyScripts — Roblox Scripts</title>
   <link rel="stylesheet" href="/style.css">
@@ -14,11 +15,11 @@
   <div class="particles" aria-hidden="true"></div>
 
   <header class="nav">
-    <a class="brand" href="/">
-      <span class="logo">☀</span>
+    <a class="brand" href="/" aria-label="SunnyScripts home">
+      <span class="logo" aria-hidden="true">☀</span>
       <span>Sunny<span>Scripts</span></span>
     </a>
-    <nav>
+    <nav aria-label="Main navigation">
       <a href="#scripts">Scripts</a>
       <a href="#about">About</a>
     </nav>
@@ -26,10 +27,10 @@
   </header>
 
   <main>
-    <section class="hero">
+    <section class="hero" aria-labelledby="hero-title">
       <div class="hero-copy reveal">
         <div class="eyebrow">☀ SUMMER 2026 • ROBLOX SCRIPT HUB</div>
-        <h1>Code your<br><span>summer.</span></h1>
+        <h1 id="hero-title">Code your<br><span>summer.</span></h1>
         <p>Discover a clean collection of Roblox scripts, tools and resources — wrapped in a bright summer vibe.</p>
         <div class="hero-actions">
           <a class="primary" href="#scripts">Browse Scripts <span>→</span></a>
@@ -37,7 +38,7 @@
         </div>
       </div>
 
-      <div class="hero-card reveal">
+      <div class="hero-card reveal" aria-hidden="true">
         <div class="card-sun">☀</div>
         <div class="code-window">
           <div class="dots"><i></i><i></i><i></i></div>
@@ -51,18 +52,18 @@ end</code></pre>
       </div>
     </section>
 
-    <section id="scripts" class="section">
+    <section id="scripts" class="section" aria-labelledby="scripts-title">
       <div class="section-heading reveal">
         <div>
           <span class="eyebrow">FEATURED</span>
-          <h2>Fresh scripts for your game</h2>
+          <h2 id="scripts-title">Fresh scripts for your game</h2>
         </div>
         <span class="count">03 SCRIPTS</span>
       </div>
 
       <div class="script-grid">
         <article class="script-card reveal">
-          <div class="script-icon">⚡</div>
+          <div class="script-icon" aria-hidden="true">⚡</div>
           <span class="pill">UTILITY</span>
           <h3>QuickTools</h3>
           <p>Useful utilities packaged into a simple, easy-to-use script.</p>
@@ -70,7 +71,7 @@ end</code></pre>
         </article>
 
         <article class="script-card featured reveal">
-          <div class="script-icon">🌴</div>
+          <div class="script-icon" aria-hidden="true">🌴</div>
           <span class="pill">POPULAR</span>
           <h3>IslandKit</h3>
           <p>Summer-inspired tools for experimenting with your Roblox projects.</p>
@@ -78,7 +79,7 @@ end</code></pre>
         </article>
 
         <article class="script-card reveal">
-          <div class="script-icon">🛠</div>
+          <div class="script-icon" aria-hidden="true">🛠</div>
           <span class="pill">TOOLS</span>
           <h3>DevBox</h3>
           <p>A small collection of developer-focused helpers and snippets.</p>
@@ -87,21 +88,22 @@ end</code></pre>
       </div>
     </section>
 
-    <section id="about" class="about reveal">
+    <section id="about" class="about reveal" aria-labelledby="about-title">
       <div>
         <span class="eyebrow">MADE FOR CREATORS</span>
-        <h2>Simple. Sunny. Built to explore.</h2>
+        <h2 id="about-title">Simple. Sunny. Built to explore.</h2>
       </div>
       <p>SunnyScripts is a starter layout for a Roblox scripting website. Replace the sample cards with your own content, links and resources.</p>
     </section>
   </main>
 
   <footer>
-    <div class="brand"><span class="logo">☀</span><span>Sunny<span>Scripts</span></span></div>
+    <div class="brand"><span class="logo" aria-hidden="true">☀</span><span>Sunny<span>Scripts</span></span></div>
     <p>Made for creators • Roblox scripting resources</p>
   </footer>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <noscript><div class="noscript">JavaScript is disabled. The site still works, but interactive copy buttons are unavailable.</div></noscript>
   <script src="/script.js" defer></script>
 </body>
 </html>
