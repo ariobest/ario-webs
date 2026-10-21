@@ -92,3 +92,22 @@
 @media(prefers-reduced-motion:reduce){.sky-sun,.sky-moon,.hero-copy>*{animation:none!important}.sky-sun{opacity:.75;transform:translate(-50%,0)}.sky-moon{display:none}.rise-reveal{opacity:1;transform:none;transition:none}}
 
 .editor-form label[hidden], .auth-form [hidden]{display:none!important}
+
+/* All 20 theme palettes, shared by the public theme switcher and Theme Studio */
+:root[data-theme="ocean"]{--page:#071c2a;--surface:#0d2b3e;--surface-2:#143b52;--ink:#effaff;--muted:#a4ccdd;--line:rgba(164,220,240,.17);--accent:#5edbff;--accent-strong:#1698c5;--glow:rgba(22,152,197,.18);--hero-glow:rgba(94,219,255,.15);color-scheme:dark}
+:root[data-theme="sunset"]{--page:#21101f;--surface:#31172d;--surface-2:#49203f;--ink:#fff3f8;--muted:#d6a7c2;--line:rgba(255,180,210,.16);--accent:#ff9aaf;--accent-strong:#df527b;--glow:rgba(223,82,123,.2);--hero-glow:rgba(255,154,175,.15);color-scheme:dark}
+:root[data-theme="lavender"]{--page:#181326;--surface:#241d38;--surface-2:#33284d;--ink:#f8f3ff;--muted:#c0b2d9;--line:rgba(199,166,255,.17);--accent:#c7a6ff;--accent-strong:#9465df;--glow:rgba(148,101,223,.18);--hero-glow:rgba(199,166,255,.15);color-scheme:dark}
+:root[data-theme="rose"]{--page:#24111d;--surface:#351827;--surface-2:#4a2137;--ink:#fff1f7;--muted:#d6afc4;--line:rgba(255,159,202,.17);--accent:#ff9fca;--accent-strong:#d94d91;--glow:rgba(217,77,145,.2);--hero-glow:rgba(255,159,202,.14);color-scheme:dark}
+:root[data-theme="forest"]{--page:#0b1c15;--surface:#12291d;--surface-2:#1c3928;--ink:#effff2;--muted:#a6c9b1;--line:rgba(163,230,168,.16);--accent:#a3e6a8;--accent-strong:#3eaa68;--glow:rgba(62,170,104,.18);--hero-glow:rgba(163,230,168,.13);color-scheme:dark}
+:root[data-theme="mint"]{--page:#0a1e1b;--surface:#102d28;--surface-2:#174039;--ink:#effff9;--muted:#a7d8ca;--line:rgba(154,243,209,.16);--accent:#9af3d1;--accent-strong:#42c99a;--glow:rgba(66,201,154,.18);--hero-glow:rgba(154,243,209,.13);color-scheme:dark}
+:root[data-theme="cyber"]{--page:#071318;--surface:#0b2028;--surface-2:#10313a;--ink:#efffff;--muted:#9cc9d0;--line:rgba(139,255,239,.18);--accent:#8bffef;--accent-strong:#00a99b;--glow:rgba(0,201,183,.2);--hero-glow:rgba(139,255,239,.13);color-scheme:dark}
+:root[data-theme="crimson"]{--page:#200e12;--surface:#30151b;--surface-2:#451d26;--ink:#fff2f2;--muted:#d8a8af;--line:rgba(255,157,157,.16);--accent:#ff9d9d;--accent-strong:#df4747;--glow:rgba(223,71,71,.18);--hero-glow:rgba(255,157,157,.13);color-scheme:dark}
+:root[data-theme="gold"]{--page:#201a0b;--surface:#302710;--surface-2:#453719;--ink:#fff9e7;--muted:#d5c69a;--line:rgba(245,215,130,.16);--accent:#f5d782;--accent-strong:#d9a82e;--glow:rgba(217,168,46,.18);--hero-glow:rgba(245,215,130,.13);color-scheme:dark}
+:root[data-theme="slate"]{--page:#111820;--surface:#1b2632;--surface-2:#273646;--ink:#f3f6fb;--muted:#afbbc9;--line:rgba(184,197,214,.16);--accent:#b8c5d6;--accent-strong:#8194ad;--glow:rgba(129,148,173,.18);--hero-glow:rgba(184,197,214,.12);color-scheme:dark}
+:root[data-theme="mono"]{--page:#111;--surface:#1c1c1c;--surface-2:#2b2b2b;--ink:#f7f7f7;--muted:#c0c0c0;--line:rgba(255,255,255,.15);--accent:#f1f1f1;--accent-strong:#777;--glow:rgba(255,255,255,.1);--hero-glow:rgba(255,255,255,.08);color-scheme:dark}
+:root[data-theme="candy"]{--page:#241529;--surface:#35203b;--surface-2:#4a2b50;--ink:#fff3ff;--muted:#d9b8dc;--line:rgba(255,181,210,.17);--accent:#ffb5d2;--accent-strong:#e779b0;--glow:rgba(231,121,176,.18);--hero-glow:rgba(255,181,210,.13);color-scheme:dark}
+:root[data-theme="sakura"]{--page:#21141d;--surface:#30202b;--surface-2:#44303e;--ink:#fff5f8;--muted:#d5b7c8;--line:rgba(255,193,209,.16);--accent:#ffc1d1;--accent-strong:#e884a2;--glow:rgba(232,132,162,.18);--hero-glow:rgba(255,193,209,.13);color-scheme:dark}
+:root[data-theme="arctic"]{--page:#101d2a;--surface:#192b3b;--surface-2:#263f52;--ink:#f2fbff;--muted:#b0c8d8;--line:rgba(193,239,255,.17);--accent:#c1efff;--accent-strong:#70bde8;--glow:rgba(112,189,232,.18);--hero-glow:rgba(193,239,255,.13);color-scheme:dark}
+.signup-link{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;position:relative;z-index:2;cursor:pointer;pointer-events:auto}
+.hero-copy{position:relative;z-index:2}.hero-actions{position:relative;z-index:3}.hero-visual{z-index:0}
+#authBackdrop[hidden],#adminBackdrop[hidden]{display:none!important}
