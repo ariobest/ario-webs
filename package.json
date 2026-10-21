@@ -2,6 +2,7 @@
   "name": "sunnyscripts-cloudflare-worker",
   "private": true,
   "scripts": {
+    "build": "echo No build step required",
     "dev": "wrangler dev",
     "deploy": "wrangler deploy"
   },
