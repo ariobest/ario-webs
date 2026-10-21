@@ -1,8 +1,6 @@
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
-
-    // Friendly account URLs open the auth dialog while still serving the static app.
     const route = url.pathname.replace(/\/+$/, "") || "/";
     if (route === "/signup" || route === "/login") {
       url.pathname = "/";
@@ -11,8 +9,11 @@ export default {
       url.pathname = "/";
       url.searchParams.set("view", route === "/scripts" ? "scripts" : route.slice(1));
     }
-    // Let Cloudflare's Workers Assets binding serve everything in /public.
-    // This is the Workers equivalent of a Pages static deployment.
-    return env.ASSETS.fetch(new Request(url, request));
+    const response = await env.ASSETS.fetch(new Request(url, request));
+    const type = response.headers.get("content-type") || "";
+    if (!type.includes("text/html")) return response;
+    const html = await response.text();
+    const injected = html.replace(/<\/body>/i, '  <script src="/key-system.js"></script>\n</body>');
+    return new Response(injected, { status: response.status, statusText: response.statusText, headers: response.headers });
   }
 };
