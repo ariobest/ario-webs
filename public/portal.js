@@ -111,7 +111,7 @@
     $("#authSubmit").disabled=true;$("#authStatus").textContent="Please wait…";
     try{
       if(mode==="signup"){
-        const result=await client.auth.signUp({email,password,options:{data:{username:username}}});
+        const result=await client.auth.signUp({email,password,options:{data:{username:username},emailRedirectTo:window.location.origin}});
         if(result.error)throw result.error;
         if(result.data.session&&result.data.user){
           await client.from("profiles").upsert({id:result.data.user.id,username:username},{onConflict:"id"});
@@ -119,7 +119,10 @@
         }else $("#authStatus").textContent="Account created. Check your email to confirm it, then log in.";
       }else{
         const result=await client.auth.signInWithPassword({email,password});if(result.error)throw result.error;
-        await refresh(result.data.user);$("#authStatus").textContent=admin?"Logged in. Admin access verified.":"Logged in. This account has no admin role.";
+        const signedInUser=result.data.user;
+        const savedUsername=String((signedInUser.user_metadata&&signedInUser.user_metadata.username)||username||"").trim();
+        if(savedUsername) { const profileResult=await client.from("profiles").upsert({id:signedInUser.id,username:savedUsername},{onConflict:"id"}); if(profileResult.error) console.warn("Profile username sync failed:",profileResult.error.message); }
+        await refresh(signedInUser);$("#authStatus").textContent=admin?"Logged in. Admin access verified.":"Logged in. This account has no admin role.";
       }
     }catch(e){$("#authStatus").textContent=e.message||"Could not authenticate.";}
     finally{$("#authSubmit").disabled=false;}
