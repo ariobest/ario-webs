@@ -5,6 +5,15 @@
   const DEFAULT_SUPABASE = { url: "https://cqtwmxojwwyeasstuhgb.supabase.co", key: "sb_publishable_qBPb1ltQbHNZ-fO3PFmDeg_IQj0QfNB" };
   let supabaseClient = null;
   let databaseConnected = false;
+  let riseObserver = null;
+  function observeRiseElements(root = document) {
+    const targets = root.querySelectorAll(".section-heading, .about-section > *, .script-card");
+    if (!("IntersectionObserver" in window)) { targets.forEach(el => el.classList.add("rise-reveal", "is-visible")); return; }
+    if (!riseObserver) riseObserver = new IntersectionObserver(entries => entries.forEach(entry => {
+      if (entry.isIntersecting) { entry.target.classList.add("is-visible"); riseObserver.unobserve(entry.target); }
+    }), { threshold: 0.12, rootMargin: "0px 0px -35px 0px" });
+    targets.forEach(el => { if (!el.classList.contains("rise-reveal")) el.classList.add("rise-reveal"); riseObserver.observe(el); });
+  }
   const starterScripts = [
     { id: "quicktools", name: "QuickTools", category: "Utility", description: "Useful utilities packaged into a simple, easy-to-use script.", link: "" },
     { id: "islandkit", name: "IslandKit", category: "Tools", description: "A set of summer-inspired tools for experimenting with Roblox projects.", link: "" },
@@ -59,6 +68,7 @@
     $("#emptyState").hidden = filtered.length !== 0;
     $("#scriptCount").textContent = scripts.length;
     renderAdminScripts();
+    observeRiseElements($("#scriptGrid"));
   }
   function renderAdminScripts() {
     const host = $("#adminScriptList");
@@ -212,6 +222,7 @@
   // Keep the supplied brand image consistent for all logo placements.
   $$(".brand-logo").forEach(image => { image.src = LOGO_URL; image.addEventListener("error", () => { image.alt = "SunnyScripts"; }); });
   applyTheme(currentTheme);
+  observeRiseElements();
   renderScripts();
   initSupabase();
 })();
