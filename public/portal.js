@@ -30,19 +30,6 @@
     ["sakura","Sakura","Cherry blossom","#ffc1d1","#e884a2","#21141d","#30202b","#44303e","#d5b7c8"],
     ["arctic","Arctic","Ice and silver","#c1efff","#70bde8","#101d2a","#192b3b","#263f52","#b0c8d8"]
   ].map(a=>({id:a[0],name:a[1],desc:a[2],accent:a[3],strong:a[4],page:a[5],surface:a[6],surface2:a[7],muted:a[8]}));
-  const tools = [
-    "Dashboard","Users","Roles & Permissions","Image to URL","Media Library","File Uploads","Scripts","Script Categories","Games","Tags",
-    "Script Versions","Featured Scripts","Drafts & Publishing","Comments","Reviews","Favorites","Reports","Moderation Queue","Banned Users","Announcements",
-    "Notifications","Badges","Access Grants","API Keys","API Documentation","API Usage","Rate Limits","Webhooks","Integrations","Supabase",
-    "Database Status","Database Tables","Storage Buckets","Storage Browser","Authentication","Login Settings","Sign-up Settings","Email Templates","Email Verification","Password Reset",
-    "OAuth Providers","Sessions","Admin Accounts","Audit Logs","Security Events","RLS Policies","Security Advisor","Backup Status","Site Settings","Branding",
-    "Logo & Favicon","Image to URL","Theme Studio","20 Themes","Appearance","Navigation","Homepage Editor","Hero Section","Footer Editor","SEO Settings",
-    "Meta Tags","Robots & Sitemap","Analytics","Traffic Overview","Script Views","Popular Scripts","User Growth","Error Logs","Performance","Cache Settings",
-    "Maintenance Mode","Status Page","Contact Messages","Support Inbox","FAQ Manager","Documentation","Changelog","Release Notes","Feature Flags","Localization",
-    "Language Settings","Time Zone","Date & Number Formats","Privacy Settings","Terms & Rules","Cookie Notice","Data Export","Data Retention","Account Deletion","Community Settings",
-    "Upload Settings","Allowed File Types","Image Optimizer","URL Validator","Link Checker","Embed Preview","Code Snippet Preview","Lua Formatter","JSON Formatter","Text Utilities",
-    "Color Picker","Gradient Maker","Icon Library","Quick Links","Admin Notes","Task Checklist","System Diagnostics"
-  ].slice(0,97);
   function setTheme(id, broadcast = true) {
     const t=themes.find(x=>x.id===id)||themes[0];
     document.documentElement.dataset.theme=t.id;
@@ -108,20 +95,6 @@
     updateUI();
     if(!admin&&!$("#adminBackdrop").hidden)$("#adminBackdrop").hidden=true;
   }
-  function addTools(){
-    const nav=$("#adminTabs"),host=$("#adminContent");if(!nav||!host||nav.dataset.expanded==="yes")return;nav.dataset.expanded="yes";
-    tools.forEach((label,i)=>{
-      const id="extra-"+(i+1);
-      const b=document.createElement("button");b.type="button";b.className="admin-tab";b.dataset.adminTab=id;b.setAttribute("role","tab");b.textContent=label;nav.appendChild(b);
-      const p=document.createElement("section");p.className="admin-pane";p.dataset.pane=id;p.hidden=true;
-      if(label==="Image to URL"){
-        p.innerHTML='<div class="pane-heading"><div><h3>Image to URL</h3><p>Upload an image to the public site-assets bucket. Only admins can upload.</p></div></div><form id="imageUploadForm" class="editor-form visible-form"><label>Choose image (max 10 MB)<input id="imageFile" type="file" accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml" required></label><button class="small-primary" type="submit">Upload and create URL</button><p id="imageUrlStatus" class="saved-note" role="status">Supported: PNG, JPG, WEBP, GIF and SVG.</p><div id="imageUrlResult" class="image-url-result" hidden><img id="uploadedImagePreview" alt="Uploaded image preview"><input id="uploadedImageUrl" readonly aria-label="Public image URL"><button class="secondary small" id="copyImageUrl" type="button">Copy URL</button></div></form>';
-      } else {
-        p.innerHTML='<div class="pane-heading"><div><h3>'+esc(label)+'</h3><p>Admin-only module. Save private notes and settings for this section.</p></div></div><form class="editor-form visible-form module-form" data-module="'+id+'"><label>Title or value<input name="title" maxlength="160" placeholder="Enter a value"></label><label>Notes / configuration<textarea name="notes" rows="4" maxlength="4000" placeholder="Write configuration notes"></textarea></label><label class="toggle-row"><input name="enabled" type="checkbox"> Enable this module</label><button class="small-primary" type="submit">Save module settings</button><p class="saved-note" role="status">Saved locally for this browser.</p></form>';
-      }
-      host.appendChild(p);
-    });
-  }
   async function handleAuth(event){
     event.preventDefault();if(authBusy)return;
     if($("#authWebsite").value.trim()){showToast("Could not submit this form. Try again.","error");return;}
@@ -158,7 +131,7 @@
   }
   function saveSignupDraft(){try{sessionStorage.setItem("sunnyScripts.signupDraft.v1",JSON.stringify({email:$("#authEmail").value.trim(),username:$("#authUsername").value.trim()}));}catch{}}
   function init(){
-    addTools();renderThemes();
+    renderThemes();
     $("#openAuth").addEventListener("click",()=>showAuth(user?"account":"signup"));
     $("#heroSignUp").addEventListener("click",event=>{event.preventDefault();showAuth("signup");});
     try{const draft=JSON.parse(sessionStorage.getItem("sunnyScripts.signupDraft.v1")||"null");if(draft){if(draft.email)$("#authEmail").value=draft.email;if(draft.username)$("#authUsername").value=draft.username;}}catch{}
@@ -176,7 +149,8 @@
       if(!admin){e.preventDefault();showToast("Administrator access required.");$("#adminBackdrop").hidden=true;showAuth("login");return;}
       $$(".admin-tab").forEach(x=>x.classList.toggle("active",x===b));
       $$(".admin-pane").forEach(x=>{x.hidden=x.dataset.pane!==b.dataset.adminTab;x.classList.toggle("active",!x.hidden);});
-      if(b.dataset.adminTab==="extra-4"||b.dataset.adminTab==="extra-10")$("#imageUrlStatus").textContent="Upload an image to create a public URL.";
+      if(b.dataset.adminTab==="keys")loadKeys();
+      if(b.dataset.adminTab==="api")checkApiStatus();
     },true);
     $("#themeGrid").addEventListener("click",e=>{const b=e.target.closest("[data-theme-choice]");if(b)setTheme(b.dataset.themeChoice);});
     $("#scriptForm").addEventListener("submit",async e=>{
@@ -185,7 +159,9 @@
       const name=$("#newScriptName").value.trim(),category=$("#newScriptCategory").value,description=$("#newScriptDescription").value.trim(),link=$("#newScriptLink").value.trim(),id=$("#editScriptId").value;
       if(!name||!description){showToast("Enter a script name and description.");return;}
       const slug=name.toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")+"-"+Date.now().toString(36);
-      const record={name,category,description,link:link||null,status:"published",owner_id:user.id};
+      const content=$("#newScriptContent").value.trim();
+      if(content.length>200000){showToast("Lua source is too large (200,000 characters maximum).");return;}
+      const record={name,category,description,link:link||null,content:content||null,status:"published",owner_id:user.id};
       let result;
       if(id&&/^[0-9a-f-]{36}$/i.test(id)) result=await client.from("scripts").update(record).eq("id",id);
       else result=await client.from("scripts").insert({...record,slug});
@@ -201,26 +177,109 @@
       if(result.error){showToast("Delete failed: "+result.error.message);return;}
       showToast("Script deleted from Supabase.");location.reload();
     },true);
-    $("#adminContent").addEventListener("submit",e=>{
-      const f=e.target.closest(".module-form");if(!f)return;e.preventDefault();if(!admin)return;
-      const value={title:f.elements.title.value,notes:f.elements.notes.value,enabled:f.elements.enabled.checked};
-      try{localStorage.setItem("sunnyScripts.admin."+f.dataset.module,JSON.stringify(value));f.querySelector('[role="status"]').textContent="Saved on this browser.";showToast("Module settings saved.");}catch{$("#toast").textContent="Could not save settings";}
+    const API_URL = "https://cqtwmxojwwyeasstuhgb.supabase.co/functions/v1/script-api";
+    async function callScriptApi(payload, needsAdmin = true) {
+      if (!client) throw new Error("Supabase client is unavailable.");
+      const { data } = await client.auth.getSession();
+      const headers = { "Content-Type": "application/json", "apikey": PUBLIC_KEY };
+      if (needsAdmin) {
+        if (!data.session?.access_token) throw new Error("Sign in as an administrator first.");
+        headers.Authorization = "Bearer " + data.session.access_token;
+      }
+      const response = await fetch(API_URL, {
+        method: "POST", headers, body: JSON.stringify(payload), cache: "no-store"
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(result.error || "API request failed (" + response.status + ").");
+      return result;
+    }
+    async function loadKeys() {
+      const status = $("#keyStatus");
+      const list = $("#keyList");
+      const select = $("#keyScriptId");
+      if (!admin || !client) {
+        status.textContent = "Sign in as an administrator to manage keys.";
+        list.innerHTML = '<p class="saved-note">Administrator access is required.</p>';
+        return;
+      }
+      status.textContent = "Loading published scripts and keys…";
+      try {
+        const scriptsResult = await client.from("scripts").select("id,name,slug").eq("status", "published").order("created_at", { ascending: false });
+        if (scriptsResult.error) throw scriptsResult.error;
+        const options = scriptsResult.data || [];
+        select.innerHTML = '<option value="">Choose a published script</option>' + options.map(s => '<option value="' + esc(s.id) + '">' + esc(s.name) + ' · ' + esc(s.slug) + '</option>').join("");
+        const result = await callScriptApi({ action: "list-keys" });
+        list.innerHTML = result.keys.length ? result.keys.map(k => {
+          const scriptName = Array.isArray(k.scripts) ? k.scripts[0]?.name : k.scripts?.name;
+          const expired = k.expires_at && Date.parse(k.expires_at) <= Date.now();
+          const state = k.revoked_at ? "Revoked" : expired ? "Expired" : k.max_uses !== null && k.use_count >= k.max_uses ? "Limit reached" : "Active";
+          return '<article class="key-row"><div class="key-row-main"><b>' + esc(k.label) + '</b><small>' + esc(scriptName || k.script_id) + ' · ' + esc(k.key_prefix) + '…</small><small>' + esc(state) + ' · ' + esc(String(k.use_count)) + (k.max_uses === null ? ' loads' : '/' + esc(String(k.max_uses)) + ' loads') + (k.expires_at ? ' · expires ' + esc(new Date(k.expires_at).toLocaleDateString()) : '') + '</small></div>' + (!k.revoked_at ? '<button class="text-action danger" type="button" data-revoke-key="' + esc(k.id) + '">Revoke</button>' : '') + '</article>';
+        }).join("") : '<p class="saved-note">No access keys yet. Create one above.</p>';
+        status.textContent = "Loaded " + result.keys.length + " key record(s).";
+      } catch (error) {
+        status.textContent = error.message || "Could not load access keys.";
+        list.innerHTML = '<p class="saved-note">Could not load keys. Check admin role and API status.</p>';
+      }
+    }
+    async function checkApiStatus() {
+      const host = $("#apiStatus");
+      host.innerHTML = '<span class="status-dot"></span><span>Checking API…</span>';
+      try {
+        const response = await fetch(API_URL + "?action=health", { cache: "no-store" });
+        const result = await response.json();
+        if (!response.ok || !result.ok) throw new Error("API health check failed.");
+        host.innerHTML = '<span class="status-dot"></span><span>Online · v' + esc(result.version) + ' · checked ' + esc(new Date(result.timestamp).toLocaleTimeString()) + '</span>';
+      } catch {
+        host.innerHTML = '<span class="status-dot api-dot-offline"></span><span>Could not reach the API. Check the function deployment and network.</span>';
+      }
+    }
+    $("#keyForm").addEventListener("submit", async event => {
+      event.preventDefault();
+      if (!admin) { showToast("Administrator access required."); return; }
+      const button = $("#createKeyBtn"); button.disabled = true;
+      $("#keyStatus").textContent = "Creating key securely…";
+      $("#newKeyResult").hidden = true;
+      try {
+        const maxValue = $("#keyMaxUses").value.trim();
+        const result = await callScriptApi({
+          action: "create-key",
+          script_id: $("#keyScriptId").value,
+          label: $("#keyLabel").value.trim() || "Access key",
+          expires_in_days: $("#keyExpiry").value || null,
+          max_uses: maxValue ? Number(maxValue) : null
+        });
+        $("#newKeyValue").value = result.key;
+        $("#newKeyResult").hidden = false;
+        $("#keyStatus").textContent = "Key created. Copy it now; only its prefix will be shown again.";
+        showToast("Access key created.", "success");
+        await loadKeys();
+      } catch (error) {
+        $("#keyStatus").textContent = error.message || "Could not create key.";
+      } finally { button.disabled = false; }
     });
-    $("#adminContent").addEventListener("submit",async e=>{
-      if(e.target.id!=="imageUploadForm")return;e.preventDefault();
-      if(!admin||!user||!client){$("#imageUrlStatus").textContent="Admin sign-in required.";return;}
-      const file=$("#imageFile").files[0];if(!file)return;
-      if(file.size>10*1024*1024){$("#imageUrlStatus").textContent="Image must be smaller than 10 MB.";return;}
-      if(!/^image\/(png|jpeg|webp|gif|svg\+xml)$/.test(file.type)){ $("#imageUrlStatus").textContent="Unsupported image type.";return; }
-      $("#imageUrlStatus").textContent="Uploading…";
-      const safe=file.name.toLowerCase().replace(/[^a-z0-9._-]+/g,"-").slice(-80)||"image";
-      const path=user.id+"/"+Date.now()+"-"+safe;
-      const upload=await client.storage.from("site-assets").upload(path,file,{upsert:false,contentType:file.type});
-      if(upload.error){$("#imageUrlStatus").textContent="Upload failed: "+upload.error.message;return;}
-      const url=client.storage.from("site-assets").getPublicUrl(path).data.publicUrl;
-      $("#uploadedImageUrl").value=url;$("#uploadedImagePreview").src=url;$("#imageUrlResult").hidden=false;$("#imageUrlStatus").textContent="Uploaded. This URL is public.";
+    $("#refreshKeys").addEventListener("click", loadKeys);
+    $("#keyList").addEventListener("click", async event => {
+      const button = event.target.closest("[data-revoke-key]");
+      if (!button || !admin) return;
+      if (!confirm("Revoke this access key? This cannot be undone.")) return;
+      button.disabled = true;
+      try {
+        await callScriptApi({ action: "revoke-key", id: button.dataset.revokeKey });
+        showToast("Access key revoked.", "success");
+        await loadKeys();
+      } catch (error) { showToast(error.message || "Could not revoke key.", "error"); button.disabled = false; }
     });
-    $("#copyImageUrl").addEventListener("click",async()=>{try{await navigator.clipboard.writeText($("#uploadedImageUrl").value);showToast("Image URL copied.");}catch{$("#uploadedImageUrl").select();document.execCommand("copy");}});
+    $("#copyNewKey").addEventListener("click", async () => {
+      try { await navigator.clipboard.writeText($("#newKeyValue").value); showToast("Key copied.", "success"); }
+      catch { $("#newKeyValue").select(); document.execCommand("copy"); showToast("Select and copy the key."); }
+    });
+    $("#checkApiStatus").addEventListener("click", checkApiStatus);
+    $("#adminScriptList").addEventListener("click", async event => {
+      const edit = event.target.closest("[data-edit-script]");
+      if (!edit || !admin || !client || !/^[0-9a-f-]{36}$/i.test(edit.dataset.editScript)) return;
+      const { data, error } = await client.from("scripts").select("content").eq("id", edit.dataset.editScript).maybeSingle();
+      if (!error) $("#newScriptContent").value = data?.content || "";
+    }, true);
     if(client){
       client.auth.getSession().then(({data})=>refresh(data.session&&data.session.user||null));
       client.auth.onAuthStateChange((event,session)=>{refresh(session&&session.user||null);if(session&&session.user){if(session.user.email)$("#authEmail").value=session.user.email;$("#authUsername").value=String((session.user.user_metadata&&session.user.user_metadata.username)||"");if(mode==="signup"||mode==="login"){mode="account";updateAuthMode();$("#authStatus").textContent="You are already signed in as "+(session.user.email||"your account")+". Your account details are filled in below.";}}if(event==="PASSWORD_RECOVERY"){mode="newpassword";showAuth("newpassword");$("#authStatus").textContent="Choose a new password to finish resetting your account.";}});
