@@ -151,6 +151,8 @@
       $$(".admin-pane").forEach(x=>{x.hidden=x.dataset.pane!==b.dataset.adminTab;x.classList.toggle("active",!x.hidden);});
       if(b.dataset.adminTab==="keys")loadKeys();
       if(b.dataset.adminTab==="api")checkApiStatus();
+      if(b.dataset.adminTab==="media")loadMedia();
+      if(b.dataset.adminTab==="settings")loadSiteSettings();
     },true);
     $("#themeGrid").addEventListener("click",e=>{const b=e.target.closest("[data-theme-choice]");if(b)setTheme(b.dataset.themeChoice);});
     $("#scriptForm").addEventListener("submit",async e=>{
@@ -233,6 +235,147 @@
         host.innerHTML = '<span class="status-dot api-dot-offline"></span><span>Could not reach the API. Check the function deployment and network.</span>';
       }
     }
+    async function loadMedia() {
+      const host = $("#mediaGrid");
+      const status = $("#mediaStatus");
+      if (!host) return;
+      if (!admin || !client) {
+        host.innerHTML = '<p class="saved-note">Administrator access is required.</p>';
+        return;
+      }
+      host.innerHTML = '<p class="saved-note">Loading media…</p>';
+      try {
+        const { data, error } = await client.storage.from("sunny-media").list("", {
+          limit: 100, sortBy: { column: "created_at", order: "desc" }
+        });
+        if (error) throw error;
+        const files = (data || []).filter(file => file.name && file.id);
+        if (!files.length) {
+          host.innerHTML = '<p class="saved-note">No media uploaded yet. Upload a logo, thumbnail or other media above.</p>';
+          return;
+        }
+        host.innerHTML = files.map(file => {
+          const path = file.name;
+          const publicUrl = client.storage.from("sunny-media").getPublicUrl(path).data.publicUrl;
+          const mime = file.metadata?.mimetype || "";
+          const image = mime.startsWith("image/") || /\.(png|jpe?g|webp|gif|svg)$/i.test(path);
+          const video = mime.startsWith("video/") || /\.(mp4|webm)$/i.test(path);
+          const preview = image
+            ? '<img src="' + esc(publicUrl) + '" alt="' + esc(path) + '" loading="lazy">'
+            : video ? '<video src="' + esc(publicUrl) + '" muted playsinline controls></video>' : '<div class="media-file-icon">' + (mime.startsWith("audio/") ? '♫' : '▤') + '</div>';
+          return '<article class="media-card"><div class="media-preview">' + preview + '</div><div class="media-card-info"><b title="' + esc(path) + '">' + esc(path) + '</b><small>' + esc(mime || "Media file") + ' · ' + esc(String(Math.round((file.metadata?.size || 0) / 1024))) + ' KB</small><div class="media-card-actions"><button class="secondary small" type="button" data-media-copy="' + esc(path) + '">Copy URL</button><button class="text-action danger" type="button" data-media-delete="' + esc(path) + '">Delete</button></div></div></article>';
+        }).join("");
+        if (status) status.textContent = "Loaded " + files.length + " file(s).";
+      } catch (error) {
+        host.innerHTML = '<p class="saved-note">Could not load media: ' + esc(error.message || "Storage request failed") + '</p>';
+        if (status) status.textContent = "Check that the sunny-media bucket and admin storage policies exist.";
+      }
+    }
+    async function loadSiteSettings() {
+      const status = $("#siteSettingsStatus");
+      if (!admin || !client) { status.textContent = "Sign in as an administrator to edit site settings."; return; }
+      status.textContent = "Loading saved settings…";
+      try {
+        const { data, error } = await client.from("site_settings").select("value,is_public").eq("key", "site_config").maybeSingle();
+        if (error) throw error;
+        const value = data?.value || {};
+        $("#settingSiteName").value = value.siteName || "SunnyScripts";
+        $("#settingTagline").value = value.tagline || "";
+        $("#settingAnnouncement").value = value.announcement || "";
+        $("#settingAnnouncementEnabled").checked = Boolean(value.announcementEnabled);
+        $("#settingDefaultTheme").value = value.defaultTheme || "summer";
+        status.textContent = data ? "Loaded from Supabase. Public fields are currently " + (data.is_public ? "published." : "private.") : "No saved settings yet. Save to create the site configuration.";
+      } catch (error) { status.textContent = error.message || "Could not load site settings."; }
+    }
+    $("#scriptFileInput").addEventListener("change", async event => {
+      const file = event.target.files?.[0];
+      if (!file) return;
+      if (file.size > 200000) { showToast("Source file exceeds the 200,000 character limit."); event.target.value = ""; return; }
+      try {
+        const source = await file.text();
+        if (source.length > 200000) throw new Error("File exceeds the 200,000 character limit.");
+        $("#newScriptContent").value = source;
+        $("#sourceCharCount").textContent = source.length.toLocaleString() + " characters";
+        if (!$("#newScriptName").value.trim()) $("#newScriptName").value = file.name.replace(/\.(lua|luau|txt|js|ts|json)$/i, "").replace(/[_-]+/g, " ");
+        showToast("Imported " + file.name + ". Save the script to publish it.");
+      } catch (error) { showToast(error.message || "Could not read that file.", "error"); }
+    });
+    $("#importScriptFile").addEventListener("click", () => $("#scriptFileInput").click());
+    $("#newScriptContent").addEventListener("input", () => {
+      $("#sourceCharCount").textContent = $("#newScriptContent").value.length.toLocaleString() + " characters";
+    });
+    $("#macCloseAdmin").addEventListener("click", () => { $("#adminBackdrop").hidden = true; document.body.classList.remove("modal-open"); });
+    $("#macMinimizeAdmin").addEventListener("click", () => $("#adminBackdrop").querySelector(".admin-modal").classList.toggle("is-minimized"));
+    $("#macFocusAdmin").addEventListener("click", () => {
+      const modal = $("#adminBackdrop").querySelector(".admin-modal");
+      modal.classList.remove("is-minimized");
+      modal.classList.toggle("is-focused");
+    });
+    $("#mediaUploadForm").addEventListener("submit", async event => {
+      event.preventDefault();
+      if (!admin || !client) { showToast("Administrator access required.", "error"); return; }
+      const input = $("#mediaFile"), file = input.files?.[0];
+      if (!file) { $("#mediaStatus").textContent = "Choose a file first."; return; }
+      if (file.size > 10 * 1024 * 1024) { $("#mediaStatus").textContent = "Files must be 10 MB or smaller."; return; }
+      const allowed = ["image/png","image/jpeg","image/webp","image/gif","image/svg+xml","video/mp4","video/webm","audio/mpeg","audio/ogg"];
+      if (!allowed.includes(file.type)) { $("#mediaStatus").textContent = "This file type is not allowed."; return; }
+      const button = $("#uploadMediaButton"); button.disabled = true;
+      $("#mediaStatus").textContent = "Uploading " + file.name + "…";
+      try {
+        const label = $("#mediaLabel").value.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+        const filename = file.name.replace(/[^a-zA-Z0-9._-]+/g, "-");
+        const path = Date.now() + (label ? "-" + label : "") + "-" + filename;
+        const { error } = await client.storage.from("sunny-media").upload(path, file, {
+          cacheControl: "3600", upsert: false, contentType: file.type
+        });
+        if (error) throw error;
+        $("#mediaStatus").textContent = "Uploaded successfully.";
+        $("#mediaUploadForm").reset();
+        showToast("Media uploaded.", "success");
+        await loadMedia();
+      } catch (error) {
+        $("#mediaStatus").textContent = error.message || "Upload failed. Check storage policies.";
+      } finally { button.disabled = false; }
+    });
+    $("#mediaGrid").addEventListener("click", async event => {
+      const copy = event.target.closest("[data-media-copy]");
+      const remove = event.target.closest("[data-media-delete]");
+      if (copy && client) {
+        const url = client.storage.from("sunny-media").getPublicUrl(copy.dataset.mediaCopy).data.publicUrl;
+        try { await navigator.clipboard.writeText(url); showToast("Public media URL copied.", "success"); }
+        catch { window.prompt("Copy public media URL:", url); }
+      } else if (remove && client && admin) {
+        if (!confirm("Delete this media file? Any page using its URL will stop displaying it.")) return;
+        remove.disabled = true;
+        const { error } = await client.storage.from("sunny-media").remove([remove.dataset.mediaDelete]);
+        if (error) { showToast(error.message || "Could not delete media.", "error"); remove.disabled = false; return; }
+        showToast("Media deleted.", "success"); await loadMedia();
+      }
+    });
+    $("#refreshMedia").addEventListener("click", loadMedia);
+    $("#reloadSiteSettings").addEventListener("click", loadSiteSettings);
+    $("#siteSettingsForm").addEventListener("submit", async event => {
+      event.preventDefault();
+      if (!admin || !client || !user) { showToast("Administrator access required.", "error"); return; }
+      const value = {
+        siteName: $("#settingSiteName").value.trim() || "SunnyScripts",
+        tagline: $("#settingTagline").value.trim(),
+        announcement: $("#settingAnnouncement").value.trim(),
+        announcementEnabled: $("#settingAnnouncementEnabled").checked,
+        defaultTheme: $("#settingDefaultTheme").value
+      };
+      const button = $("#saveSiteSettings"); button.disabled = true;
+      $("#siteSettingsStatus").textContent = "Saving to Supabase…";
+      try {
+        const { error } = await client.from("site_settings").upsert({
+          key: "site_config", value, is_public: true, updated_by: user.id, updated_at: new Date().toISOString()
+        }, { onConflict: "key" });
+        if (error) throw error;
+        $("#siteSettingsStatus").textContent = "Saved. Public site settings are live on the next page load.";
+        showToast("Site settings saved.", "success");
+      } catch (error) { $("#siteSettingsStatus").textContent = error.message || "Could not save settings."; }
+      finally { button.disabled = false; }
+    });
     $("#keyForm").addEventListener("submit", async event => {
       event.preventDefault();
       if (!admin) { showToast("Administrator access required."); return; }
