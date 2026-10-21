@@ -421,7 +421,7 @@
       const edit = event.target.closest("[data-edit-script]");
       if (!edit || !admin || !client || !/^[0-9a-f-]{36}$/i.test(edit.dataset.editScript)) return;
       const { data, error } = await client.from("scripts").select("content").eq("id", edit.dataset.editScript).maybeSingle();
-      if (!error) $("#newScriptContent").value = data?.content || "";
+      if (!error) { $("#newScriptContent").value = data?.content || ""; $("#sourceCharCount").textContent = $("#newScriptContent").value.length.toLocaleString() + " characters"; }
     }, true);
     if(client){
       client.auth.getSession().then(({data})=>refresh(data.session&&data.session.user||null));
