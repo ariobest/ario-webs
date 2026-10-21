@@ -15,7 +15,7 @@
   <header class="nav">
     <a class="brand" href="#home" aria-label="SunnyScripts home"><img class="brand-logo" src="https://www.image2url.com/r2/default/images/1792591024054-9d66ce25-9de6-4662-93d2-a3c6e127a298.png" alt=""><span>Sunny<span>Scripts</span></span></a>
     <nav aria-label="Main navigation"><button class="nav-link active" data-view="scripts">Scripts</button><button class="nav-link" data-view="about">About</button></nav>
-    <div class="nav-actions"><button class="icon-button" id="themeQuick" title="Cycle theme" aria-label="Cycle theme">◐</button><button class="nav-button" id="openAdmin">Admin panel ↗</button></div>
+    <div class="nav-actions"><button class="icon-button" id="themeQuick" title="Cycle theme" aria-label="Cycle theme">◐</button><button class="nav-button" id="openAdmin" hidden>Admin panel ↗</button><button class="secondary account-button" id="openAuth">Sign up / Log in</button></div>
   </header>
   <main id="home">
     <section class="hero" id="hero">
@@ -38,15 +38,15 @@
     </section>
     <section class="about-section" id="about"><div><span class="eyebrow">MADE FOR CREATORS</span><h2>A clean space<br>to build and explore.</h2></div><p>SunnyScripts is a community-style library starter. Use the admin tools to manage the scripts shown on this device, choose a look you love, and configure your public Supabase project settings.</p></section>
   </main>
-  <footer><a class="brand" href="#home"><img class="brand-logo" src="https://www.image2url.com/r2/default/images/1792591024054-9d66ce25-9de6-4662-93d2-a3c6e127a298.png" alt=""><span>Sunny<span>Scripts</span></span></a><span>Roblox scripting resources · Made for creators</span><button class="footer-admin" id="openAdminFooter">Admin settings</button></footer>
+  <footer><a class="brand" href="#home"><img class="brand-logo" src="https://www.image2url.com/r2/default/images/1792591024054-9d66ce25-9de6-4662-93d2-a3c6e127a298.png" alt=""><span>Sunny<span>Scripts</span></span></a><span>Roblox scripting resources · Made for creators</span><button class="footer-admin" id="openAdminFooter" hidden>Admin settings</button></footer>
 
   <div class="modal-backdrop" id="adminBackdrop" hidden>
     <section class="admin-modal" role="dialog" aria-modal="true" aria-labelledby="adminTitle">
       <header class="admin-header"><div><span class="eyebrow">CONTROL CENTER</span><h2 id="adminTitle">Admin panel</h2><p>Manage scripts, themes and your Supabase connection.</p></div><button class="icon-button close-modal" id="closeAdmin" aria-label="Close admin panel">×</button></header>
-      <div class="admin-tabs" role="tablist"><button class="admin-tab active" data-admin-tab="scripts" role="tab">Scripts</button><button class="admin-tab" data-admin-tab="themes" role="tab">Themes</button><button class="admin-tab" data-admin-tab="supabase" role="tab">Supabase</button></div>
+      <div class="admin-tabs" id="adminTabs" role="tablist"><button class="admin-tab active" data-admin-tab="scripts" role="tab">Scripts</button><button class="admin-tab" data-admin-tab="themes" role="tab">Themes</button><button class="admin-tab" data-admin-tab="supabase" role="tab">Supabase</button></div>
       <div class="admin-content" id="adminContent">
         <section class="admin-pane active" data-pane="scripts"><div class="pane-heading"><div><h3>Script library</h3><p>Published scripts load from Supabase. Edits in this panel are saved locally until authenticated admin publishing is enabled.</p></div><button class="small-primary" id="newScriptBtn">＋ Add script</button></div><div id="adminScriptList" class="admin-script-list"></div><form id="scriptForm" class="editor-form" hidden><h4 id="scriptFormTitle">Add a script</h4><input type="hidden" id="editScriptId"><label>Script name<input id="newScriptName" required maxlength="70" placeholder="My Script"></label><label>Category<select id="newScriptCategory"><option>Utility</option><option>Tools</option><option>Learning</option></select></label><label>Description<textarea id="newScriptDescription" required maxlength="240" rows="3" placeholder="What does it do?"></textarea></label><label>Link (optional)<input id="newScriptLink" type="url" placeholder="https://…"></label><div class="form-actions"><button type="button" class="secondary small" id="cancelScript">Cancel</button><button class="small-primary" type="submit">Save script</button></div></form></section>
-        <section class="admin-pane" data-pane="themes" hidden><div class="pane-heading"><div><h3>Choose your atmosphere</h3><p>Theme changes apply across the whole site and are remembered on this device.</p></div></div><div class="theme-grid">
+        <section class="admin-pane" data-pane="themes" hidden><div class="pane-heading"><div><h3>Choose your atmosphere</h3><p>Theme changes apply across the whole site and are remembered on this device.</p></div></div><div class="theme-grid" id="themeGrid">
           <button class="theme-choice" data-theme-choice="summer"><span class="theme-preview preview-summer">☀</span><b>Summer</b><small>Warm and sunny</small></button>
           <button class="theme-choice" data-theme-choice="light"><span class="theme-preview preview-light">☼</span><b>Light</b><small>Clean and bright</small></button>
           <button class="theme-choice" data-theme-choice="dark"><span class="theme-preview preview-dark">☾</span><b>Dark</b><small>Midnight blue</small></button>
@@ -59,6 +59,21 @@
       <div class="admin-foot"><span><span class="status-dot"></span> Supabase-backed public library</span><button class="secondary small" id="closeAdminBottom">Done</button></div>
     </section>
   </div>
+  <div class="modal-backdrop" id="authBackdrop" hidden>
+    <section class="auth-modal" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+      <header class="admin-header"><div><span class="eyebrow">SUNNYSCRIPTS ACCOUNT</span><h2 id="authTitle">Welcome back</h2><p id="authSubtitle">Sign in or create an account.</p></div><button class="icon-button" id="closeAuth" aria-label="Close account dialog">×</button></header>
+      <div class="auth-switch"><button class="auth-mode active" data-auth-mode="login" type="button">Log in</button><button class="auth-mode" data-auth-mode="signup" type="button">Sign up</button></div>
+      <form id="authForm" class="editor-form visible-form auth-form">
+        <label id="usernameField" hidden>Username<input id="authUsername" type="text" maxlength="32" autocomplete="username" placeholder="Your username"></label>
+        <label>Email address<input id="authEmail" type="email" autocomplete="email" required placeholder="you@example.com"></label>
+        <label>Password<input id="authPassword" type="password" minlength="8" autocomplete="current-password" required placeholder="At least 8 characters"></label>
+        <button class="small-primary" id="authSubmit" type="submit">Log in</button>
+        <button class="secondary small" id="signOutButton" type="button" hidden>Sign out</button>
+        <p class="saved-note" id="authStatus" role="status">Authentication powered by Supabase.</p>
+      </form>
+    </section>
+  </div>
+  <script src="/portal.js" defer></script>
   <button id="backToTop" type="button" aria-label="Back to top" title="Back to top">↑</button>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
