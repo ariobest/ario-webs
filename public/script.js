@@ -22,8 +22,9 @@
   const safeWrite = (key, value) => { try { localStorage.setItem(key, JSON.stringify(value)); return true; } catch { showToast("Could not save: browser storage is unavailable."); return false; } };
   const showToast = (message) => { if (!toast) return; toast.textContent = message; toast.classList.add("show"); clearTimeout(toastTimer); toastTimer = setTimeout(() => toast.classList.remove("show"), 2200); };
   const DEMO_NAMES = new Set(["quicktools","islandkit","devbox"]);
-  let scripts = safeRead(STORAGE.scripts, []).filter(item => !DEMO_NAMES.has(String(item?.name || "").toLowerCase()) && !DEMO_NAMES.has(String(item?.slug || "").toLowerCase()));
+  let scripts = safeRead(STORAGE.scripts, []);
   if (!Array.isArray(scripts)) scripts = [];
+  scripts = scripts.filter(item => !DEMO_NAMES.has(String(item?.name || "").toLowerCase()) && !DEMO_NAMES.has(String(item?.slug || "").toLowerCase()));
   const validThemes = ["summer","light","dark","winter","autumn","spring","ocean","sunset","lavender","rose","forest","mint","cyber","crimson","gold","slate","mono","candy","sakura","arctic"];
   let favorites = new Set(safeRead(STORAGE.favorites, []));
   let showFavorites = false;
