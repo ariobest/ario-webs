@@ -5,8 +5,8 @@
   const PROJECT_URL = "https://cqtwmxojwwyeasstuhgb.supabase.co";
   const PUBLIC_KEY = "sb_publishable_qBPb1ltQbHNZ-fO3PFmDeg_IQj0QfNB";
   const client = window.supabase && window.supabase.createClient ? window.supabase.createClient(PROJECT_URL, PUBLIC_KEY) : null;
-  let user = null, admin = false, mode = "login";
-  const showToast = (msg) => { const t=$("#toast"); if(t){t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2200);} };
+  let user = null, admin = false, mode = "login", authBusy = false, toastTimer = 0;
+  const showToast = (msg, kind = "info") => { const t=$("#toast"); if(t){t.textContent=msg;t.dataset.kind=kind;t.classList.add("show");clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove("show"),3200);} };
   const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const themes = [
     ["summer","Summer","Warm and sunny","#f5b942","#e59b1a","#101a2b","#162238","#22314c","#a9c0e5"],
@@ -62,22 +62,29 @@
     setTheme(current);
   }
   function showAuth(which) {
-    mode=which||"login";$("#authBackdrop").hidden=false;document.body.classList.add("modal-open");updateAuthMode();
-    $("#authStatus").textContent=user?("Signed in as "+(user.email||"account")+(admin?" · Admin verified.":" · Standard account.")):"Supabase email authentication";
+    mode=user && (which==="signup" || which==="login" || !which) ? "account" : (which||"login");
+    if(user){$("#authEmail").value=user.email||$("#authEmail").value;$("#authUsername").value=String((user.user_metadata&&user.user_metadata.username)||$("#authUsername").value||"");}
+    $("#authBackdrop").hidden=false;document.body.classList.add("modal-open");updateAuthMode();
+    $("#authStatus").textContent=user?("You are already signed in as "+(user.email||"your account")+". Your account details are filled in below."):"Supabase email authentication";
+    if(user)showToast("You are already signed in.","success");
+    $("#closeAuth").focus();
   }
   function closeAuth(){ $("#authBackdrop").hidden=true;document.body.classList.remove("modal-open"); }
   function updateAuthMode(){
     $(".auth-mode").forEach(b=>b.classList.toggle("active",b.dataset.authMode===mode));
-    $("#usernameField").hidden=mode!=="signup";
-    $("#authPasswordField").hidden=mode==="reset";
-    $("#authPassword").required=mode!=="reset";
-    $("#authTitle").textContent=mode==="signup"?"Create your account":mode==="reset"?"Reset your password":mode==="newpassword"?"Choose a new password":"Welcome back";
-    $("#authSubtitle").textContent=mode==="signup"?"Sign up with email, username and password.":mode==="reset"?"We will email you a secure password-reset link.":mode==="newpassword"?"Choose a new password for your account.":"Log in with your email and password.";
-    $("#authSubmit").textContent=mode==="signup"?"Create account":mode==="reset"?"Send reset link":mode==="newpassword"?"Save new password":"Log in";
+    const accountMode=mode==="account";
+    $("#usernameField").hidden=mode!=="signup"&&!accountMode;
+    $("#authPasswordField").hidden=mode==="reset"||accountMode;
+    $("#authPassword").required=mode!=="reset"&&!accountMode;
+    $("#authPassword").value=accountMode?"":$("#authPassword").value;
+    $("#authTitle").textContent=accountMode?"You are already signed in":mode==="signup"?"Create your account":mode==="reset"?"Reset your password":mode==="newpassword"?"Choose a new password":"Welcome back";
+    $("#authSubtitle").textContent=accountMode?"Your account details are shown below. You can safely close this window.":mode==="signup"?"Sign up with email, username and password.":mode==="reset"?"We will email you a secure password-reset link.":mode==="newpassword"?"Choose a new password for your account.":"Log in with your email and password.";
+    $("#authSubmit").textContent=accountMode?"Already signed in":mode==="signup"?"Create account":mode==="reset"?"Send reset link":mode==="newpassword"?"Save new password":"Log in";
+    $("#authSubmit").disabled=accountMode||authBusy;
     $("#authPassword").autocomplete=mode==="signup"||mode==="newpassword"?"new-password":"current-password";
     $("#resendConfirmation").hidden=mode!=="signup";
     $("#forgotPassword").hidden=mode!=="login";
-    $("#authModeSwitch").hidden=mode==="reset"||mode==="newpassword";
+    $("#authModeSwitch").hidden=accountMode||mode==="reset"||mode==="newpassword";
     $("#signOutButton").hidden=!user;
   }
   function updateUI(){
@@ -110,43 +117,51 @@
     });
   }
   async function handleAuth(event){
-    event.preventDefault();if(!client){$("#authStatus").textContent="Supabase client did not load.";return;}
+    event.preventDefault();if(authBusy)return;
+    if($("#authWebsite").value.trim()){showToast("Could not submit this form. Try again.","error");return;}
+    if(user&&mode!=="newpassword"){mode="account";updateAuthMode();$("#authStatus").textContent="You are already signed in as "+(user.email||"your account")+". Sign out first if you need to use another account.";showToast("You are already signed in.","info");return;}
+    if(!client){$("#authStatus").textContent="Supabase client did not load.";showToast("Authentication is unavailable right now.","error");return;}
     const email=$("#authEmail").value.trim(),password=$("#authPassword").value,username=$("#authUsername").value.trim();
     if(mode==="signup"&&!/^[a-zA-Z0-9_.-]{3,32}$/.test(username)){ $("#authStatus").textContent="Username must be 3–32 letters, numbers, dot, dash or underscore.";return; }
     if((mode==="reset"||mode==="newpassword")&&!email&&mode==="reset"){ $("#authStatus").textContent="Enter your account email first.";return; }
-    $("#authSubmit").disabled=true;$("#authStatus").textContent="Please wait…";
+    authBusy=true;$("#authSubmit").disabled=true;$("#authStatus").textContent="Please wait…";
     try{
       if(mode==="signup"){
         const result=await client.auth.signUp({email,password,options:{data:{username:username},emailRedirectTo:window.location.origin}});
         if(result.error)throw result.error;
         if(result.data.session&&result.data.user){
           await client.from("profiles").upsert({id:result.data.user.id,username:username},{onConflict:"id"});
-          await refresh(result.data.user);$("#authStatus").textContent="Account created and signed in.";
-        }else { $("#resendConfirmation").hidden=false; $("#authStatus").textContent="Account created. Check your inbox and spam folder for the SunnyScripts confirmation email."; }
+          await refresh(result.data.user);mode="account";updateAuthMode();$("#authStatus").textContent="Account created and signed in. Welcome to SunnyScripts!";showToast("Account created successfully.","success");
+        }else { $("#resendConfirmation").hidden=false; $("#authStatus").textContent="Account created. Check your inbox and spam folder for the SunnyScripts confirmation email.";showToast("Confirmation email requested. Check your inbox.","success"); }
       }else if(mode==="reset"){
         const result=await client.auth.resetPasswordForEmail(email,{redirectTo:window.location.origin});
         if(result.error)throw result.error;
-        $("#authStatus").textContent="If that account exists, a password-reset email has been requested. Check your inbox and spam folder.";
+        $("#authStatus").textContent="If that account exists, a password-reset email has been requested. Check your inbox and spam folder.";showToast("If the account exists, a reset email is on its way.","success");
       }else if(mode==="newpassword"){
         const result=await client.auth.updateUser({password});if(result.error)throw result.error;
-        await refresh(result.data.user);mode="login";updateAuthMode();$("#authStatus").textContent="Password updated. You can now log in with your new password.";
+        await refresh(result.data.user);mode="account";updateAuthMode();$("#authStatus").textContent="Password updated successfully.";showToast("Password updated.","success");
       }else{
         const result=await client.auth.signInWithPassword({email,password});if(result.error)throw result.error;
         const signedInUser=result.data.user;
         const savedUsername=String((signedInUser.user_metadata&&signedInUser.user_metadata.username)||username||"").trim();
         if(savedUsername) { const profileResult=await client.from("profiles").upsert({id:signedInUser.id,username:savedUsername},{onConflict:"id"}); if(profileResult.error) console.warn("Profile username sync failed:",profileResult.error.message); }
-        await refresh(signedInUser);$("#authStatus").textContent=admin?"Logged in. Admin access verified.":"Logged in. This account has no admin role.";
+        await refresh(signedInUser);mode="account";updateAuthMode();$("#authStatus").textContent="You are already signed in as "+(signedInUser.email||"your account")+".";showToast(admin?"Welcome back, admin.":"Signed in successfully.","success");
       }
-    }catch(e){$("#authStatus").textContent=e.message||"Could not authenticate.";}
-    finally{$("#authSubmit").disabled=false;}
+    }catch(e){$("#authStatus").textContent=e.message||"Could not authenticate.";showToast(e.message||"Authentication failed.","error");}
+    finally{authBusy=false;$("#authSubmit").disabled=mode==="account";}
   }
+  function saveSignupDraft(){try{sessionStorage.setItem("sunnyScripts.signupDraft.v1",JSON.stringify({email:$("#authEmail").value.trim(),username:$("#authUsername").value.trim()}));}catch{}}
   function init(){
     addTools();renderThemes();
-    $("#openAuth").addEventListener("click",()=>showAuth(user?"login":"signup"));
+    $("#openAuth").addEventListener("click",()=>showAuth(user?"account":"signup"));
+    $("#heroSignUp").addEventListener("click",()=>showAuth("signup"));
+    try{const draft=JSON.parse(sessionStorage.getItem("sunnyScripts.signupDraft.v1")||"null");if(draft){if(draft.email)$("#authEmail").value=draft.email;if(draft.username)$("#authUsername").value=draft.username;}}catch{}
+    $("#authEmail").addEventListener("input",saveSignupDraft);$("#authUsername").addEventListener("input",saveSignupDraft);
     $("#closeAuth").addEventListener("click",closeAuth);
     $("#authBackdrop").addEventListener("click",e=>{if(e.target===$("#authBackdrop"))closeAuth();});
     $$(".auth-mode").forEach(b=>b.addEventListener("click",()=>{mode=b.dataset.authMode;updateAuthMode();}));
     $("#authForm").addEventListener("submit",handleAuth);
+    const authParams=new URLSearchParams(location.search);if(authParams.get("auth")==="signup"||location.hash==="#signup")showAuth("signup");
     $("#forgotPassword").addEventListener("click",()=>{mode="reset";updateAuthMode();$("#authStatus").textContent="Enter your email and we will send a secure reset link.";});
     $("#resendConfirmation").addEventListener("click",async()=>{if(!client)return;const email=$("#authEmail").value.trim();if(!email){$("#authStatus").textContent="Enter the email address you signed up with first.";return;}const b=$("#resendConfirmation");b.disabled=true;try{const {error}=await client.auth.resend({type:"signup",email,options:{emailRedirectTo:window.location.origin}});if(error)throw error;$("#authStatus").textContent="If confirmation is still needed, a new email has been requested. Check your inbox and spam folder.";}catch(e){$("#authStatus").textContent=e.message||"Could not resend confirmation.";}finally{b.disabled=false;}});
     $("#signOutButton").addEventListener("click",async()=>{if(!client)return;const {error}=await client.auth.signOut();if(error){$("#authStatus").textContent=error.message;return;}await refresh(null);updateAuthMode();showToast("Signed out.");});
@@ -202,7 +217,7 @@
     $("#copyImageUrl").addEventListener("click",async()=>{try{await navigator.clipboard.writeText($("#uploadedImageUrl").value);showToast("Image URL copied.");}catch{$("#uploadedImageUrl").select();document.execCommand("copy");}});
     if(client){
       client.auth.getSession().then(({data})=>refresh(data.session&&data.session.user||null));
-      client.auth.onAuthStateChange((event,session)=>{refresh(session&&session.user||null);if(session&&session.user&&session.user.email)$("#authEmail").value=session.user.email;if(event==="PASSWORD_RECOVERY"){mode="newpassword";showAuth("newpassword");$("#authStatus").textContent="Choose a new password to finish resetting your account.";}});
+      client.auth.onAuthStateChange((event,session)=>{refresh(session&&session.user||null);if(session&&session.user){if(session.user.email)$("#authEmail").value=session.user.email;$("#authUsername").value=String((session.user.user_metadata&&session.user.user_metadata.username)||"");}if(event==="PASSWORD_RECOVERY"){mode="newpassword";showAuth("newpassword");$("#authStatus").textContent="Choose a new password to finish resetting your account.";}});
       if(location.hash.includes("type=recovery")||new URLSearchParams(location.search).get("type")==="recovery"){mode="newpassword";showAuth("newpassword");$("#authStatus").textContent="Choose a new password to finish resetting your account.";}
     }else $("#authStatus").textContent="Supabase client library unavailable.";
     updateUI();
