@@ -36,3 +36,16 @@ Both templates use Supabase's supported `{{ .ConfirmationURL }}` variable. Keep 
 ## Security note
 
 Only the Supabase project URL and public publishable/anon key belong in browser code. SMTP credentials and provider API keys must remain in provider/Supabase settings or a trusted server-side secret store.
+
+## 5. Reduce signup abuse and email spam
+
+The website now includes a hidden honeypot field and blocks duplicate form submissions while a request is in progress. These are lightweight friction only; browser-side checks cannot stop a determined bot from calling Supabase directly.
+
+For real protection, open the Supabase dashboard and:
+1. Go to **Authentication → Rate Limits** and use conservative limits for signups and email sends.
+2. Go to **Authentication → Bot and Abuse Protection** and configure a CAPTCHA provider such as Cloudflare Turnstile.
+3. Add the Turnstile site key to the signup page and the matching secret to Supabase, then pass the CAPTCHA token with Supabase Auth requests. CAPTCHA is not active until both dashboard configuration and the client token integration are complete.
+4. In Resend, keep domain authentication (SPF/DKIM) valid and monitor bounce/complaint events. Do not repeatedly resend confirmation emails to addresses that bounce or complain.
+
+Never place the Turnstile secret, SMTP password, Resend API key, or Supabase service-role key in frontend files.
+
