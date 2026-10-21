@@ -1,7 +1,7 @@
 (() => {
   "use strict";
   const LOGO_URL = "https://www.image2url.com/r2/default/images/1792591024054-9d66ce25-9de6-4662-93d2-a3c6e127a298.png";
-  const STORAGE = { theme: "sunnyScripts.theme.v1", scripts: "sunnyScripts.library.v1", supabase: "sunnyScripts.supabase.public.v1" };
+  const STORAGE = { theme: "sunnyScripts.theme.v1", scripts: "sunnyScripts.library.v1", supabase: "sunnyScripts.supabase.public.v1", favorites: "sunnyScripts.favorites.v1" };
   const starterScripts = [
     { id: "quicktools", name: "QuickTools", category: "Utility", description: "Useful utilities packaged into a simple, easy-to-use script.", link: "" },
     { id: "islandkit", name: "IslandKit", category: "Tools", description: "A set of summer-inspired tools for experimenting with Roblox projects.", link: "" },
@@ -17,6 +17,8 @@
   let scripts = safeRead(STORAGE.scripts, starterScripts);
   if (!Array.isArray(scripts)) scripts = starterScripts.slice();
   const validThemes = ["summer", "light", "dark", "winter", "autumn", "spring"];
+  let favorites = new Set(safeRead(STORAGE.favorites, []));
+  let showFavorites = false;
   let currentTheme = safeRead(STORAGE.theme, "summer");
   if (!validThemes.includes(currentTheme)) currentTheme = "summer";
 
@@ -43,8 +45,14 @@
   function renderScripts() {
     const query = ($("#scriptSearch").value || "").trim().toLowerCase();
     const category = $("#categoryFilter").value;
-    const filtered = scripts.filter(item => (category === "all" || item.category === category) && [item.name, item.category, item.description].some(value => String(value || "").toLowerCase().includes(query)));
-    $("#scriptGrid").innerHTML = filtered.map((item, index) => `<article class="script-card" style="--card-index:${index}"><div class="script-card-top"><span class="script-icon">${item.category === "Utility" ? "⌁" : item.category === "Tools" ? "⌘" : "✧"}</span><span class="pill">${escapeHTML(item.category)}</span></div><h3>${escapeHTML(item.name)}</h3><p>${escapeHTML(item.description)}</p><div class="script-card-actions"><button class="copy-btn" data-copy-name="${escapeHTML(item.name)}" type="button">Copy name <span>↗</span></button>${item.link ? `<a class="open-script" href="${escapeHTML(item.link)}" target="_blank" rel="noopener noreferrer">Open ↗</a>` : ""}</div></article>`).join("");
+    const sort = $("#sortScripts").value;
+    let filtered = scripts.filter(item => (category === "all" || item.category === category) && (!showFavorites || favorites.has(item.id)) && [item.name, item.category, item.description].some(value => String(value || "").toLowerCase().includes(query)));
+    filtered = filtered.slice().sort((a, b) => sort === "az" ? a.name.localeCompare(b.name) : sort === "za" ? b.name.localeCompare(a.name) : scripts.indexOf(a) - scripts.indexOf(b));
+    $("#favoritesToggle").classList.toggle("active", showFavorites);
+    $("#favoritesToggle").setAttribute("aria-pressed", String(showFavorites));
+    $("#favoritesToggle").textContent = showFavorites ? "♥ Favorites" : "♡ Favorites";
+    $("#scriptGrid").innerHTML = filtered.map((item, index) => `<article class="script-card" style="--card-index:${index}"><div class="script-card-top"><span class="script-icon">${item.category === "Utility" ? "⌁" : item.category === "Tools" ? "⌘" : "✧"}</span><span class="pill">${escapeHTML(item.category)}</span><button class="favorite-btn ${favorites.has(item.id) ? "is-favorite" : ""}" data-favorite-id="${escapeHTML(item.id)}" type="button" aria-label="${favorites.has(item.id) ? "Remove from" : "Add to"} favorites" aria-pressed="${favorites.has(item.id)}">${favorites.has(item.id) ? "♥" : "♡"}</button></div><h3>${escapeHTML(item.name)}</h3><p>${escapeHTML(item.description)}</p><div class="script-card-actions"><button class="copy-btn" data-copy-name="${escapeHTML(item.name)}" type="button">Copy name <span>↗</span></button>${item.link ? `<a class="open-script" href="${escapeHTML(item.link)}" target="_blank" rel="noopener noreferrer">Open ↗</a>` : ""}</div></article>`).join("");
+    $("#emptyState").textContent = showFavorites && filtered.length === 0 ? "No favorites yet — tap the heart on a script to save it." : "No scripts match that search.";
     $("#emptyState").hidden = filtered.length !== 0;
     $("#scriptCount").textContent = scripts.length;
     renderAdminScripts();
@@ -92,6 +100,10 @@
   $$("[data-scroll-scripts]").forEach(button => button.addEventListener("click", () => $("#scripts").scrollIntoView({ behavior: "smooth" })));
   $("#scriptSearch").addEventListener("input", renderScripts);
   $("#categoryFilter").addEventListener("change", renderScripts);
+  $("#sortScripts").addEventListener("change", renderScripts);
+  $("#favoritesToggle").addEventListener("click", () => { showFavorites = !showFavorites; renderScripts(); });
+  $("#backToTop").addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
+  window.addEventListener("scroll", () => $("#backToTop").classList.toggle("visible", window.scrollY > 500), { passive: true });
   $("#newScriptBtn").addEventListener("click", () => { resetScriptForm(); $("#scriptForm").hidden = false; $("#newScriptName").focus(); });
   $("#cancelScript").addEventListener("click", resetScriptForm);
   $("#scriptForm").addEventListener("submit", event => {
@@ -115,6 +127,13 @@
     }
   });
   $("#scriptGrid").addEventListener("click", async event => {
+    const favoriteButton = event.target.closest("[data-favorite-id]");
+    if (favoriteButton) {
+      const id = favoriteButton.dataset.favoriteId;
+      if (favorites.has(id)) favorites.delete(id); else favorites.add(id);
+      if (safeWrite(STORAGE.favorites, [...favorites])) { renderScripts(); showToast(favorites.has(id) ? "Added to favorites." : "Removed from favorites."); }
+      return;
+    }
     const button = event.target.closest("[data-copy-name]"); if (!button) return;
     const value = button.dataset.copyName;
     try { await navigator.clipboard.writeText(value); showToast('"' + value + '" copied!'); }
