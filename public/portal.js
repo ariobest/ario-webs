@@ -53,7 +53,8 @@
     const label=$("#themeLabel");if(label)label.textContent=t.name.toUpperCase()+" EDITION";
     const meta=$('meta[name="theme-color"]');if(meta)meta.content=t.page;
     try{localStorage.setItem("sunnyScripts.theme.v1",JSON.stringify(t.id));}catch{}
-    $$("#themeGrid [data-theme-choice]").forEach(b=>{b.classList.toggle("selected",b.dataset.themeChoice===id);b.setAttribute("aria-pressed",String(b.dataset.themeChoice===id));});
+    $("#themeGrid [data-theme-choice]").forEach(b=>{b.classList.toggle("selected",b.dataset.themeChoice===id);b.setAttribute("aria-pressed",String(b.dataset.themeChoice===id));});
+    document.dispatchEvent(new CustomEvent("sunnyScripts:theme-change", { detail: { id } }));
   }
   function renderThemes() {
     const host=$("#themeGrid");if(!host)return;
