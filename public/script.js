@@ -34,7 +34,7 @@
   let currentTheme = safeRead(STORAGE.theme, "summer");
   if (!validThemes.includes(currentTheme)) currentTheme = "summer";
 
-  function applyTheme(theme, announce = false) {
+  function applyTheme(theme, announce = false, syncPortal = true) {
     if (!validThemes.includes(theme)) return;
     currentTheme = theme;
     document.documentElement.dataset.theme = theme;
@@ -50,6 +50,8 @@
       button.setAttribute("aria-pressed", String(selected));
     });
     if (announce) showToast(themeNames[theme].replace(" EDITION", "").toLowerCase() + " theme applied");
+    // Keep the Theme Studio's inline palette and this switcher's state in sync.
+    if (syncPortal) document.dispatchEvent(new CustomEvent("sunnyScripts:theme-change", { detail: { id: theme } }));
   }
 
   function escapeHTML(value) {
@@ -150,6 +152,10 @@
     }
   }
 
+  document.addEventListener("sunnyScripts:theme-change", event => {
+    const id = event.detail?.id;
+    if (validThemes.includes(id) && currentTheme !== id) applyTheme(id, false, false);
+  });
   $("#themeQuick").addEventListener("click", () => { const index = validThemes.indexOf(currentTheme); applyTheme(validThemes[(index + 1) % validThemes.length], true); });
   // Public Themes tab: one delegated handler survives theme-grid rerenders.
   $("#publicThemeGrid")?.addEventListener("click", event => {
