@@ -76,7 +76,7 @@
   }
   function closeAuth(){ $("#authBackdrop").hidden=true;document.body.classList.remove("modal-open"); }
   function updateAuthMode(){
-    $(".auth-mode").forEach(b=>b.classList.toggle("active",b.dataset.authMode===mode));
+    $$(".auth-mode").forEach(b=>b.classList.toggle("active",b.dataset.authMode===mode));
     const accountMode=mode==="account";
     $("#usernameField").hidden=mode!=="signup"&&!accountMode;
     $("#authPasswordField").hidden=mode==="reset"||accountMode;
