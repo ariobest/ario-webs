@@ -170,8 +170,32 @@
   document.addEventListener("keydown", event => { if (event.key === "Escape" && !$("#adminBackdrop").hidden) closeAdmin(); });
   $$(".admin-tab").forEach(button => button.addEventListener("click", () => selectAdminTab(button.dataset.adminTab)));
   $$("[data-theme-choice]").forEach(button => button.addEventListener("click", () => applyTheme(button.dataset.themeChoice, true)));
-  $("[data-view]").forEach(button => button.addEventListener("click", () => { const view = button.dataset.view; $(".nav-link").forEach(link => link.classList.toggle("active", link === button)); const target = view === "about" ? $("#about") : view === "themes" ? $("#themes") : $("#scripts"); target?.scrollIntoView({ behavior: "smooth", block: "start" }); }));
-  $$("[data-scroll-scripts]").forEach(button => button.addEventListener("click", () => $("#scripts").scrollIntoView({ behavior: "smooth" })));
+  function setPage(view, updateAddress = true) {
+    const page = ["scripts", "themes", "about"].includes(view) ? view : "scripts";
+    $("#hero").hidden = page !== "scripts";
+    $("#scripts").hidden = page !== "scripts";
+    $("#themes").hidden = page !== "themes";
+    $("#about").hidden = page !== "about";
+    $(".nav-link").forEach(link => {
+      const active = link.dataset.view === page;
+      link.classList.toggle("active", active);
+      link.setAttribute("aria-current", active ? "page" : "false");
+    });
+    if (updateAddress) {
+      const url = new URL(location.href);
+      url.pathname = page === "scripts" ? "/scripts" : "/" + page;
+      url.searchParams.delete("view");
+      history.pushState({ view: page }, "", url);
+    }
+    window.scrollTo({ top: 0, behavior: "auto" });
+  }
+  $("[data-view]").forEach(button => button.addEventListener("click", () => setPage(button.dataset.view)));
+  $("[data-scroll-scripts]").forEach(button => button.addEventListener("click", () => setPage("scripts")));
+  window.addEventListener("popstate", () => {
+    const route = location.pathname.replace(/\\/+$/, "") || "/";
+    const fromPath = route === "/themes" ? "themes" : route === "/about" ? "about" : "scripts";
+    setPage(new URLSearchParams(location.search).get("view") || fromPath, false);
+  });
   $("#scriptSearch").addEventListener("input", renderScripts);
   $("#categoryFilter").addEventListener("change", renderScripts);
   $("#sortScripts").addEventListener("change", renderScripts);
@@ -234,6 +258,9 @@
   // Keep the supplied brand image consistent for all logo placements.
   $$(".brand-logo").forEach(image => { image.src = LOGO_URL; image.addEventListener("error", () => { image.alt = "SunnyScripts"; }); });
   applyTheme(currentTheme);
+  const initialRoute = location.pathname.replace(/\\/+$/, "") || "/";
+  const initialView = new URLSearchParams(location.search).get("view") || (initialRoute === "/themes" ? "themes" : initialRoute === "/about" ? "about" : "scripts");
+  setPage(initialView, false);
   observeRiseElements();
   renderScripts();
   initSupabase();
