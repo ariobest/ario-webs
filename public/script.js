@@ -14,11 +14,6 @@
     }), { threshold: 0.12, rootMargin: "0px 0px -35px 0px" });
     targets.forEach(el => { if (!el.classList.contains("rise-reveal")) el.classList.add("rise-reveal"); riseObserver.observe(el); });
   }
-  const starterScripts = [
-    { id: "quicktools", name: "QuickTools", category: "Utility", description: "Useful utilities packaged into a simple, easy-to-use script.", link: "" },
-    { id: "islandkit", name: "IslandKit", category: "Tools", description: "A set of summer-inspired tools for experimenting with Roblox projects.", link: "" },
-    { id: "devbox", name: "DevBox", category: "Learning", description: "Developer-focused helpers and starter snippets for your next idea.", link: "" }
-  ];
   const $ = (selector, root = document) => root.querySelector(selector);
   const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
   const toast = $("#toast");
@@ -26,8 +21,9 @@
   const safeRead = (key, fallback) => { try { const value = localStorage.getItem(key); return value === null ? fallback : JSON.parse(value); } catch { return fallback; } };
   const safeWrite = (key, value) => { try { localStorage.setItem(key, JSON.stringify(value)); return true; } catch { showToast("Could not save: browser storage is unavailable."); return false; } };
   const showToast = (message) => { if (!toast) return; toast.textContent = message; toast.classList.add("show"); clearTimeout(toastTimer); toastTimer = setTimeout(() => toast.classList.remove("show"), 2200); };
-  let scripts = safeRead(STORAGE.scripts, starterScripts);
-  if (!Array.isArray(scripts)) scripts = starterScripts.slice();
+  const DEMO_NAMES = new Set(["quicktools","islandkit","devbox"]);
+  let scripts = safeRead(STORAGE.scripts, []).filter(item => !DEMO_NAMES.has(String(item?.name || "").toLowerCase()) && !DEMO_NAMES.has(String(item?.slug || "").toLowerCase()));
+  if (!Array.isArray(scripts)) scripts = [];
   const validThemes = ["summer","light","dark","winter","autumn","spring","ocean","sunset","lavender","rose","forest","mint","cyber","crimson","gold","slate","mono","candy","sakura","arctic"];
   let favorites = new Set(safeRead(STORAGE.favorites, []));
   let showFavorites = false;
@@ -66,7 +62,7 @@
     $("#favoritesToggle").classList.toggle("active", showFavorites);
     $("#favoritesToggle").setAttribute("aria-pressed", String(showFavorites));
     $("#favoritesToggle").textContent = showFavorites ? "♥ Favorites" : "♡ Favorites";
-    $("#scriptGrid").innerHTML = filtered.map((item, index) => `<article class="script-card" style="--card-index:${index}"><div class="script-card-top"><span class="script-icon">${item.category === "Utility" ? "⌁" : item.category === "Tools" ? "⌘" : "✧"}</span><span class="pill">${escapeHTML(item.category)}</span><button class="favorite-btn ${favorites.has(item.id) ? "is-favorite" : ""}" data-favorite-id="${escapeHTML(item.id)}" type="button" aria-label="${favorites.has(item.id) ? "Remove from" : "Add to"} favorites" aria-pressed="${favorites.has(item.id)}">${favorites.has(item.id) ? "♥" : "♡"}</button></div><h3>${escapeHTML(item.name)}</h3><p>${escapeHTML(item.description)}</p><div class="script-card-actions"><button class="copy-btn" data-copy-name="${escapeHTML(item.name)}" type="button">Copy name <span>↗</span></button>${item.link ? `<a class="open-script" href="${escapeHTML(item.link)}" target="_blank" rel="noopener noreferrer">Open ↗</a>` : ""}</div></article>`).join("");
+    $("#scriptGrid").innerHTML = filtered.map((item, index) => `<article class="script-card" style="--card-index:${index}"><div class="script-card-top"><span class="script-icon">${item.category === "Utility" ? "⌁" : item.category === "Tools" ? "⌘" : "✧"}</span><span class="pill">${escapeHTML(item.category)}</span><button class="favorite-btn ${favorites.has(item.id) ? "is-favorite" : ""}" data-favorite-id="${escapeHTML(item.id)}" type="button" aria-label="${favorites.has(item.id) ? "Remove from" : "Add to"} favorites" aria-pressed="${favorites.has(item.id)}">${favorites.has(item.id) ? "♥" : "♡"}</button><details class="script-more"><summary aria-label="More script options" title="More options">•••</summary><div class="script-more-menu"><button type="button" data-copy-link="${escapeHTML(item.slug || item.id)}">Copy script link</button><button type="button" data-copy-name="${escapeHTML(item.name)}">Copy script name</button></div></details></div><h3>${escapeHTML(item.name)}</h3><p>${escapeHTML(item.description)}</p><div class="script-card-actions"><button class="copy-btn" data-copy-loader="${escapeHTML(item.slug || item.id)}" type="button">Copy script <span>↗</span></button>${item.link ? `<a class="open-script" href="${escapeHTML(item.link)}" target="_blank" rel="noopener noreferrer">Details ↗</a>` : ""}</div></article>`).join("");
     $("#emptyState").textContent = showFavorites && filtered.length === 0 ? "No favorites yet — tap the heart on a script to save it." : "No scripts match that search.";
     $("#emptyState").hidden = filtered.length !== 0;
     $("#scriptCount").textContent = scripts.length;
@@ -115,12 +111,12 @@
     try {
       const { data, error } = await supabaseClient
         .from("published_script_metadata")
-        .select("id,name,category,description,link,created_at")
-        .eq("status", "published")
+        .select("id,name,slug,category,description,link,created_at")
         .order("created_at", { ascending: false });
       if (error) throw error;
       scripts = (data || []).map(item => ({
         id: String(item.id),
+        slug: item.slug || String(item.id),
         name: item.name,
         category: item.category || "Utility",
         description: item.description || "",
@@ -129,6 +125,7 @@
       databaseConnected = true;
       safeWrite(STORAGE.scripts, scripts);
       renderScripts();
+      loadPublicSiteSettings();
       if (status) status.textContent = "Connected to Supabase. Published scripts are loading from the database.";
     } catch (error) {
       databaseConnected = false;
@@ -224,6 +221,51 @@
       if (safeWrite(STORAGE.scripts, scripts)) { renderScripts(); showToast("Script deleted."); }
     }
   });
+  async function copyText(value, message) {
+    try { await navigator.clipboard.writeText(value); showToast(message || "Copied to clipboard."); return true; }
+    catch {
+      const area = document.createElement("textarea"); area.value = value; area.style.position = "fixed"; area.style.opacity = "0"; document.body.appendChild(area); area.select();
+      let ok = false; try { ok = document.execCommand("copy"); } catch {}
+      area.remove(); showToast(ok ? (message || "Copied to clipboard.") : "Copy unavailable — select and copy manually."); return ok;
+    }
+  }
+  function buildLoader(slug) {
+    const api = "https://cqtwmxojwwyeasstuhgb.supabase.co/functions/v1/script-api";
+    const safeSlug = String(slug || "").replace(/[^a-zA-Z0-9_-]/g, "");
+    return [
+      "-- SunnyScripts protected loader",
+      "-- Paste your access key below. Source is delivered only after server-side key verification.",
+      'local HttpService = game:GetService("HttpService")',
+      'local API_URL = "' + api + '"',
+      'local SCRIPT_SLUG = "' + safeSlug + '"',
+      'local ACCESS_KEY = "PASTE_YOUR_ACCESS_KEY_HERE"',
+      'local PUBLIC_KEY = "sb_publishable_qBPb1ltQbHNZ-fO3PFmDeg_IQj0QfNB"',
+      "",
+      "local send = (syn and syn.request) or (http and http.request) or http_request or request",
+      'assert(type(send) == "function", "Your environment needs an HTTP request function.")',
+      "",
+      "local response = send({",
+      "    Url = API_URL,",
+      '    Method = "POST",',
+      "    Headers = {",
+      '        ["Content-Type"] = "application/json",',
+      '        ["apikey"] = PUBLIC_KEY',
+      "    },",
+      "    Body = HttpService:JSONEncode({",
+      '        action = "load",',
+      "        key = ACCESS_KEY,",
+      "        script = SCRIPT_SLUG",
+      "    })",
+      "})",
+      "",
+      "local status = response.StatusCode or response.Status or 0",
+      'local body = response.Body or response.body or ""',
+      'assert(status == 200, "SunnyScripts key verification failed: " .. tostring(body))',
+      "local run, loadError = loadstring(body)",
+      'assert(type(run) == "function", "Could not load authorized script: " .. tostring(loadError))',
+      "run()"
+    ].join("\n");
+  }
   $("#scriptGrid").addEventListener("click", async event => {
     const favoriteButton = event.target.closest("[data-favorite-id]");
     if (favoriteButton) {
@@ -232,15 +274,35 @@
       if (safeWrite(STORAGE.favorites, [...favorites])) { renderScripts(); showToast(favorites.has(id) ? "Added to favorites." : "Removed from favorites."); }
       return;
     }
-    const button = event.target.closest("[data-copy-name]"); if (!button) return;
-    const value = button.dataset.copyName;
-    try { await navigator.clipboard.writeText(value); showToast('"' + value + '" copied!'); }
-    catch {
-      const area = document.createElement("textarea"); area.value = value; area.style.position = "fixed"; area.style.opacity = "0"; document.body.appendChild(area); area.select();
-      let ok = false; try { ok = document.execCommand("copy"); } catch {}
-      area.remove(); showToast(ok ? '"' + value + '" copied!' : "Copy unavailable — " + value);
+    const moreButton = event.target.closest("[data-copy-link]");
+    if (moreButton) {
+      const url = new URL("/scripts", location.origin); url.searchParams.set("script", moreButton.dataset.copyLink);
+      await copyText(url.href, "Script link copied."); moreButton.closest("details")?.removeAttribute("open"); return;
     }
+    const loaderButton = event.target.closest("[data-copy-loader]");
+    if (loaderButton) {
+      await copyText(buildLoader(loaderButton.dataset.copyLoader), "Protected loader copied. Add your access key before running it.");
+      return;
+    }
+    const nameButton = event.target.closest("[data-copy-name]");
+    if (nameButton) await copyText(nameButton.dataset.copyName, "Script name copied.");
   });
+  async function loadPublicSiteSettings() {
+    if (!supabaseClient) return;
+    try {
+      const { data, error } = await supabaseClient.from("site_settings").select("value").eq("key", "site_config").eq("is_public", true).maybeSingle();
+      if (error || !data?.value) return;
+      const value = data.value;
+      if (value.siteName) {
+        document.title = value.siteName + " — Roblox Scripts";
+        const brand = $(".brand > span"); if (brand) brand.textContent = value.siteName;
+      }
+      const tagline = $("#heroTagline"); if (tagline && value.tagline) tagline.textContent = value.tagline;
+      const banner = $("#siteAnnouncement");
+      if (banner) { banner.textContent = value.announcement || ""; banner.hidden = !(value.announcementEnabled && value.announcement); }
+      if (value.defaultTheme && validThemes.includes(value.defaultTheme)) applyTheme(value.defaultTheme, false, false);
+    } catch (error) { console.warn("Public site settings could not be loaded:", error); }
+  }
   $("#supabaseForm").addEventListener("submit", event => {
     event.preventDefault();
     const url = $("#supabaseUrl").value.trim().replace(/\/$/, "");
