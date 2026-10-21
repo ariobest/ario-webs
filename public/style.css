@@ -90,3 +90,5 @@
 #heroSignUp{white-space:nowrap}
 @media(max-width:580px){.sky-sun{width:58px;height:58px}.sky-moon{width:48px;height:48px}.sky-moon:after{width:43px;height:43px;left:14px;top:-5px}.hero-actions{flex-wrap:wrap}.hero-actions #heroSignUp{flex-basis:100%}}
 @media(prefers-reduced-motion:reduce){.sky-sun,.sky-moon,.hero-copy>*{animation:none!important}.sky-sun{opacity:.75;transform:translate(-50%,0)}.sky-moon{display:none}.rise-reveal{opacity:1;transform:none;transition:none}}
+
+.editor-form label[hidden], .auth-form [hidden]{display:none!important}
