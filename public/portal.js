@@ -202,7 +202,7 @@
     $("#copyImageUrl").addEventListener("click",async()=>{try{await navigator.clipboard.writeText($("#uploadedImageUrl").value);showToast("Image URL copied.");}catch{$("#uploadedImageUrl").select();document.execCommand("copy");}});
     if(client){
       client.auth.getSession().then(({data})=>refresh(data.session&&data.session.user||null));
-      client.auth.onAuthStateChange((event,session)=>{refresh(session&&session.user||null);if(event==="PASSWORD_RECOVERY"){mode="newpassword";showAuth("newpassword");$("#authStatus").textContent="Choose a new password to finish resetting your account.";}});
+      client.auth.onAuthStateChange((event,session)=>{refresh(session&&session.user||null);if(session&&session.user&&session.user.email)$("#authEmail").value=session.user.email;if(event==="PASSWORD_RECOVERY"){mode="newpassword";showAuth("newpassword");$("#authStatus").textContent="Choose a new password to finish resetting your account.";}});
       if(location.hash.includes("type=recovery")||new URLSearchParams(location.search).get("type")==="recovery"){mode="newpassword";showAuth("newpassword");$("#authStatus").textContent="Choose a new password to finish resetting your account.";}
     }else $("#authStatus").textContent="Supabase client library unavailable.";
     updateUI();
