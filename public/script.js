@@ -189,7 +189,7 @@
     }
     window.scrollTo({ top: 0, behavior: "auto" });
   }
-  $("[data-view]").forEach(button => button.addEventListener("click", () => setPage(button.dataset.view)));
+  $$("[data-view]").forEach(button => button.addEventListener("click", () => setPage(button.dataset.view)));
   $("[data-scroll-scripts]").forEach(button => button.addEventListener("click", () => setPage("scripts")));
   window.addEventListener("popstate", () => {
     const route = location.pathname.replace(/\/+$/, "") || "/";
