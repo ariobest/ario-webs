@@ -62,3 +62,31 @@
 .image-url-result img{max-width:100%;max-height:220px;object-fit:contain;border-radius:8px}
 .image-url-result input{width:100%;min-width:0;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);font-size:11px}
 @media(max-width:580px){.account-button{padding:8px;font-size:10px}#themeGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.auth-form{margin:13px 16px 18px}.auth-switch{padding:13px 16px 0}.admin-tabs{padding-left:12px;padding-right:12px}}
+
+
+/* Sunrise-to-moon hero scene, rising scroll reveals, and accessible auth polish */
+.hero-visual{isolation:isolate}
+.sky-cycle{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0;opacity:.9}
+.sky-sun,.sky-moon{position:absolute;left:50%;top:42%;width:82px;height:82px;border-radius:50%;transform:translate(-50%,0);will-change:transform,opacity}
+.sky-sun{background:radial-gradient(circle at 35% 30%,#fff4c1 0,#ffd36c 36%,#f4a536 72%);box-shadow:0 0 24px #ffc65a88,0 0 90px #f5a93644;animation:sun-rise 10s ease-in-out infinite}
+.sky-moon{top:14%;width:65px;height:65px;background:#dbe8ff;box-shadow:0 0 22px #c8ddff66,0 0 70px #a8c9ff33;opacity:0;animation:moon-fall 10s ease-in-out infinite}
+.sky-moon:after{content:"";position:absolute;top:-7px;left:19px;width:58px;height:58px;border-radius:50%;background:var(--page)}
+.sky-horizon{position:absolute;left:10%;right:10%;top:73%;height:1px;background:linear-gradient(90deg,transparent,var(--accent),transparent);opacity:.55}
+@keyframes sun-rise{0%,100%{opacity:0;transform:translate(-50%,95px) scale(.82)}12%{opacity:.95}38%{opacity:1;transform:translate(-50%,-25px) scale(1)}48%{opacity:0;transform:translate(-50%,-42px) scale(.94)}}
+@keyframes moon-fall{0%,44%{opacity:0;transform:translate(-50%,-60px) scale(.8)}53%{opacity:.95}78%{opacity:1;transform:translate(-50%,90px) scale(1)}95%,100%{opacity:0;transform:translate(-50%,110px) scale(.9)}}
+.hero-copy>*{animation:copy-rise .7s both;animation-delay:calc(var(--rise-index,0)*90ms)}
+.hero-copy>*:nth-child(1){--rise-index:0}.hero-copy>*:nth-child(2){--rise-index:1}.hero-copy>*:nth-child(3){--rise-index:2}.hero-copy>*:nth-child(4){--rise-index:3}.hero-copy>*:nth-child(5){--rise-index:4}
+@keyframes copy-rise{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.rise-reveal{opacity:0;transform:translateY(24px);transition:opacity .7s ease,transform .7s cubic-bezier(.2,.7,.2,1)}
+.rise-reveal.is-visible{opacity:1;transform:translateY(0)}
+.rise-reveal:nth-child(2){transition-delay:70ms}.rise-reveal:nth-child(3){transition-delay:130ms}
+.toast{max-width:min(440px,calc(100vw - 28px));display:flex;align-items:center;gap:10px;border-color:color-mix(in srgb,var(--accent) 35%,var(--line));backdrop-filter:blur(16px)}
+.toast.show{animation:toast-rise .28s ease-out both}
+.toast[data-kind="success"]{border-color:rgba(91,205,151,.55)}
+.toast[data-kind="error"]{border-color:rgba(242,115,115,.65)}
+@keyframes toast-rise{from{opacity:0;transform:translate(-50%,18px) scale(.97)}to{opacity:1;transform:translate(-50%,0) scale(1)}}
+.spam-trap{position:absolute!important;left:-10000px!important;top:auto!important;width:1px!important;height:1px!important;overflow:hidden!important;opacity:0!important;pointer-events:none!important}
+.auth-form input[readonly]{opacity:.82;cursor:default}
+#heroSignUp{white-space:nowrap}
+@media(max-width:580px){.sky-sun{width:58px;height:58px}.sky-moon{width:48px;height:48px}.sky-moon:after{width:43px;height:43px;left:14px;top:-5px}.hero-actions{flex-wrap:wrap}.hero-actions #heroSignUp{flex-basis:100%}}
+@media(prefers-reduced-motion:reduce){.sky-sun,.sky-moon,.hero-copy>*{animation:none!important}.sky-sun{opacity:.75;transform:translate(-50%,0)}.sky-moon{display:none}.rise-reveal{opacity:1;transform:none;transition:none}}
