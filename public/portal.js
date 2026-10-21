@@ -140,6 +140,28 @@
       if(b.dataset.adminTab==="extra-4"||b.dataset.adminTab==="extra-10")$("#imageUrlStatus").textContent="Upload an image to create a public URL.";
     },true);
     $("#themeGrid").addEventListener("click",e=>{const b=e.target.closest("[data-theme-choice]");if(b)setTheme(b.dataset.themeChoice);});
+    $("#scriptForm").addEventListener("submit",async e=>{
+      if(!admin||!user||!client)return;
+      e.preventDefault();e.stopImmediatePropagation();
+      const name=$("#newScriptName").value.trim(),category=$("#newScriptCategory").value,description=$("#newScriptDescription").value.trim(),link=$("#newScriptLink").value.trim(),id=$("#editScriptId").value;
+      if(!name||!description){showToast("Enter a script name and description.");return;}
+      const slug=name.toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")+"-"+Date.now().toString(36);
+      const record={name,category,description,link:link||null,status:"published",owner_id:user.id};
+      let result;
+      if(id&&/^[0-9a-f-]{36}$/i.test(id)) result=await client.from("scripts").update(record).eq("id",id);
+      else result=await client.from("scripts").insert({...record,slug});
+      if(result.error){showToast("Supabase save failed: "+result.error.message);return;}
+      showToast("Script saved to Supabase.");location.reload();
+    },true);
+    $("#adminScriptList").addEventListener("click",async e=>{
+      const button=e.target.closest("[data-delete-script]");if(!button||!admin||!client)return;
+      const id=button.dataset.deleteScript;if(!/^[0-9a-f-]{36}$/i.test(id))return;
+      e.preventDefault();e.stopImmediatePropagation();
+      if(!confirm("Delete this script from Supabase?"))return;
+      const result=await client.from("scripts").delete().eq("id",id);
+      if(result.error){showToast("Delete failed: "+result.error.message);return;}
+      showToast("Script deleted from Supabase.");location.reload();
+    },true);
     $("#adminContent").addEventListener("submit",e=>{
       const f=e.target.closest(".module-form");if(!f)return;e.preventDefault();if(!admin)return;
       const value={title:f.elements.title.value,notes:f.elements.notes.value,enabled:f.elements.enabled.checked};
