@@ -1,14 +1,17 @@
 (() => {
   "use strict";
-  const API = "https://cqtwmxojwwyeasstuhgb.supabase.co/functions/v1/script-api";
   const SUPABASE_URL = "https://cqtwmxojwwyeasstuhgb.supabase.co";
   const PUBLIC_KEY = "sb_publishable_qBPb1ltQbHNZ-fO3PFmDeg_IQj0QfNB";
   const esc = value => String(value ?? "").replace(/[&<>\"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'\"':"&quot;","'":"&#39;"}[c]));
   const slugify = value => String(value || "").toLowerCase().trim().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"").slice(0,80) || "script";
-  function makeLoader(slug, key = "PASTE_YOUR_SUNNY_KEY_HERE") {
+  let issuedKey = "";
+  let activeSlug = "";
+
+  function makeLoader(slug, key = issuedKey || "PASTE_YOUR_SUNNY_KEY_HERE") {
     const url = `${location.origin}/script/${encodeURIComponent(slug)}?key=${encodeURIComponent(key)}`;
     return { url, lua: `loadstring(game:HttpGet("${url}"))()` };
   }
+
   function injectStyles(){
     if(document.getElementById("sunnyProtectToolsStyle"))return;
     const s=document.createElement("style");s.id="sunnyProtectToolsStyle";s.textContent=`
@@ -18,21 +21,30 @@
       .sunny-loader-actions{display:flex;gap:8px;flex-wrap:wrap}.sunny-loader-actions button{border:0;border-radius:10px;padding:9px 12px;cursor:pointer;font-weight:700}
       .sunny-loader-primary{background:var(--accent,#f5b942);color:#10131a}.sunny-loader-copy{background:rgba(127,153,190,.14);color:inherit}
       .sunny-loader-note{font-size:.78rem!important;margin-top:9px!important}
+      .sunny-code-interactive{transition:transform .28s ease,filter .28s ease;animation:sunnyCodeFloat 4.5s ease-in-out infinite;transform-origin:center}
+      .sunny-code-interactive:hover,.sunny-code-interactive.sunny-code-touch{transform:translateY(-7px) scale(1.015) rotate(-.5deg);filter:drop-shadow(0 18px 28px rgba(0,0,0,.2));animation-play-state:paused}
+      .sunny-code-interactive pre{position:relative;overflow:hidden}
+      .sunny-code-cursor{display:inline-block;width:7px;height:1em;margin-left:3px;vertical-align:-2px;background:currentColor;animation:sunnyCursor .75s steps(1) infinite}
+      @keyframes sunnyCodeFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+      @keyframes sunnyCursor{50%{opacity:0}}
     `;document.head.appendChild(s);
   }
+
   function showLoaderBox(slug, name){
     injectStyles();
     const form=document.querySelector("#scriptForm"); if(!form)return;
+    activeSlug=slug;
     let box=document.getElementById("sunnyLoaderBox");
     if(!box){box=document.createElement("div");box.id="sunnyLoaderBox";box.className="sunny-loader-box";form.appendChild(box)}
     const generated=makeLoader(slug);
-    box.innerHTML=`<h4>🛡️ Protected loader${name?` — ${esc(name)}`:""}</h4><p>Your script is protected by Sunny Dev. Give users a Sunny key, then use the key in the loader below.</p><label>Script URL<input id="sunnyLoaderUrl" readonly></label><label>Lua loadstring<textarea id="sunnyLoaderCode" rows="3" readonly></textarea></label><div class="sunny-loader-actions"><button type="button" class="sunny-loader-primary" id="sunnyCopyLoader">Copy loadstring</button><button type="button" class="sunny-loader-copy" id="sunnyCopyUrl">Copy URL</button></div><p class="sunny-loader-note">Replace <b>PASTE_YOUR_SUNNY_KEY_HERE</b> with a generated SUNNY key. Keys are checked by the server before the script is delivered.</p>`;
+    box.innerHTML=`<h4>🛡️ Protected loader${name?` — ${esc(name)}`:""}</h4><p>Your script is protected by Sunny Dev. The loader uses a real Sunny key when one has been issued.</p><label>Script URL<input id="sunnyLoaderUrl" readonly></label><label>Lua loadstring<textarea id="sunnyLoaderCode" rows="3" readonly></textarea></label><div class="sunny-loader-actions"><button type="button" class="sunny-loader-primary" id="sunnyCopyLoader">Copy loadstring</button><button type="button" class="sunny-loader-copy" id="sunnyCopyUrl">Copy URL</button></div><p class="sunny-loader-note" id="sunnyLoaderNote">${issuedKey ? "Real Sunny key attached ✓" : "Get a Sunny key from the top bar to attach a real key automatically."}</p>`;
     box.querySelector("#sunnyLoaderUrl").value=generated.url;
     box.querySelector("#sunnyLoaderCode").value=generated.lua;
     box.querySelector("#sunnyCopyLoader").onclick=()=>navigator.clipboard?.writeText(box.querySelector("#sunnyLoaderCode").value).then(()=>box.querySelector("#sunnyCopyLoader").textContent="Copied ✓").catch(()=>window.prompt("Copy loadstring:",box.querySelector("#sunnyLoaderCode").value));
     box.querySelector("#sunnyCopyUrl").onclick=()=>navigator.clipboard?.writeText(box.querySelector("#sunnyLoaderUrl").value).then(()=>box.querySelector("#sunnyCopyUrl").textContent="Copied ✓").catch(()=>window.prompt("Copy URL:",box.querySelector("#sunnyLoaderUrl").value));
     box.scrollIntoView({behavior:"smooth",block:"center"});
   }
+
   async function findPublishedScript(name){
     try{
       const client=window.supabase?.createClient?.(SUPABASE_URL,PUBLIC_KEY); if(!client)return null;
@@ -40,17 +52,48 @@
       if(error)throw error; return data||null;
     }catch(error){console.warn("Sunny loader lookup failed",error);return null;}
   }
-  function watch(){
-    const form=document.querySelector("#scriptForm"); if(!form)return;
-    form.addEventListener("submit",async()=>{
-      const name=document.querySelector("#newScriptName")?.value.trim(); if(!name)return;
-      setTimeout(async()=>{
-        const record=await findPublishedScript(name);
-        if(record?.slug) showLoaderBox(record.slug,record.name);
-        else { const slug=slugify(name); showLoaderBox(slug,name); }
-      },1800);
-    });
+
+  function refreshLoaderWithKey(key){
+    if(!key || !activeSlug)return;
+    issuedKey=key;
+    const generated=makeLoader(activeSlug,key);
+    const url=document.querySelector("#sunnyLoaderUrl"), code=document.querySelector("#sunnyLoaderCode"), note=document.querySelector("#sunnyLoaderNote");
+    if(url)url.value=generated.url;
+    if(code)code.value=generated.lua;
+    if(note)note.textContent="Real Sunny key attached ✓ — copy the loadstring.";
   }
+
+  function bindCodePreview(){
+    injectStyles();
+    const win=document.querySelector(".code-window"); if(!win || win.dataset.sunnyInteractive)return;
+    win.dataset.sunnyInteractive="1"; win.classList.add("sunny-code-interactive");
+    const code=win.querySelector("code"); if(!code)return;
+    const original=code.textContent.trim(); let running=false;
+    const type=()=>{
+      if(running)return; running=true; win.classList.add("sunny-code-touch"); code.textContent="";
+      let i=0; const cursor=document.createElement("span"); cursor.className="sunny-code-cursor"; code.appendChild(cursor);
+      const tick=()=>{ if(i<original.length){cursor.before(document.createTextNode(original[i++]));setTimeout(tick,18)}else{running=false;setTimeout(()=>win.classList.remove("sunny-code-touch"),350)} };
+      tick();
+    };
+    win.addEventListener("mouseenter",type); win.addEventListener("touchstart",type,{passive:true});
+  }
+
+  function watch(){
+    document.addEventListener("submit",async e=>{
+      if(!e.target?.matches?.("#scriptForm"))return;
+      const name=document.querySelector("#newScriptName")?.value.trim(); if(!name)return;
+      let record=null;
+      for(let i=0;i<8 && !record;i++){
+        await new Promise(r=>setTimeout(r,i?700:1200));
+        record=await findPublishedScript(name);
+      }
+      if(record?.slug)showLoaderBox(record.slug,record.name); else showLoaderBox(slugify(name),name);
+    },true);
+    window.addEventListener("sunny:key-issued",e=>refreshLoaderWithKey(e.detail?.key),false);
+    bindCodePreview();
+    const observer=new MutationObserver(bindCodePreview); observer.observe(document.documentElement,{childList:true,subtree:true});
+  }
+
   window.sunnyProtectedLoader={makeLoader,showLoaderBox};
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",watch);else watch();
 })();
