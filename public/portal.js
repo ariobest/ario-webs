@@ -155,7 +155,7 @@
   function init(){
     addTools();renderThemes();
     $("#openAuth").addEventListener("click",()=>showAuth(user?"account":"signup"));
-    $("#heroSignUp").addEventListener("click",()=>showAuth("signup"));
+    $("#heroSignUp").addEventListener("click",event=>{event.preventDefault();showAuth("signup");});
     try{const draft=JSON.parse(sessionStorage.getItem("sunnyScripts.signupDraft.v1")||"null");if(draft){if(draft.email)$("#authEmail").value=draft.email;if(draft.username)$("#authUsername").value=draft.username;}}catch{}
     $("#authEmail").addEventListener("input",saveSignupDraft);$("#authUsername").addEventListener("input",saveSignupDraft);
     $("#closeAuth").addEventListener("click",closeAuth);
