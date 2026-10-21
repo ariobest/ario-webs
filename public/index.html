@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="SunnyScripts — a summer-themed Roblox scripts hub">
+  <title>SunnyScripts — Roblox Scripts</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div class="sun" aria-hidden="true"></div>
+  <div class="cloud cloud-one" aria-hidden="true"></div>
+  <div class="cloud cloud-two" aria-hidden="true"></div>
+  <div class="particles" aria-hidden="true"></div>
+
+  <header class="nav">
+    <a class="brand" href="/">
+      <span class="logo">☀</span>
+      <span>Sunny<span>Scripts</span></span>
+    </a>
+    <nav>
+      <a href="#scripts">Scripts</a>
+      <a href="#about">About</a>
+    </nav>
+    <a class="nav-button" href="#scripts">Explore</a>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero-copy reveal">
+        <div class="eyebrow">☀ SUMMER 2026 • ROBLOX SCRIPT HUB</div>
+        <h1>Code your<br><span>summer.</span></h1>
+        <p>Discover a clean collection of Roblox scripts, tools and resources — wrapped in a bright summer vibe.</p>
+        <div class="hero-actions">
+          <a class="primary" href="#scripts">Browse Scripts <span>→</span></a>
+          <a class="secondary" href="#about">Learn More</a>
+        </div>
+      </div>
+
+      <div class="hero-card reveal">
+        <div class="card-sun">☀</div>
+        <div class="code-window">
+          <div class="dots"><i></i><i></i><i></i></div>
+          <pre><code>local <b>summer</b> = true
+
+if summer then
+  print(<em>"Let's code!"</em>)
+end</code></pre>
+        </div>
+        <div class="float-tag">✦ Ready to play</div>
+      </div>
+    </section>
+
+    <section id="scripts" class="section">
+      <div class="section-heading reveal">
+        <div>
+          <span class="eyebrow">FEATURED</span>
+          <h2>Fresh scripts for your game</h2>
+        </div>
+        <span class="count">03 SCRIPTS</span>
+      </div>
+
+      <div class="script-grid">
+        <article class="script-card reveal">
+          <div class="script-icon">⚡</div>
+          <span class="pill">UTILITY</span>
+          <h3>QuickTools</h3>
+          <p>Useful utilities packaged into a simple, easy-to-use script.</p>
+          <button class="copy-btn" data-script="QuickTools" type="button">Copy Name <span>↗</span></button>
+        </article>
+
+        <article class="script-card featured reveal">
+          <div class="script-icon">🌴</div>
+          <span class="pill">POPULAR</span>
+          <h3>IslandKit</h3>
+          <p>Summer-inspired tools for experimenting with your Roblox projects.</p>
+          <button class="copy-btn" data-script="IslandKit" type="button">Copy Name <span>↗</span></button>
+        </article>
+
+        <article class="script-card reveal">
+          <div class="script-icon">🛠</div>
+          <span class="pill">TOOLS</span>
+          <h3>DevBox</h3>
+          <p>A small collection of developer-focused helpers and snippets.</p>
+          <button class="copy-btn" data-script="DevBox" type="button">Copy Name <span>↗</span></button>
+        </article>
+      </div>
+    </section>
+
+    <section id="about" class="about reveal">
+      <div>
+        <span class="eyebrow">MADE FOR CREATORS</span>
+        <h2>Simple. Sunny. Built to explore.</h2>
+      </div>
+      <p>SunnyScripts is a starter layout for a Roblox scripting website. Replace the sample cards with your own content, links and resources.</p>
+    </section>
+  </main>
+
+  <footer>
+    <div class="brand"><span class="logo">☀</span><span>Sunny<span>Scripts</span></span></div>
+    <p>Made for creators • Roblox scripting resources</p>
+  </footer>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="/script.js" defer></script>
+</body>
+</html>
