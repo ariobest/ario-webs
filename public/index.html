@@ -62,12 +62,13 @@
   <div class="modal-backdrop" id="authBackdrop" hidden>
     <section class="auth-modal" role="dialog" aria-modal="true" aria-labelledby="authTitle">
       <header class="admin-header"><div><span class="eyebrow">SUNNYSCRIPTS ACCOUNT</span><h2 id="authTitle">Welcome back</h2><p id="authSubtitle">Sign in or create an account.</p></div><button class="icon-button" id="closeAuth" aria-label="Close account dialog">×</button></header>
-      <div class="auth-switch"><button class="auth-mode active" data-auth-mode="login" type="button">Log in</button><button class="auth-mode" data-auth-mode="signup" type="button">Sign up</button></div>
+      <div class="auth-switch" id="authModeSwitch"><button class="auth-mode active" data-auth-mode="login" type="button">Log in</button><button class="auth-mode" data-auth-mode="signup" type="button">Sign up</button></div>
       <form id="authForm" class="editor-form visible-form auth-form">
         <label id="usernameField" hidden>Username<input id="authUsername" type="text" maxlength="32" autocomplete="username" placeholder="Your username"></label>
         <label>Email address<input id="authEmail" type="email" autocomplete="email" required placeholder="you@example.com"></label>
-        <label>Password<input id="authPassword" type="password" minlength="8" autocomplete="current-password" required placeholder="At least 8 characters"></label>
+        <label id="authPasswordField">Password<input id="authPassword" type="password" minlength="8" autocomplete="current-password" required placeholder="At least 8 characters"></label>
         <button class="small-primary" id="authSubmit" type="submit">Log in</button>
+        <div class="form-actions auth-extra-actions"><button class="secondary small" id="forgotPassword" type="button">Forgot password?</button><button class="secondary small" id="resendConfirmation" type="button" hidden>Resend confirmation email</button></div>
         <button class="secondary small" id="signOutButton" type="button" hidden>Sign out</button>
         <p class="saved-note" id="authStatus" role="status">Authentication powered by Supabase.</p>
       </form>
