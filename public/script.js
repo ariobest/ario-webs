@@ -114,7 +114,7 @@
     const status = $("#supabaseStatus");
     try {
       const { data, error } = await supabaseClient
-        .from("published_scripts")
+        .from("published_script_metadata")
         .select("id,name,category,description,link,created_at")
         .eq("status", "published")
         .order("created_at", { ascending: false });
