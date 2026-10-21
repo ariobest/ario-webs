@@ -258,7 +258,7 @@
   // Keep the supplied brand image consistent for all logo placements.
   $$(".brand-logo").forEach(image => { image.src = LOGO_URL; image.addEventListener("error", () => { image.alt = "SunnyScripts"; }); });
   applyTheme(currentTheme);
-  const initialRoute = location.pathname.replace(/\\/+$/, "") || "/";
+  const initialRoute = location.pathname.replace(/\/+$/, "") || "/";
   const initialView = new URLSearchParams(location.search).get("view") || (initialRoute === "/themes" ? "themes" : initialRoute === "/about" ? "about" : "scripts");
   setPage(initialView, false);
   observeRiseElements();
