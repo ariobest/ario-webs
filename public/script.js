@@ -2,6 +2,9 @@
   "use strict";
   const LOGO_URL = "https://www.image2url.com/r2/default/images/1792591024054-9d66ce25-9de6-4662-93d2-a3c6e127a298.png";
   const STORAGE = { theme: "sunnyScripts.theme.v1", scripts: "sunnyScripts.library.v1", supabase: "sunnyScripts.supabase.public.v1", favorites: "sunnyScripts.favorites.v1" };
+  const DEFAULT_SUPABASE = { url: "https://cqtwmxojwwyeasstuhgb.supabase.co", key: "sb_publishable_qBPb1ltQbHNZ-fO3PFmDeg_IQj0QfNB" };
+  let supabaseClient = null;
+  let databaseConnected = false;
   const starterScripts = [
     { id: "quicktools", name: "QuickTools", category: "Utility", description: "Useful utilities packaged into a simple, easy-to-use script.", link: "" },
     { id: "islandkit", name: "IslandKit", category: "Tools", description: "A set of summer-inspired tools for experimenting with Roblox projects.", link: "" },
@@ -80,11 +83,60 @@
     const item = scripts.find(script => script.id === id); if (!item) return;
     $("#editScriptId").value = item.id; $("#newScriptName").value = item.name; $("#newScriptCategory").value = item.category; $("#newScriptDescription").value = item.description; $("#newScriptLink").value = item.link || ""; $("#scriptFormTitle").textContent = "Edit script"; $("#scriptForm").hidden = false; $("#newScriptName").focus();
   }
+  function activeSupabaseConfig() {
+    const custom = safeRead(STORAGE.supabase, null);
+    return custom?.url && custom?.key ? custom : DEFAULT_SUPABASE;
+  }
   function loadSupabaseForm() {
-    const config = safeRead(STORAGE.supabase, null);
-    $("#supabaseUrl").value = config?.url || "";
-    $("#supabaseKey").value = config?.key || "";
-    $("#supabaseStatus").textContent = config?.url && config?.key ? "Configuration saved in this browser." : "No configuration saved in this browser.";
+    const custom = safeRead(STORAGE.supabase, null);
+    const config = activeSupabaseConfig();
+    $("#supabaseUrl").value = config.url;
+    $("#supabaseKey").value = config.key;
+    $("#supabaseStatus").textContent = custom?.url && custom?.key
+      ? "Custom public configuration saved in this browser."
+      : "Using the website's default public Supabase configuration.";
+  }
+  async function loadDatabaseScripts() {
+    if (!supabaseClient) return;
+    const status = $("#supabaseStatus");
+    try {
+      const { data, error } = await supabaseClient
+        .from("scripts")
+        .select("id,name,category,description,link,created_at")
+        .eq("status", "published")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      scripts = (data || []).map(item => ({
+        id: String(item.id),
+        name: item.name,
+        category: item.category || "Utility",
+        description: item.description || "",
+        link: item.link || ""
+      }));
+      databaseConnected = true;
+      safeWrite(STORAGE.scripts, scripts);
+      renderScripts();
+      if (status) status.textContent = "Connected to Supabase. Published scripts are loading from the database.";
+    } catch (error) {
+      databaseConnected = false;
+      if (status) status.textContent = "Supabase connection failed: " + (error?.message || "check Data API exposure and table grants.");
+      console.warn("SunnyScripts Supabase read failed:", error);
+    }
+  }
+  function initSupabase() {
+    const config = activeSupabaseConfig();
+    if (!window.supabase?.createClient) {
+      const status = $("#supabaseStatus");
+      if (status) status.textContent = "Supabase client library did not load. Check your network/CDN access.";
+      return;
+    }
+    try {
+      supabaseClient = window.supabase.createClient(config.url, config.key);
+      loadDatabaseScripts();
+    } catch (error) {
+      databaseConnected = false;
+      console.warn("SunnyScripts Supabase setup failed:", error);
+    }
   }
 
   $("#themeQuick").addEventListener("click", () => { const index = validThemes.indexOf(currentTheme); applyTheme(validThemes[(index + 1) % validThemes.length], true); });
@@ -150,15 +202,16 @@
     if (!url || !key) { $("#supabaseStatus").textContent = "Enter both the project URL and public key."; return; }
     try { const parsed = new URL(url); if (parsed.protocol !== "https:" || !parsed.hostname.endsWith(".supabase.co")) { $("#supabaseStatus").textContent = "Use your HTTPS Supabase project URL."; return; } } catch { $("#supabaseStatus").textContent = "That project URL is not valid."; return; }
     if (/service_role|sb_secret_/i.test(key)) { $("#supabaseStatus").textContent = "For safety, service-role and secret keys cannot be saved here."; return; }
-    if (safeWrite(STORAGE.supabase, { url, key })) { $("#supabaseStatus").textContent = "Saved. It will remain in this browser after refresh."; showToast("Supabase configuration saved."); }
+    if (safeWrite(STORAGE.supabase, { url, key })) { $("#supabaseStatus").textContent = "Saved. Connecting to Supabase…"; initSupabase(); showToast("Supabase configuration saved."); }
   });
   $("#clearSupabase").addEventListener("click", () => {
     if (!window.confirm("Clear the saved Supabase URL and public key from this browser?")) return;
-    localStorage.removeItem(STORAGE.supabase); loadSupabaseForm(); showToast("Saved configuration cleared.");
+    localStorage.removeItem(STORAGE.supabase); loadSupabaseForm(); initSupabase(); showToast("Using the website's default Supabase configuration.");
   });
 
   // Keep the supplied brand image consistent for all logo placements.
   $$(".brand-logo").forEach(image => { image.src = LOGO_URL; image.addEventListener("error", () => { image.alt = "SunnyScripts"; }); });
   applyTheme(currentTheme);
   renderScripts();
+  initSupabase();
 })();
