@@ -7,6 +7,9 @@ export default {
     if (route === "/signup" || route === "/login") {
       url.pathname = "/";
       url.searchParams.set("auth", route === "/signup" ? "signup" : "login");
+    } else if (route === "/themes" || route === "/about" || route === "/scripts") {
+      url.pathname = "/";
+      url.searchParams.set("view", route === "/scripts" ? "scripts" : route.slice(1));
     }
     // Let Cloudflare's Workers Assets binding serve everything in /public.
     // This is the Workers equivalent of a Pages static deployment.
