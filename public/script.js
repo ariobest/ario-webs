@@ -2,78 +2,80 @@
   "use strict";
 
   const toast = document.getElementById("toast");
-  let toastTimer;
+  let toastTimer = null;
 
-  function showToast(text) {
+  const showToast = (message) => {
     if (!toast) return;
-    toast.textContent = text;
+    toast.textContent = message;
     toast.classList.add("show");
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => toast.classList.remove("show"), 1600);
-  }
+    window.clearTimeout(toastTimer);
+    toastTimer = window.setTimeout(() => toast.classList.remove("show"), 1600);
+  };
 
-  async function copyText(text) {
-    if (navigator.clipboard && window.isSecureContext) {
-      await navigator.clipboard.writeText(text);
-      return true;
-    }
-
+  const fallbackCopy = (text) => {
     const area = document.createElement("textarea");
     area.value = text;
     area.setAttribute("readonly", "");
     area.style.position = "fixed";
-    area.style.opacity = "0";
+    area.style.left = "-9999px";
+    area.style.top = "0";
     document.body.appendChild(area);
+    area.focus();
     area.select();
 
     let copied = false;
     try {
       copied = document.execCommand("copy");
+    } catch {
+      copied = false;
     } finally {
       area.remove();
     }
     return copied;
-  }
+  };
+
+  const copyText = async (text) => {
+    if (navigator.clipboard && window.isSecureContext) {
+      try {
+        await navigator.clipboard.writeText(text);
+        return true;
+      } catch {
+        // Fall through to the compatibility method.
+      }
+    }
+    return fallbackCopy(text);
+  };
 
   document.querySelectorAll(".copy-btn").forEach((button) => {
     button.addEventListener("click", async () => {
-      const name = button.dataset.script;
+      const name = button.dataset.script?.trim();
       if (!name) return;
 
-      try {
-        const copied = await copyText(name);
-        showToast(copied ? `"${name}" copied!` : `Script: ${name}`);
-      } catch {
-        showToast(`Script: ${name}`);
-      }
+      const copied = await copyText(name);
+      showToast(copied ? `"${name}" copied!` : `Script: ${name}`);
     });
   });
 
-  // Scroll reveal
   const revealItems = document.querySelectorAll(".reveal");
+  const reduceMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
 
-  if ("IntersectionObserver" in window) {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (!entry.isIntersecting) return;
-          entry.target.classList.add("visible");
-          observer.unobserve(entry.target);
-        });
-      },
-      { threshold: 0.12 }
-    );
+  if (reduceMotion || !("IntersectionObserver" in window)) {
+    revealItems.forEach((item) => item.classList.add("visible"));
+  } else {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add("visible");
+        observer.unobserve(entry.target);
+      });
+    }, { threshold: 0.12 });
 
     revealItems.forEach((item) => observer.observe(item));
-  } else {
-    revealItems.forEach((item) => item.classList.add("visible"));
   }
 
-  // Decorative particles. Keep them lightweight and disable them for reduced motion.
   const particleLayer = document.querySelector(".particles");
-  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  if (particleLayer && !reducedMotion) {
+  if (particleLayer && !reduceMotion) {
     const fragment = document.createDocumentFragment();
 
     for (let i = 0; i < 18; i += 1) {
