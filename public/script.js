@@ -63,7 +63,7 @@
     $("#favoritesToggle").classList.toggle("active", showFavorites);
     $("#favoritesToggle").setAttribute("aria-pressed", String(showFavorites));
     $("#favoritesToggle").textContent = showFavorites ? "♥ Favorites" : "♡ Favorites";
-    $("#scriptGrid").innerHTML = filtered.map((item, index) => `<article class="script-card" style="--card-index:${index}"><div class="script-card-top"><span class="script-icon">${item.category === "Utility" ? "⌁" : item.category === "Tools" ? "⌘" : "✧"}</span><span class="pill">${escapeHTML(item.category)}</span><button class="favorite-btn ${favorites.has(item.id) ? "is-favorite" : ""}" data-favorite-id="${escapeHTML(item.id)}" type="button" aria-label="${favorites.has(item.id) ? "Remove from" : "Add to"} favorites" aria-pressed="${favorites.has(item.id)}">${favorites.has(item.id) ? "♥" : "♡"}</button><details class="script-more"><summary aria-label="More script options" title="More options">•••</summary><div class="script-more-menu"><button type="button" data-copy-link="${escapeHTML(item.slug || item.id)}">Copy script link</button><button type="button" data-copy-name="${escapeHTML(item.name)}">Copy script name</button></div></details></div><h3>${escapeHTML(item.name)}</h3><p>${escapeHTML(item.description)}</p><div class="script-card-actions"><button class="copy-btn" data-copy-loader="${escapeHTML(item.slug || item.id)}" type="button">Copy script <span>↗</span></button>${item.link ? `<a class="open-script" href="${escapeHTML(item.link)}" target="_blank" rel="noopener noreferrer">Details ↗</a>` : ""}</div></article>`).join("");
+    $("#scriptGrid").innerHTML = filtered.map((item, index) => `<article class="script-card" id="script-${escapeHTML(item.slug || item.id)}" style="--card-index:${index}"><div class="script-card-top"><span class="script-icon">${item.category === "Utility" ? "⌁" : item.category === "Tools" ? "⌘" : "✧"}</span><span class="pill">${escapeHTML(item.category)}</span><button class="favorite-btn ${favorites.has(item.id) ? "is-favorite" : ""}" data-favorite-id="${escapeHTML(item.id)}" type="button" aria-label="${favorites.has(item.id) ? "Remove from" : "Add to"} favorites" aria-pressed="${favorites.has(item.id)}">${favorites.has(item.id) ? "♥" : "♡"}</button><details class="script-more"><summary aria-label="More script options" title="More options">•••</summary><div class="script-more-menu"><button type="button" data-copy-link="${escapeHTML(item.slug || item.id)}">Copy script link</button><button type="button" data-copy-name="${escapeHTML(item.name)}">Copy script name</button></div></details></div><h3>${escapeHTML(item.name)}</h3><p>${escapeHTML(item.description)}</p><div class="script-card-actions"><button class="copy-btn" data-copy-loader="${escapeHTML(item.slug || item.id)}" type="button">Copy script <span>↗</span></button>${item.link ? `<a class="open-script" href="${escapeHTML(item.link)}" target="_blank" rel="noopener noreferrer">Details ↗</a>` : ""}</div></article>`).join("");
     $("#emptyState").textContent = showFavorites && filtered.length === 0 ? "No favorites yet — tap the heart on a script to save it." : "No scripts match that search.";
     $("#emptyState").hidden = filtered.length !== 0;
     $("#scriptCount").textContent = scripts.length;
@@ -127,6 +127,7 @@
       safeWrite(STORAGE.scripts, scripts);
       renderScripts();
       loadPublicSiteSettings();
+      if (location.hash.startsWith("#script-")) requestAnimationFrame(() => document.getElementById(decodeURIComponent(location.hash.slice(1)))?.scrollIntoView({ behavior: "smooth", block: "center" }));
       if (status) status.textContent = "Connected to Supabase. Published scripts are loading from the database.";
     } catch (error) {
       databaseConnected = false;
@@ -277,7 +278,7 @@
     }
     const moreButton = event.target.closest("[data-copy-link]");
     if (moreButton) {
-      const url = new URL("/scripts", location.origin); url.searchParams.set("script", moreButton.dataset.copyLink);
+      const url = new URL("/scripts", location.origin); url.hash = "script-" + moreButton.dataset.copyLink;
       await copyText(url.href, "Script link copied."); moreButton.closest("details")?.removeAttribute("open"); return;
     }
     const loaderButton = event.target.closest("[data-copy-loader]");
