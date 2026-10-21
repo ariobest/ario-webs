@@ -1,109 +1,65 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="summer">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#8edff4">
-  <meta name="description" content="SunnyScripts — a summer-themed Roblox scripts hub">
+  <meta name="theme-color" content="#101a2b">
+  <meta name="description" content="SunnyScripts — discover Roblox scripts, tools and resources.">
   <title>SunnyScripts — Roblox Scripts</title>
+  <link rel="icon" type="image/png" href="https://www.image2url.com/r2/default/images/1792591024054-9d66ce25-9de6-4662-93d2-a3c6e127a298.png">
+  <link rel="apple-touch-icon" href="https://www.image2url.com/r2/default/images/1792591024054-9d66ce25-9de6-4662-93d2-a3c6e127a298.png">
   <link rel="stylesheet" href="/style.css">
 </head>
 <body>
-  <div class="sun" aria-hidden="true"></div>
-  <div class="cloud cloud-one" aria-hidden="true"></div>
-  <div class="cloud cloud-two" aria-hidden="true"></div>
-  <div class="particles" aria-hidden="true"></div>
-
+  <div class="ambient ambient-one" aria-hidden="true"></div><div class="ambient ambient-two" aria-hidden="true"></div>
   <header class="nav">
-    <a class="brand" href="/" aria-label="SunnyScripts home">
-      <span class="logo" aria-hidden="true">☀</span>
-      <span>Sunny<span>Scripts</span></span>
-    </a>
-    <nav aria-label="Main navigation">
-      <a href="#scripts">Scripts</a>
-      <a href="#about">About</a>
-    </nav>
-    <a class="nav-button" href="#scripts">Explore</a>
+    <a class="brand" href="#home" aria-label="SunnyScripts home"><img class="brand-logo" src="https://www.image2url.com/r2/default/images/1792591024054-9d66ce25-9de6-4662-93d2-a3c6e127a298.png" alt=""><span>Sunny<span>Scripts</span></span></a>
+    <nav aria-label="Main navigation"><button class="nav-link active" data-view="scripts">Scripts</button><button class="nav-link" data-view="about">About</button></nav>
+    <div class="nav-actions"><button class="icon-button" id="themeQuick" title="Cycle theme" aria-label="Cycle theme">◐</button><button class="nav-button" id="openAdmin">Admin panel ↗</button></div>
   </header>
-
-  <main>
-    <section class="hero" aria-labelledby="hero-title">
-      <div class="hero-copy reveal">
-        <div class="eyebrow">☀ SUMMER 2026 • ROBLOX SCRIPT HUB</div>
-        <h1 id="hero-title">Code your<br><span>summer.</span></h1>
-        <p>Discover a clean collection of Roblox scripts, tools and resources — wrapped in a bright summer vibe.</p>
-        <div class="hero-actions">
-          <a class="primary" href="#scripts">Browse Scripts <span>→</span></a>
-          <a class="secondary" href="#about">Learn More</a>
-        </div>
+  <main id="home">
+    <section class="hero" id="hero">
+      <div class="hero-copy">
+        <div class="eyebrow"><span class="status-dot"></span> ROBLOX SCRIPT HUB <span id="themeLabel">SUMMER EDITION</span></div>
+        <h1>Code your<br><span>next adventure.</span></h1>
+        <p>Explore a curated hub for Roblox scripts, developer tools and useful resources — with a theme for every season.</p>
+        <div class="hero-actions"><button class="primary" data-scroll-scripts>Explore scripts <span>→</span></button><button class="secondary" data-view="about">About the hub</button></div>
+        <div class="hero-meta"><span><b id="scriptCount">3</b> scripts listed</span><span>✦ Built for creators</span></div>
       </div>
+      <div class="hero-visual" aria-hidden="true"><div class="orb orb-large"></div><div class="orb orb-small"></div><div class="code-window"><div class="window-top"><span></span><span></span><span></span><label>LocalScript.lua</label></div><pre><code><i>local</i> <b>sunnyScripts</b> = <em>true</em>
 
-      <div class="hero-card reveal" aria-hidden="true">
-        <div class="card-sun">☀</div>
-        <div class="code-window">
-          <div class="dots"><i></i><i></i><i></i></div>
-          <pre><code>local <b>summer</b> = true
-
-if summer then
-  print(<em>"Let's code!"</em>)
-end</code></pre>
-        </div>
-        <div class="float-tag">✦ Ready to play</div>
-      </div>
+<i>if</i> sunnyScripts <i>then</i>
+  print(<em>"Ready to create!"</em>)
+<i>end</i></code></pre><div class="window-footer"><span class="status-dot"></span> All systems ready <span>Lua</span></div></div><div class="floating-chip">✦ Creator toolkit</div></div>
     </section>
-
-    <section id="scripts" class="section" aria-labelledby="scripts-title">
-      <div class="section-heading reveal">
-        <div>
-          <span class="eyebrow">FEATURED</span>
-          <h2 id="scripts-title">Fresh scripts for your game</h2>
-        </div>
-        <span class="count">03 SCRIPTS</span>
-      </div>
-
-      <div class="script-grid">
-        <article class="script-card reveal">
-          <div class="script-icon" aria-hidden="true">⚡</div>
-          <span class="pill">UTILITY</span>
-          <h3>QuickTools</h3>
-          <p>Useful utilities packaged into a simple, easy-to-use script.</p>
-          <button class="copy-btn" data-script="QuickTools" type="button">Copy Name <span>↗</span></button>
-        </article>
-
-        <article class="script-card featured reveal">
-          <div class="script-icon" aria-hidden="true">🌴</div>
-          <span class="pill">POPULAR</span>
-          <h3>IslandKit</h3>
-          <p>Summer-inspired tools for experimenting with your Roblox projects.</p>
-          <button class="copy-btn" data-script="IslandKit" type="button">Copy Name <span>↗</span></button>
-        </article>
-
-        <article class="script-card reveal">
-          <div class="script-icon" aria-hidden="true">🛠</div>
-          <span class="pill">TOOLS</span>
-          <h3>DevBox</h3>
-          <p>A small collection of developer-focused helpers and snippets.</p>
-          <button class="copy-btn" data-script="DevBox" type="button">Copy Name <span>↗</span></button>
-        </article>
-      </div>
+    <section class="section" id="scripts">
+      <div class="section-heading"><div><span class="eyebrow">THE LIBRARY</span><h2>Scripts for your next idea.</h2><p>Browse the collection and copy a script name.</p></div><div class="script-tools"><label class="search-box"><span>⌕</span><input id="scriptSearch" type="search" placeholder="Search scripts…" aria-label="Search scripts"></label><select id="categoryFilter" aria-label="Filter by category"><option value="all">All categories</option><option>Utility</option><option>Tools</option><option>Learning</option></select></div></div>
+      <div class="script-grid" id="scriptGrid"></div><div class="empty-state" id="emptyState" hidden>No scripts match that search.</div>
     </section>
-
-    <section id="about" class="about reveal" aria-labelledby="about-title">
-      <div>
-        <span class="eyebrow">MADE FOR CREATORS</span>
-        <h2 id="about-title">Simple. Sunny. Built to explore.</h2>
-      </div>
-      <p>SunnyScripts is a starter layout for a Roblox scripting website. Replace the sample cards with your own content, links and resources.</p>
-    </section>
+    <section class="about-section" id="about"><div><span class="eyebrow">MADE FOR CREATORS</span><h2>A clean space<br>to build and explore.</h2></div><p>SunnyScripts is a community-style library starter. Use the admin tools to manage the scripts shown on this device, choose a look you love, and configure your public Supabase project settings.</p></section>
   </main>
+  <footer><a class="brand" href="#home"><img class="brand-logo" src="https://www.image2url.com/r2/default/images/1792591024054-9d66ce25-9de6-4662-93d2-a3c6e127a298.png" alt=""><span>Sunny<span>Scripts</span></span></a><span>Roblox scripting resources · Made for creators</span><button class="footer-admin" id="openAdminFooter">Admin settings</button></footer>
 
-  <footer>
-    <div class="brand"><span class="logo" aria-hidden="true">☀</span><span>Sunny<span>Scripts</span></span></div>
-    <p>Made for creators • Roblox scripting resources</p>
-  </footer>
-
+  <div class="modal-backdrop" id="adminBackdrop" hidden>
+    <section class="admin-modal" role="dialog" aria-modal="true" aria-labelledby="adminTitle">
+      <header class="admin-header"><div><span class="eyebrow">CONTROL CENTER</span><h2 id="adminTitle">Admin panel</h2><p>Manage scripts, themes and your Supabase connection.</p></div><button class="icon-button close-modal" id="closeAdmin" aria-label="Close admin panel">×</button></header>
+      <div class="admin-tabs" role="tablist"><button class="admin-tab active" data-admin-tab="scripts" role="tab">Scripts</button><button class="admin-tab" data-admin-tab="themes" role="tab">Themes</button><button class="admin-tab" data-admin-tab="supabase" role="tab">Supabase</button></div>
+      <div class="admin-content" id="adminContent">
+        <section class="admin-pane active" data-pane="scripts"><div class="pane-heading"><div><h3>Script library</h3><p>Add or remove cards from this browser's saved library.</p></div><button class="small-primary" id="newScriptBtn">＋ Add script</button></div><div id="adminScriptList" class="admin-script-list"></div><form id="scriptForm" class="editor-form" hidden><h4 id="scriptFormTitle">Add a script</h4><input type="hidden" id="editScriptId"><label>Script name<input id="newScriptName" required maxlength="70" placeholder="My Script"></label><label>Category<select id="newScriptCategory"><option>Utility</option><option>Tools</option><option>Learning</option></select></label><label>Description<textarea id="newScriptDescription" required maxlength="240" rows="3" placeholder="What does it do?"></textarea></label><label>Link (optional)<input id="newScriptLink" type="url" placeholder="https://…"></label><div class="form-actions"><button type="button" class="secondary small" id="cancelScript">Cancel</button><button class="small-primary" type="submit">Save script</button></div></form></section>
+        <section class="admin-pane" data-pane="themes" hidden><div class="pane-heading"><div><h3>Choose your atmosphere</h3><p>Theme changes apply across the whole site and are remembered on this device.</p></div></div><div class="theme-grid">
+          <button class="theme-choice" data-theme-choice="summer"><span class="theme-preview preview-summer">☀</span><b>Summer</b><small>Warm and sunny</small></button>
+          <button class="theme-choice" data-theme-choice="light"><span class="theme-preview preview-light">☼</span><b>Light</b><small>Clean and bright</small></button>
+          <button class="theme-choice" data-theme-choice="dark"><span class="theme-preview preview-dark">☾</span><b>Dark</b><small>Midnight blue</small></button>
+          <button class="theme-choice" data-theme-choice="winter"><span class="theme-preview preview-winter">❄</span><b>Winter</b><small>Frosted blue</small></button>
+          <button class="theme-choice" data-theme-choice="autumn"><span class="theme-preview preview-autumn">🍂</span><b>Autumn</b><small>Warm amber</small></button>
+          <button class="theme-choice" data-theme-choice="spring"><span class="theme-preview preview-spring">✿</span><b>Spring</b><small>Fresh green</small></button>
+        </div><p class="saved-note" id="themeSavedNote">Your selected theme is saved automatically.</p></section>
+        <section class="admin-pane" data-pane="supabase" hidden><div class="security-note"><b>Public client configuration</b><p>Only use your Supabase project URL and publishable/anon key here. Never enter a service-role key. Values are saved in this browser's local storage, not in the GitHub repository or Cloudflare secrets.</p></div><form id="supabaseForm" class="editor-form visible-form"><label>Supabase project URL<input id="supabaseUrl" type="url" placeholder="https://your-project.supabase.co" autocomplete="url"></label><label>Publishable / anon key<textarea id="supabaseKey" rows="3" placeholder="sb_publishable_… or your anon JWT" autocomplete="off" spellcheck="false"></textarea></label><div class="form-actions"><button type="button" class="secondary small" id="clearSupabase">Clear saved values</button><button class="small-primary" type="submit">Save configuration</button></div><p id="supabaseStatus" class="saved-note" role="status">No configuration saved in this browser.</p></form><p class="config-help">This saves the values so they remain after refresh on this device/browser. It does not create Cloudflare environment variables or connect database tables automatically.</p></section>
+      </div>
+      <div class="admin-foot"><span><span class="status-dot"></span> Local settings active</span><button class="secondary small" id="closeAdminBottom">Done</button></div>
+    </section>
+  </div>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
-  <noscript><div class="noscript">JavaScript is disabled. The site still works, but interactive copy buttons are unavailable.</div></noscript>
   <script src="/script.js" defer></script>
 </body>
 </html>
