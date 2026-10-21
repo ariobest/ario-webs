@@ -43,7 +43,7 @@
     "Upload Settings","Allowed File Types","Image Optimizer","URL Validator","Link Checker","Embed Preview","Code Snippet Preview","Lua Formatter","JSON Formatter","Text Utilities",
     "Color Picker","Gradient Maker","Icon Library","Quick Links","Admin Notes","Task Checklist","System Diagnostics"
   ].slice(0,97);
-  function setTheme(id) {
+  function setTheme(id, broadcast = true) {
     const t=themes.find(x=>x.id===id)||themes[0];
     document.documentElement.dataset.theme=t.id;
     const root=document.documentElement.style;
@@ -54,8 +54,12 @@
     const meta=$('meta[name="theme-color"]');if(meta)meta.content=t.page;
     try{localStorage.setItem("sunnyScripts.theme.v1",JSON.stringify(t.id));}catch{}
     $("#themeGrid [data-theme-choice]").forEach(b=>{b.classList.toggle("selected",b.dataset.themeChoice===id);b.setAttribute("aria-pressed",String(b.dataset.themeChoice===id));});
-    document.dispatchEvent(new CustomEvent("sunnyScripts:theme-change", { detail: { id } }));
+    if (broadcast) document.dispatchEvent(new CustomEvent("sunnyScripts:theme-change", { detail: { id } }));
   }
+  document.addEventListener("sunnyScripts:theme-change", event => {
+    const id = event.detail?.id;
+    if (themes.some(theme => theme.id === id)) setTheme(id, false);
+  });
   function renderThemes() {
     const host=$("#themeGrid");if(!host)return;
     host.innerHTML=themes.map(t=>'<button type="button" class="theme-choice" data-theme-choice="'+t.id+'"><span class="theme-preview" style="background:linear-gradient(135deg,'+t.page+','+t.strong+');color:'+t.accent+'">✦</span><b>'+esc(t.name)+'</b><small>'+esc(t.desc)+'</small></button>').join("");
