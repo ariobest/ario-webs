@@ -17,14 +17,15 @@
     <nav aria-label="Main navigation"><button class="nav-link active" data-view="scripts">Scripts</button><button class="nav-link" data-view="themes">Themes</button><button class="nav-link" data-view="about">About</button></nav>
     <div class="nav-actions"><button class="icon-button" id="themeQuick" title="Cycle theme" aria-label="Cycle theme">◐</button><button class="nav-button" id="openAdmin" hidden>Admin panel ↗</button><button class="secondary account-button" id="openAuth">Sign up / Log in</button></div>
   </header>
+  <div id="siteAnnouncement" class="site-announcement" hidden></div>
   <main id="home">
     <section class="hero" id="hero">
       <div class="hero-copy">
         <div class="eyebrow"><span class="status-dot"></span> ROBLOX SCRIPT HUB <span id="themeLabel">SUMMER EDITION</span></div>
         <h1>Code your<br><span>next adventure.</span></h1>
-        <p>Explore a curated hub for Roblox scripts, developer tools and useful resources — with a theme for every season.</p>
+        <p id="heroTagline">Explore a curated hub for Roblox scripts, developer tools and useful resources — with a theme for every season.</p>
         <div class="hero-actions"><button class="primary" data-scroll-scripts>Explore scripts <span>→</span></button><button class="secondary" data-view="about">About the hub</button><a class="secondary signup-link" id="heroSignUp" href="/signup">Create account ↗</a></div>
-        <div class="hero-meta"><span><b id="scriptCount">3</b> scripts listed</span><span>✦ Built for creators</span></div>
+        <div class="hero-meta"><span><b id="scriptCount">0</b> scripts listed</span><span>✦ Built for creators</span></div>
       </div>
       <div class="hero-visual" aria-hidden="true"><div class="sky-cycle"><span class="sky-sun"></span><span class="sky-moon"></span><span class="sky-horizon"></span></div><div class="orb orb-large"></div><div class="orb orb-small"></div><div class="code-window"><div class="window-top"><span></span><span></span><span></span><label>LocalScript.lua</label></div><pre><code><i>local</i> <b>sunnyScripts</b> = <em>true</em>
 
