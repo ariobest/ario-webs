@@ -140,3 +140,6 @@
 .public-theme-grid [data-public-theme="candy"] .theme-preview{background:linear-gradient(135deg,#241529,#e779b0);color:#ffb5d2}
 .public-theme-grid [data-public-theme="sakura"] .theme-preview{background:linear-gradient(135deg,#21141d,#e884a2);color:#ffc1d1}
 .public-theme-grid [data-public-theme="arctic"] .theme-preview{background:linear-gradient(135deg,#101d2a,#70bde8);color:#c1efff}
+
+/* Real page views: keep hidden pages out of layout and screen-reader navigation. */
+#hero[hidden],#scripts[hidden],#themes[hidden],#about[hidden]{display:none!important}
