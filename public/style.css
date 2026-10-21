@@ -111,3 +111,12 @@
 .signup-link{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;position:relative;z-index:2;cursor:pointer;pointer-events:auto}
 .hero-copy{position:relative;z-index:2}.hero-actions{position:relative;z-index:3}.hero-visual{z-index:0}
 #authBackdrop[hidden],#adminBackdrop[hidden]{display:none!important}
+
+/* Standalone public Themes tab; kept separate from the existing Light/Dark theme behavior. */
+.public-themes-section{scroll-margin-top:100px}
+.public-theme-grid{grid-template-columns:repeat(5,minmax(0,1fr));}
+.public-theme-grid .theme-choice{min-width:0;cursor:pointer;min-height:132px}
+.public-theme-grid .theme-preview{min-height:60px}
+.public-theme-grid .theme-choice:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+@media(max-width:850px){.public-theme-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:580px){.public-theme-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
