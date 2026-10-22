@@ -423,11 +423,16 @@
       }
       host.innerHTML = '<p class="saved-note">Loading media…</p>';
       try {
-        const { data, error } = await client.storage.from("void-files").list("", {
-          limit: 100, sortBy: { column: "created_at", order: "desc" }
-        });
-        if (error) throw error;
-        const files = (data || []).filter(file => file.name && file.id);
+        const storage = client.storage.from("void-files");
+        const files = [];
+        const pageSize = 100;
+        for (let offset = 0; ; offset += pageSize) {
+          const { data, error } = await storage.list("", { limit: pageSize, offset, sortBy: { column: "created_at", order: "desc" } });
+          if (error) throw error;
+          const page = (data || []).filter(file => file.name && file.id);
+          files.push(...page);
+          if (!data || data.length < pageSize) break;
+        }
         if (!files.length) {
           host.innerHTML = '<p class="saved-note">No media uploaded yet. Upload a logo, thumbnail or other media above.</p>';
           return;
@@ -623,19 +628,7 @@
       if (!admin || !client) { showToast("Administrator access required.", "error"); return; }
       const input = $("#mediaFile"), file = input.files?.[0];
       if (!file) { $("#mediaStatus").textContent = "Choose a file first."; return; }
-      if (file.size > 25 * 1024 * 1024) { $("#mediaStatus").textContent = "Files must be 25 MB or smaller."; return; }
-      const extension = file.name.split(".").pop()?.toLowerCase() || "";
-      const contentTypes = {
-        png:"image/png",jpg:"image/jpeg",jpeg:"image/jpeg",webp:"image/webp",gif:"image/gif",svg:"image/svg+xml",
-        mp4:"video/mp4",webm:"video/webm",mp3:"audio/mpeg",ogg:"audio/ogg",
-        lua:"text/plain",luau:"text/plain",txt:"text/plain",json:"application/json",pdf:"application/pdf",
-        zip:"application/zip",md:"text/markdown",csv:"text/csv"
-      };
-      const uploadType = file.type || contentTypes[extension] || "";
-      if (!contentTypes[extension] || (file.type && file.type !== contentTypes[extension] && !(["lua","luau","txt","md","csv"].includes(extension) && file.type === "text/plain"))) {
-        $("#mediaStatus").textContent = "Allowed: images, Lua/Luau, text, JSON, PDF, ZIP, audio and video files.";
-        return;
-      }
+      const uploadType = file.type || "application/octet-stream";
       const button = $("#uploadMediaButton"); button.disabled = true;
       $("#mediaStatus").textContent = "Uploading " + file.name + "…";
       try {
