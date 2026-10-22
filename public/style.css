@@ -394,3 +394,33 @@ body{background:radial-gradient(ellipse at 50% -15%,rgba(255,255,255,.09),transp
 .profile-detail span{color:var(--muted);font-size:11px}.profile-detail strong{font-size:12px;overflow-wrap:anywhere}.profile-actions{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}.profile-modal .saved-note{margin-bottom:0}
 @media(max-width:580px){.brand-logo{width:43px!important;height:43px!important}.brand>span{font-size:10px}.hero{padding-top:65px!important}.profile-modal{padding:20px}.profile-detail{grid-template-columns:1fr;gap:6px}.profile-detail button{justify-self:start}.profile-head{gap:10px}.profile-avatar{width:48px;height:48px;flex-basis:48px;border-radius:15px}.access-denied-card{border-radius:24px}}
 @media(prefers-reduced-motion:reduce){.access-denied-card,.profile-modal,.denied-orbit,.denied-orbit:before,.denied-orbit:after{animation:none!important}}
+
+
+/* Slow, subtle floating motion for the main page title */
+:root[data-theme="mono"] .hero h1{
+  display:inline-block;
+  transform-origin:50% 55%;
+  animation:void-title-float 6.5s ease-in-out infinite;
+  transition:transform 900ms cubic-bezier(.2,.75,.25,1),text-shadow 900ms ease;
+  will-change:transform;
+}
+:root[data-theme="mono"] .hero h1:hover{
+  transform:translateY(-7px) scale(1.018);
+  text-shadow:0 12px 38px rgba(255,255,255,.12);
+}
+:root[data-theme="mono"] .hero h1 span{
+  display:inline-block;
+  transition:transform 900ms cubic-bezier(.2,.75,.25,1),text-shadow 900ms ease;
+}
+:root[data-theme="mono"] .hero h1:hover span{
+  transform:translateY(-2px);
+  text-shadow:0 0 42px rgba(255,255,255,.26);
+}
+@keyframes void-title-float{
+  0%,100%{transform:translateY(0) rotate(0deg)}
+  50%{transform:translateY(-5px) rotate(-.25deg)}
+}
+@media(prefers-reduced-motion:reduce){
+  :root[data-theme="mono"] .hero h1{animation:none;transition:none;transform:none}
+  :root[data-theme="mono"] .hero h1:hover,:root[data-theme="mono"] .hero h1:hover span{transform:none;text-shadow:none}
+}
