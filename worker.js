@@ -13,6 +13,7 @@ export default {
       api.searchParams.set("script", slug);
       api.searchParams.set("key", key);
       const upstream = await fetch(api.toString(), { headers: { "Accept": "text/plain" } });
+      if (!upstream.ok && wantsHtml) return protectedPage();
       const headers = new Headers(upstream.headers);
       headers.set("Cache-Control", "no-store, max-age=0");
       headers.set("X-Content-Type-Options", "nosniff");
