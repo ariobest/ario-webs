@@ -163,7 +163,10 @@
         name: item.name,
         category: item.category || "Utility",
         description: item.description || "",
-        link: item.link || ""
+        link: item.link || "",
+        release_status: item.release_status || "active",
+        banner_url: item.banner_url || "",
+        showcase_url: item.showcase_url || ""
       }));
       databaseConnected = true;
       safeWrite(STORAGE.scripts, scripts);
