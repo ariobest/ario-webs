@@ -26,7 +26,11 @@ export default {
 
     // Friendly account URLs open the auth dialog while still serving the static app.
     const url = new URL(request.url);
-    if (route === "/signup" || route === "/login") {
+    if (route === "/admin") {
+      // Serve the app shell for the clean /admin URL; the client verifies the signed-in role.
+      url.pathname = "/";
+      url.searchParams.set("admin", "1");
+    } else if (route === "/signup" || route === "/login") {
       url.pathname = "/";
       url.searchParams.set("auth", route === "/signup" ? "signup" : "login");
     } else if (route.startsWith("/scripts/") && route !== "/scripts") {
