@@ -22,6 +22,7 @@
   const safeWrite = (key, value) => { try { localStorage.setItem(key, JSON.stringify(value)); return true; } catch { showToast("Could not save: browser storage is unavailable."); return false; } };
   const showToast = (message) => { if (!toast) return; toast.textContent = message; toast.classList.add("show"); clearTimeout(toastTimer); toastTimer = setTimeout(() => toast.classList.remove("show"), 2200); };
   const DEMO_NAMES = new Set(["quicktools","islandkit","devbox"]);
+  const requestedScript = new URLSearchParams(location.search).get("script");
   let scripts = safeRead(STORAGE.scripts, []);
   if (!Array.isArray(scripts)) scripts = [];
   scripts = scripts.filter(item => !DEMO_NAMES.has(String(item?.name || "").toLowerCase()) && !DEMO_NAMES.has(String(item?.slug || "").toLowerCase()));
@@ -54,6 +55,27 @@
   function escapeHTML(value) {
     return String(value ?? "").replace(/[&<>"']/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char]);
   }
+  function renderScriptDetail(slug) {
+    const host = $("#scripts");
+    if (!host) return;
+    let view = $("#scriptDetailView");
+    if (!view) {
+      view = document.createElement("section");
+      view.id = "scriptDetailView";
+      view.className = "script-detail-view";
+      host.appendChild(view);
+    }
+    const item = scripts.find(script => String(script.slug || "").toLowerCase() === String(slug || "").toLowerCase());
+    $(".script-tools").hidden = true;
+    $("#scriptGrid").hidden = true;
+    $("#emptyState").hidden = true;
+    view.hidden = false;
+    if (!item) {
+      view.innerHTML = '<a class="secondary small" href="/scripts">← Back to scripts</a><h2>Script not found</h2><p>This script may be unpublished, unavailable, or the URL may be incorrect.</p>';
+      return;
+    }
+    view.innerHTML = '<a class="secondary small" href="/scripts">← Back to scripts</a><div class="script-detail-card"><span class="eyebrow">VOID DEVELOPMENT · SCRIPT DETAILS</span><h2>' + escapeHTML(item.name) + '</h2><p>' + escapeHTML(item.description || "No description provided.") + '</p><div class="script-detail-meta"><span>' + escapeHTML(item.category || "Script") + '</span><span>Slug: ' + escapeHTML(item.slug || item.id) + '</span></div>' + (item.link ? '<a class="secondary" href="' + escapeHTML(item.link) + '" target="_blank" rel="noopener noreferrer">Open project link ↗</a>' : '') + '<p class="saved-note">Source remains protected and is delivered only through the authorized key-checked loader.</p></div>';
+  }
   function renderScripts() {
     const query = ($("#scriptSearch").value || "").trim().toLowerCase();
     const category = $("#categoryFilter").value;
@@ -66,6 +88,8 @@
     $("#scriptGrid").innerHTML = filtered.map((item, index) => `<article class="script-card" id="script-${escapeHTML(item.slug || item.id)}" style="--card-index:${index}"><div class="script-card-top"><span class="script-icon">${item.category === "Utility" ? "⌁" : item.category === "Tools" ? "⌘" : "✧"}</span><span class="pill">${escapeHTML(item.category)}</span><button class="favorite-btn ${favorites.has(item.id) ? "is-favorite" : ""}" data-favorite-id="${escapeHTML(item.id)}" type="button" aria-label="${favorites.has(item.id) ? "Remove from" : "Add to"} favorites" aria-pressed="${favorites.has(item.id)}">${favorites.has(item.id) ? "♥" : "♡"}</button><details class="script-more"><summary aria-label="More script options" title="More options">•••</summary><div class="script-more-menu"><button type="button" data-copy-link="${escapeHTML(item.slug || item.id)}">Copy script link</button><button type="button" data-copy-name="${escapeHTML(item.name)}">Copy script name</button></div></details></div><h3>${escapeHTML(item.name)}</h3><p>${escapeHTML(item.description)}</p><div class="script-card-actions"><button class="copy-btn" data-copy-loader="${escapeHTML(item.slug || item.id)}" type="button">Copy script <span>↗</span></button>${item.link ? `<a class="open-script" href="${escapeHTML(item.link)}" target="_blank" rel="noopener noreferrer">Details ↗</a>` : ""}</div></article>`).join("");
     $("#emptyState").textContent = showFavorites && filtered.length === 0 ? "No favorites yet — tap the heart on a script to save it." : "No scripts match that search.";
     $("#emptyState").hidden = filtered.length !== 0;
+    if (requestedScript) renderScriptDetail(requestedScript);
+    else { const detail = $("#scriptDetailView"); if (detail) detail.hidden = true; $(".script-tools").hidden = false; $("#scriptGrid").hidden = false; }
     $("#scriptCount").textContent = scripts.length;
     renderAdminScripts();
     observeRiseElements($("#scriptGrid"));
