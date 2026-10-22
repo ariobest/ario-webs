@@ -75,7 +75,8 @@
     $("#authSubmit").disabled=accountMode||authBusy;
     $("#authPassword").autocomplete=mode==="signup"||mode==="newpassword"?"new-password":"current-password";
     $("#authEmail").readOnly=accountMode;$("#authUsername").readOnly=accountMode;
-    $("#resendConfirmation").hidden=mode!=="signup";
+    // Keep resend available from both Sign up and Log in if confirmation is pending.
+    $("#resendConfirmation").hidden=mode!=="signup"&&mode!=="login";
     $("#forgotPassword").hidden=mode!=="login";
     $("#authModeSwitch").hidden=accountMode||mode==="reset"||mode==="newpassword";
     $("#signOutButton").hidden=!user;
@@ -84,7 +85,8 @@
     $("#openAuth").textContent=user?(admin?"Admin account ▾":"My account ▾"):"Sign up / Log in";
     $("#openProfile").hidden=!user;
     // Admin navigation is shown only after the Supabase role check succeeds.
-    $("#openAdmin").hidden=!admin;$("#openAdminFooter").hidden=!admin;
+    // Keep the admin entry visible for signed-in users; server/database permissions still decide access.
+    $("#openAdmin").hidden=!user;$("#openAdminFooter").hidden=!user;
     $("#signOutButton").hidden=!user;
     const notice=$("#adminAccessNotice");
     if(notice){
@@ -236,6 +238,17 @@
       const choice = event.target.closest("[data-appearance-theme]");
       if (choice) setTheme(choice.dataset.appearanceTheme);
       if (event.target.closest("#resetTheme")) setTheme("mono");
+    });
+    // Prevent the visible admin entry from opening privileged controls without a verified role.
+    ["#openAdmin", "#openAdminFooter"].forEach(selector => {
+      const button = $(selector);
+      button?.addEventListener("click", event => {
+        if (admin) return;
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        if (!user) showAuth("login");
+        else showToast(adminRoleError ? "Admin access could not be verified. Refresh and sign in again." : "This account does not have the administrator role.", "error");
+      }, true);
     });
     $("#refreshAdminOverview").addEventListener("click", loadAdminOverview);
     $("#scriptForm").addEventListener("submit",async e=>{
