@@ -8,7 +8,7 @@
   <title>VOID DEVELOPMENT — Premium Script Workspace</title>
   <link rel="icon" type="image/png" href="https://cdn.phototourl.com/member/2026-10-22-2137bbb7-82d5-48bb-855c-03c7361f95a8.png">
   <link rel="apple-touch-icon" href="https://cdn.phototourl.com/member/2026-10-22-2137bbb7-82d5-48bb-855c-03c7361f95a8.png">
-  <link rel="stylesheet" href="/style.css?v=20261023lefttabs3">
+  <link rel="stylesheet" href="/style.css?v=20261023mobile4">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/material-darker.min.css">
 </head>
@@ -16,9 +16,23 @@
   <div class="ambient ambient-one" aria-hidden="true"></div><div class="ambient ambient-two" aria-hidden="true"></div>
   <header class="nav">
     <a class="brand" href="/" aria-label="VOID DEVELOPMENT home"><img class="brand-logo" src="https://cdn.phototourl.com/member/2026-10-22-2137bbb7-82d5-48bb-855c-03c7361f95a8.png" alt=""><span>VOID <span>DEVELOPMENT</span></span></a>
+    <button class="mobile-menu-toggle" id="mobileMenuToggle" type="button" aria-label="Open navigation menu" aria-expanded="false" aria-controls="mobileNavPanel"><span></span><span></span><span></span></button>
     <nav aria-label="Main navigation"><button class="nav-link active" data-view="home"><span aria-hidden="true">⌂</span> Home</button><button class="nav-link" data-view="scripts"><span aria-hidden="true">⌘</span> Scripts</button><button class="nav-link" data-view="about"><span aria-hidden="true">ⓘ</span> About</button><button class="nav-link" data-view="themes"><span aria-hidden="true">◈</span> Themes</button></nav>
     <div class="nav-actions"><button class="icon-button" id="themeQuick" title="Toggle Light / Black Void" aria-label="Toggle Light / Black Void">◐</button><button class="nav-button" id="openAdmin" hidden>Admin panel ↗</button><a class="secondary discord-button" href="https://discord.com/" target="_blank" rel="noopener noreferrer" id="discordLink">Discord ↗</a><button class="secondary profile-button" id="openProfile" hidden>Profile</button><button class="secondary account-button" id="openAuth">Sign up / Log in</button></div>
   </header>
+  <div class="mobile-nav-scrim" id="mobileNavScrim" hidden></div>
+  <aside class="mobile-nav-panel" id="mobileNavPanel" aria-label="Mobile navigation" aria-hidden="true">
+    <div class="mobile-nav-heading"><span>MENU</span><button type="button" class="mobile-nav-close" id="mobileNavClose" aria-label="Close navigation">×</button></div>
+    <button class="mobile-nav-link active" data-view="home"><span>⌂</span> Home</button>
+    <button class="mobile-nav-link" data-view="scripts"><span>⌘</span> Scripts</button>
+    <button class="mobile-nav-link" data-view="about"><span>ⓘ</span> About</button>
+    <button class="mobile-nav-link" data-view="themes"><span>◈</span> Themes</button>
+    <div class="mobile-nav-divider"></div>
+    <button class="mobile-nav-link" id="mobileThemeToggle"><span>◐</span> Toggle appearance</button>
+    <button class="mobile-nav-link" id="mobileAdminLink" hidden><span>⚙</span> Admin panel</button>
+    <a class="mobile-nav-link" href="https://discord.com/" target="_blank" rel="noopener noreferrer"><span>↗</span> Discord</a>
+    <button class="mobile-nav-link mobile-nav-account" id="mobileAuthLink"><span>＋</span> Sign up / Log in</button>
+  </aside>
   <div id="siteAnnouncement" class="site-announcement" hidden></div>
   <main id="home">
     <section class="hero" id="hero">
