@@ -211,3 +211,26 @@
 .setting-check input{width:auto!important;min-width:16px;accent-color:var(--accent)}
 @media(max-width:760px){.media-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.admin-brandline{gap:10px}}
 @media(max-width:480px){.media-grid{grid-template-columns:1fr}.media-preview{height:180px}.source-meta{flex-direction:column;gap:3px}.mac-dot{width:11px;height:11px;min-width:11px}}
+
+
+/* ARIO STUDIOS premium dark glass design */
+:root{--page:#07090f;--surface:#0d111b;--surface-2:#121a2a;--ink:#f4f7ff;--muted:#929eb4;--line:rgba(132,164,220,.16);--accent:#5b8cff;--accent-strong:#3268e8;--glow:rgba(58,111,244,.22);--hero-glow:rgba(40,89,220,.19);color-scheme:dark;scroll-behavior:smooth}
+body{background:radial-gradient(ellipse at 72% 0%,rgba(32,70,151,.18),transparent 42%),var(--page)}
+.brand{gap:11px;letter-spacing:.035em}.brand>span{font-weight:800;letter-spacing:.075em}.brand>span span{color:var(--accent)}
+.brand-logo{width:36px;height:36px;object-fit:contain;filter:drop-shadow(0 0 14px rgba(64,119,255,.3))}
+button,a,.theme-choice,.script-card,.admin-tab{transition:transform .22s ease,box-shadow .22s ease,border-color .22s ease,background .22s ease,color .22s ease}
+button:hover,a.secondary:hover,.theme-choice:hover{box-shadow:0 0 0 1px rgba(91,140,255,.2),0 0 25px rgba(54,106,238,.18);border-color:var(--accent);transform:translateY(-2px)}
+button.primary:hover,.small-primary:hover,.nav-button:hover{box-shadow:0 0 28px rgba(55,111,255,.38),0 0 0 1px rgba(117,160,255,.4);transform:translateY(-2px)}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.code-window{border-color:rgba(91,140,255,.3);box-shadow:0 25px 90px rgba(0,0,0,.42),0 0 50px rgba(45,95,225,.13);transition:transform .35s ease,box-shadow .35s ease}
+.hero-visual:hover .code-window{transform:translateY(-5px) rotateY(-2deg);box-shadow:0 28px 100px rgba(0,0,0,.5),0 0 55px rgba(45,95,225,.23)}
+.code-window code{display:block;overflow:hidden;white-space:pre;animation:ario-code-focus .5s ease both}
+@keyframes ario-code-focus{from{opacity:.55;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.discord-button{text-decoration:none;display:inline-flex;align-items:center;justify-content:center}
+.section,.public-themes-section,.about-section{scroll-margin-top:110px}
+.script-card,.theme-choice,.admin-modal,.auth-modal{backdrop-filter:blur(18px)}
+.script-card:hover{transform:translateY(-4px);border-color:rgba(91,140,255,.38);box-shadow:0 18px 50px rgba(0,0,0,.22),0 0 28px rgba(43,93,221,.09)}
+.nav{backdrop-filter:blur(22px);background:rgba(7,9,15,.82);border-bottom-color:rgba(130,157,208,.12)}
+.ambient{opacity:.5}.ambient-one{background:radial-gradient(circle,rgba(43,89,194,.2),transparent 70%)}
+footer{border-top-color:var(--line)}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}}
