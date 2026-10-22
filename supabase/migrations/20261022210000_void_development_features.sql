@@ -133,4 +133,16 @@ using (exists (select 1 from public.user_roles r where r.user_id = (select auth.
 with check (exists (select 1 from public.user_roles r where r.user_id = (select auth.uid()) and r.role = 'admin'));
 grant select, insert, update on public.announcements to authenticated;
 
+do $
+begin
+  if exists (select 1 from pg_publication where pubname = 'supabase_realtime') then
+    if not exists (select 1 from pg_publication_tables where pubname='supabase_realtime' and schemaname='public' and tablename='void_notifications') then
+      alter publication supabase_realtime add table public.void_notifications;
+    end if;
+    if not exists (select 1 from pg_publication_tables where pubname='supabase_realtime' and schemaname='public' and tablename='script_events') then
+      alter publication supabase_realtime add table public.script_events;
+    end if;
+  end if;
+end $;
+
 commit;
