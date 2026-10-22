@@ -200,6 +200,37 @@
     const id = event.detail?.id;
     if (validThemes.includes(id) && currentTheme !== id) applyTheme(id, false, false);
   });
+
+  // Mobile navigation drawer: reuse the same page router as desktop navigation.
+  const mobileMenuToggle = $("#mobileMenuToggle");
+  const mobileNavPanel = $("#mobileNavPanel");
+  const mobileNavScrim = $("#mobileNavScrim");
+  function closeMobileNav() {
+    if (!mobileNavPanel || !mobileMenuToggle) return;
+    mobileNavPanel.classList.remove("open");
+    mobileNavPanel.setAttribute("aria-hidden", "true");
+    mobileMenuToggle.setAttribute("aria-expanded", "false");
+    mobileMenuToggle.setAttribute("aria-label", "Open navigation menu");
+    if (mobileNavScrim) mobileNavScrim.hidden = true;
+    document.body.classList.remove("mobile-nav-open");
+  }
+  function openMobileNav() {
+    if (!mobileNavPanel || !mobileMenuToggle) return;
+    mobileNavPanel.classList.add("open");
+    mobileNavPanel.setAttribute("aria-hidden", "false");
+    mobileMenuToggle.setAttribute("aria-expanded", "true");
+    mobileMenuToggle.setAttribute("aria-label", "Close navigation menu");
+    if (mobileNavScrim) mobileNavScrim.hidden = false;
+    document.body.classList.add("mobile-nav-open");
+  }
+  mobileMenuToggle?.addEventListener("click", () => mobileNavPanel?.classList.contains("open") ? closeMobileNav() : openMobileNav());
+  $("#mobileNavClose")?.addEventListener("click", closeMobileNav);
+  mobileNavScrim?.addEventListener("click", closeMobileNav);
+  $("#mobileThemeToggle")?.addEventListener("click", () => { applyTheme(currentTheme === "light" ? "mono" : "light", true); closeMobileNav(); });
+  $("#mobileAdminLink")?.addEventListener("click", () => { closeMobileNav(); openAdmin(); });
+  $("#mobileAuthLink")?.addEventListener("click", () => { closeMobileNav(); $("#openAuth")?.click(); });
+  document.addEventListener("keydown", event => { if (event.key === "Escape") closeMobileNav(); });
+
   $("#themeQuick").addEventListener("click", () => applyTheme(currentTheme === "light" ? "mono" : "light", true));
   // Public Themes tab: one delegated handler survives theme-grid rerenders.
   $("#publicThemeGrid")?.addEventListener("click", event => {
@@ -220,7 +251,13 @@
     $("#scripts").hidden = page !== "scripts";
     $("#themes").hidden = page !== "themes";
     $("#about").hidden = page !== "about";
-    $$(".nav-link").forEach(link => {
+    $(".mobile-nav-link[data-view]").forEach(link => {
+      const active = link.dataset.view === page;
+      link.classList.toggle("active", active);
+      link.setAttribute("aria-current", active ? "page" : "false");
+    });
+    closeMobileNav();
+    $(".nav-link").forEach(link => {
       const active = link.dataset.view === page;
       link.classList.toggle("active", active);
       link.setAttribute("aria-current", active ? "page" : "false");
