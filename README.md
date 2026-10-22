@@ -1,4 +1,4 @@
-# SunnyScripts — Cloudflare Workers
+# ARIO STUDIOS — Cloudflare Workers
 
 This version is structured for **Cloudflare Workers**, not a Pages-only project.
 
