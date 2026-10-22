@@ -280,7 +280,7 @@
     $("#checkApiStatus")?.addEventListener("click", checkApiStatus);
     $("#testVerificationKey")?.addEventListener("click", verifyAdminKey);
     $("#copyNewKey")?.addEventListener("click", async () => {const field=$("#newKeyValue");try{await navigator.clipboard.writeText(field.value);$("#copyNewKey").textContent="Copied ✓";}catch{field.focus();field.select();document.execCommand("copy");}});
-    $("#adminTabs")?.addEventListener("click", e => {if(e.target.closest('[data-admin-tab="keys"]'))refreshKeyList();if(e.target.closest('[data-admin-tab="api"]'))checkApiStatus();});
+    $("#adminTabs")?.addEventListener("click", e => {if(e.target.closest('[data-admin-tab="keys"]'))refreshAdminScripts().then(refreshKeyList);if(e.target.closest('[data-admin-tab="api"]'))checkApiStatus();});
     $("#keyList")?.addEventListener("click", e => {const b=e.target.closest("[data-void-revoke-key]");if(b)revokeAdminKey(b.dataset.voidRevokeKey);});
     $("#adminScriptList")?.addEventListener("click", e => {
       const edit=e.target.closest("[data-void-edit]"), del=e.target.closest("[data-void-delete]");
