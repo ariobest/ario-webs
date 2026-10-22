@@ -305,7 +305,7 @@
       const {data}=await db.auth.getSession();await onSession(data.session);
       db.auth.onAuthStateChange((_event,session)=>{setTimeout(()=>onSession(session),0);});
       loadAnnouncementsPublic();attachFavoriteTracking();
-      const grid=$("#scriptGrid");if(grid&&window.MutationObserver)new MutationObserver(()=>{if(user)syncFavoriteButtons();}).observe(grid,{childList:true,subtree:true});
+      const grid=$("#scriptGrid");if(grid&&window.MutationObserver)new MutationObserver(()=>{if(user)syncFavoriteButtons();}).observe(grid,{childList:true,subtree:false});
     } catch(e){console.error("VOID feature initialization failed:",e);status("voidProfileStatus","Could not initialize community features.",true);}
   }
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init,{once:true});else init();
