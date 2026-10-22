@@ -227,9 +227,61 @@
       await refreshAdminScripts();
     } catch(e) { alert(e.message || "Could not delete script. It may have related keys or activity records."); }
   }
+
+  async function refreshKeyList() {
+    const host=$("#keyList"); if(!host)return;
+    host.innerHTML='<p class="saved-note">Loading access keys…</p>';
+    try {
+      const {session}=await requireAdmin();
+      const data=await api({action:"list-keys"},session.access_token);
+      host.innerHTML=(data.keys||[]).length?(data.keys||[]).map(k=>'<article class="key-list-row"><div><b>'+esc(k.key_prefix||"VOID-•••")+'</b><small>'+esc(k.label||"Access key")+' · '+esc(k.scripts?.name||k.scripts?.slug||"Script")+'</small><small>'+esc(k.revoked_at?"Revoked":k.expires_at?"Expires "+new Date(k.expires_at).toLocaleString():"No expiry")+' · '+esc(String(k.use_count||0))+'/'+esc(k.max_uses==null?"∞":String(k.max_uses))+' uses</small></div>'+(!k.revoked_at?'<button type="button" class="text-action danger" data-void-revoke-key="'+esc(k.id)+'">Revoke</button>':'<span class="saved-note">Revoked</span>')+'</article>').join(""):'<p class="empty-state">No access keys have been created yet.</p>';
+      const status=$("#keyStatus");if(status){status.textContent="Loaded "+(data.keys||[]).length+" key records.";status.dataset.state="ok";}
+    } catch(e) { host.innerHTML='<p class="saved-note" data-state="error">'+esc(e.message||"Could not load keys.")+'</p>'; }
+  }
+  async function createAdminKey(e) {
+    e.preventDefault();
+    const status=$("#keyStatus"),button=$("#createKeyBtn");
+    try {
+      const {session}=await requireAdmin();
+      if(!$("#keyScriptId").value)throw new Error("Choose a published script first.");
+      button.disabled=true;status.textContent="Creating key…";
+      const data=await api({action:"create-key",script_id:$("#keyScriptId").value,label:$("#keyLabel").value.trim()||"Access key",expires_in_days:$("#keyExpiry").value||null,max_uses:$("#keyMaxUses").value||null},session.access_token);
+      $("#newKeyResult").hidden=false;$("#newKeyValue").value=data.key;
+      status.textContent="Key created. Copy it now; the full key is not stored for later display.";status.dataset.state="ok";
+      await refreshKeyList();
+    } catch(err) { status.hidden=false;status.textContent=err.message||"Could not create key.";status.dataset.state="error"; }
+    finally {button.disabled=false;}
+  }
+  async function revokeAdminKey(id) {
+    if(!confirm("Revoke this key now? It will no longer authorize script loading."))return;
+    try {const {session}=await requireAdmin();await api({action:"revoke-key",id},session.access_token);await refreshKeyList();}
+    catch(err){alert(err.message||"Could not revoke this key.");}
+  }
+  async function checkApiStatus() {
+    const host=$("#apiStatus");if(!host)return;
+    host.innerHTML='<span class="status-dot"></span><span>Checking API…</span>';
+    try {const r=await fetch(API_URL+"?action=health",{cache:"no-store"});const d=await r.json();if(!r.ok||!d.ok)throw new Error(d.error||"API did not respond successfully.");host.innerHTML='<span class="status-dot is-online"></span><span>Online · '+esc(d.service||"VOID Script API")+'</span>';}
+    catch(err){host.innerHTML='<span class="status-dot is-offline"></span><span>Offline · '+esc(err.message||"API unavailable")+'</span>';}
+  }
+  async function verifyAdminKey() {
+    const result=$("#verificationTestResult"),slug=$("#verificationScriptSlug")?.value,key=$("#verificationKeyInput")?.value.trim();
+    if(!result)return;
+    if(!slug||!key){result.textContent="Choose a published script and enter a key.";result.dataset.state="error";return;}
+    result.textContent="Verifying key…";
+    try {const d=await api({action:"validate",script:slug,key});result.textContent=d.valid?"Key is valid for "+(d.script?.name||slug)+".":"Key is invalid or expired.";result.dataset.state=d.valid?"ok":"error";}
+    catch(err){result.textContent=err.message||"Key verification failed.";result.dataset.state="error";}
+  }
+
   function installAdminFixes() {
     if (!client && window.supabase?.createClient) { try { client=window.supabase.createClient(SUPABASE_URL,PUBLIC_KEY); } catch {} }
     $("#scriptForm")?.addEventListener("submit", saveScript, true);
+    $("#keyForm")?.addEventListener("submit", createAdminKey, true);
+    $("#refreshKeys")?.addEventListener("click", refreshKeyList);
+    $("#checkApiStatus")?.addEventListener("click", checkApiStatus);
+    $("#testVerificationKey")?.addEventListener("click", verifyAdminKey);
+    $("#copyNewKey")?.addEventListener("click", async () => {const field=$("#newKeyValue");try{await navigator.clipboard.writeText(field.value);$("#copyNewKey").textContent="Copied ✓";}catch{field.focus();field.select();document.execCommand("copy");}});
+    $("#adminTabs")?.addEventListener("click", e => {if(e.target.closest('[data-admin-tab="keys"]'))refreshKeyList();if(e.target.closest('[data-admin-tab="api"]'))checkApiStatus();});
+    $("#keyList")?.addEventListener("click", e => {const b=e.target.closest("[data-void-revoke-key]");if(b)revokeAdminKey(b.dataset.voidRevokeKey);});
     $("#adminScriptList")?.addEventListener("click", e => {
       const edit=e.target.closest("[data-void-edit]"), del=e.target.closest("[data-void-delete]");
       if(edit){e.preventDefault();e.stopImmediatePropagation();const s=adminScripts.find(x=>x.id===edit.dataset.voidEdit);if(s)fillScriptForm(s);}
