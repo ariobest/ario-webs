@@ -9,7 +9,54 @@
 
   function makeLoader(slug, key = issuedKey || "PASTE_YOUR_ARIO_KEY_HERE") {
     const url = `${location.origin}/script/${encodeURIComponent(slug)}?key=${encodeURIComponent(key)}`;
-    return { url, lua: `loadstring(game:HttpGet("${url}"))()` };
+    const api = "https://cqtwmxojwwyeasstuhgb.supabase.co/functions/v1/script-api";
+    const lua = `local HttpService = game:GetService("HttpService")
+local API = "${api}"
+local KEY = "${key.replace(/\\/g,"\\\\").replace(/"/g,'\\"')}"
+local SCRIPT = "${slug.replace(/\\/g,"\\\\").replace(/"/g,'\\"')}"
+local function fail(message)
+    warn("[VOID KEY SYSTEM] " .. message)
+    return nil
+end
+if KEY == "PASTE_YOUR_ARIO_KEY_HERE" then
+    return fail("WRONG KEY — paste the key you received from the website.")
+end
+local checked, response = pcall(function()
+    return HttpService:RequestAsync({
+        Url = API, Method = "POST",
+        Headers = { ["Content-Type"] = "application/json" },
+        Body = HttpService:JSONEncode({ action = "validate", key = KEY, script = SCRIPT })
+    })
+end)
+if not checked or not response then return fail("KEY SERVICE UNAVAILABLE — try again later.") end
+local data = {}
+pcall(function() data = HttpService:JSONDecode(response.Body) end)
+if not response.Success or data.valid ~= true then
+    local code = data.code or ""
+    if code == "KEY_NOT_FOUND" or code == "" then return fail("WRONG KEY") end
+    if code == "KEY_EXPIRED" then return fail("KEY EXPIRED") end
+    if code == "KEY_REVOKED" then return fail("KEY REVOKED") end
+    if code == "WRONG_SCRIPT" then return fail("KEY NOT AUTHORIZED FOR THIS SCRIPT") end
+    if code == "SCRIPT_UNPUBLISHED" then return fail("SCRIPT IS NOT PUBLISHED") end
+    if code == "KEY_LIMIT_REACHED" then return fail("KEY USAGE LIMIT REACHED") end
+    return fail(data.error or "KEY VERIFICATION FAILED")
+end
+local loaded, sourceResponse = pcall(function()
+    return HttpService:RequestAsync({
+        Url = API .. "?action=load&script=" .. HttpService:UrlEncode(SCRIPT) .. "&key=" .. HttpService:UrlEncode(KEY),
+        Method = "GET"
+    })
+end)
+if not loaded or not sourceResponse or not sourceResponse.Success then
+    return fail("SCRIPT LOAD FAILED — key may have expired or been revoked.")
+end
+local source = sourceResponse.Body
+if type(source) ~= "string" or source == "" then return fail("SCRIPT SOURCE IS EMPTY.") end
+local compile, scriptFunction = pcall(loadstring, source)
+if not compile or type(scriptFunction) ~= "function" then return fail("SCRIPT SOURCE COULD NOT BE COMPILED.") end
+local ran, result = pcall(scriptFunction)
+if not ran then warn("[VOID SCRIPT ERROR] " .. tostring(result)) end`;
+    return { url, lua };
   }
 
   function injectStyles(){
