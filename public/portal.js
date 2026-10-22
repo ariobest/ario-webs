@@ -152,7 +152,7 @@
       if(b.dataset.adminTab==="keys")loadKeys();
       if(b.dataset.adminTab==="api")checkApiStatus();
       if(b.dataset.adminTab==="media")loadMedia();
-      if(b.dataset.adminTab==="settings")loadSiteSettings();
+      if(b.dataset.adminTab==="settings"||b.dataset.adminTab==="discord")loadSiteSettings();
     },true);
     $("#themeGrid").addEventListener("click",e=>{const b=e.target.closest("[data-theme-choice]");if(b)setTheme(b.dataset.themeChoice);});
     $("#scriptForm").addEventListener("submit",async e=>{
@@ -286,6 +286,8 @@
         $("#settingAnnouncement").value = value.announcement || "";
         $("#settingAnnouncementEnabled").checked = Boolean(value.announcementEnabled);
         $("#settingDefaultTheme").value = value.defaultTheme || "mono";
+        if($("#settingDiscordUrl"))$("#settingDiscordUrl").value=value.discordUrl||"";
+        if($("#settingDiscordDescription"))$("#settingDiscordDescription").value=value.discordDescription||"";
         status.textContent = data ? "Loaded from Supabase. Public fields are currently " + (data.is_public ? "published." : "private.") : "No saved settings yet. Save to create the site configuration.";
       } catch (error) { status.textContent = error.message || "Could not load site settings."; }
     }
