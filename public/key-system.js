@@ -16,7 +16,7 @@
         <button class="icon-button key-gate-close" id="closeKeySystem" type="button" aria-label="Close">×</button><div class="key-gate-icon">⚿</div><span class="eyebrow">VOID DEVELOPMENT KEY SYSTEM</span><h2 id="keyGateTitle">Get your script key</h2><p>Wait 20 seconds for verification, then receive a real VOID key.</p>
         <label>Script slug<input id="keyScript" maxlength="120" placeholder="example-script"></label><div class="key-protection-note"><b>THIS SCRIPT IS PROTECTED BY VOID DEVELOPMENT — BETTER LUCK NEXT TIME.</b><span>Protected scripts require a valid VOID key.</span></div>
         <div class="key-gate-actions"><button class="small-primary" id="startKeyButton" type="button">Start 20-second verification</button></div><p id="keyGateStatus" class="saved-note" role="status">Choose a published script, then start verification.</p><p id="keyError" class="key-error" hidden></p>
-        <div id="keyResult" class="key-result" hidden><span class="eyebrow">YOUR REAL ARIO KEY</span><div class="key-result-row"><input id="keyValue" readonly spellcheck="false"><button class="secondary small" id="copyKeyButton" type="button">Copy key</button></div><small id="keyExpiryText"></small></div>
+        <div id="keyResult" class="key-result" hidden><span class="eyebrow">YOUR VOID KEY</span><div class="key-result-row"><input id="keyValue" readonly spellcheck="false"><button class="secondary small" id="copyKeyButton" type="button">Copy key</button></div><small id="keyExpiryText"></small></div>
       </section></div>`;
     document.body.appendChild(wrap);
     const navActions=$(".nav-actions");if(navActions)navActions.prepend($("#openKeySystem"));else document.body.prepend($("#openKeySystem"));
