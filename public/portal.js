@@ -153,8 +153,15 @@
       if(b.dataset.adminTab==="api")checkApiStatus();
       if(b.dataset.adminTab==="media")loadMedia();
       if(b.dataset.adminTab==="settings"||b.dataset.adminTab==="discord")loadSiteSettings();
+      if(b.dataset.adminTab==="overview")loadAdminOverview();
     },true);
     $("#themeGrid").addEventListener("click",e=>{const b=e.target.closest("[data-theme-choice]");if(b)setTheme(b.dataset.themeChoice);});
+    $("#adminContent").addEventListener("click", event => {
+      const choice = event.target.closest("[data-appearance-theme]");
+      if (choice) setTheme(choice.dataset.appearanceTheme);
+      if (event.target.closest("#resetTheme")) setTheme("mono");
+    });
+    $("#refreshAdminOverview").addEventListener("click", loadAdminOverview);
     $("#scriptForm").addEventListener("submit",async e=>{
       if(!admin||!user||!client)return;
       e.preventDefault();e.stopImmediatePropagation();
@@ -274,6 +281,25 @@
       } catch (error) {
         host.innerHTML = '<p class="saved-note">Could not load media: ' + esc(error.message || "Storage request failed") + '</p>';
         if (status) status.textContent = "Check that the ario-media bucket and admin storage policies exist.";
+      }
+    }
+    async function loadAdminOverview() {
+      const status = $("#adminOverviewStatus");
+      if (!admin || !client) { status.textContent = "Sign in as an administrator to load live totals."; return; }
+      status.textContent = "Loading live totals…";
+      try {
+        const { data, error } = await client.from("scripts").select("id,status");
+        if (error) throw error;
+        const rows = data || [];
+        $("#overviewTotalScripts").textContent = String(rows.length);
+        $("#overviewPublishedScripts").textContent = String(rows.filter(row => row.status === "published").length);
+        $("#overviewDraftScripts").textContent = String(rows.filter(row => row.status === "draft").length);
+        status.textContent = "Live counts loaded from Supabase.";
+      } catch (error) {
+        $("#overviewTotalScripts").textContent = "—";
+        $("#overviewPublishedScripts").textContent = "—";
+        $("#overviewDraftScripts").textContent = "—";
+        status.textContent = "Could not load overview totals. Check administrator access and retry.";
       }
     }
     async function loadSiteSettings() {
