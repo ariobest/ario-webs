@@ -691,3 +691,58 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
  #adminBackdrop .admin-tabs{grid-template-columns:minmax(0,1fr)}
 }
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+
+
+/* VOID navigation, key dialog, and responsive admin repair */
+.nav{transition:transform .24s ease,opacity .24s ease;will-change:transform}
+.nav.void-nav-hidden{transform:translateY(-130%);opacity:0;pointer-events:none}
+.void-side-toggle{position:fixed;z-index:42;right:16px;top:50%;width:46px;height:54px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;border:1px solid var(--line);border-radius:17px;background:color-mix(in srgb,var(--surface) 82%,transparent);color:var(--ink);box-shadow:0 12px 40px rgba(0,0,0,.22);backdrop-filter:blur(22px);opacity:0;pointer-events:none;transform:translate(20px,-50%);transition:opacity .2s ease,transform .2s ease}
+.void-side-toggle span{display:block;width:17px;height:2px;border-radius:5px;background:currentColor}
+.void-side-toggle.is-visible{opacity:1;pointer-events:auto;transform:translate(0,-50%)}
+.void-side-toggle:hover{border-color:var(--accent);box-shadow:0 0 30px var(--glow)}
+.void-side-shade{position:fixed;inset:0;z-index:48;border:0;background:rgba(0,0,0,.42);backdrop-filter:blur(4px);opacity:0;pointer-events:none;transition:opacity .22s ease}
+.void-side-shade.open{opacity:1;pointer-events:auto}
+.void-side-drawer{position:fixed;z-index:49;top:12px;right:12px;bottom:12px;width:min(340px,calc(100vw - 24px));padding:18px;display:flex;flex-direction:column;gap:20px;border:1px solid var(--line);border-radius:25px;background:color-mix(in srgb,var(--page) 84%,#202020);color:var(--ink);box-shadow:0 25px 90px rgba(0,0,0,.45);backdrop-filter:blur(28px);transform:translateX(calc(100% + 28px));opacity:.7;visibility:hidden;transition:transform .25s ease,opacity .25s ease,visibility .25s}
+.void-side-drawer.open{transform:translateX(0);opacity:1;visibility:visible}
+.void-drawer-head{display:flex;align-items:center;gap:10px;padding:4px 0 17px;border-bottom:1px solid var(--line)}
+.void-drawer-head img{width:42px;height:42px;object-fit:contain;border-radius:13px;box-shadow:0 0 24px var(--glow)}
+.void-drawer-head>div{min-width:0;display:grid;gap:3px;flex:1}
+.void-drawer-head b{font:700 12px 'Space Grotesk',sans-serif;letter-spacing:.04em}
+.void-drawer-head small,.void-drawer-foot{font-size:10px;color:var(--muted)}
+.void-drawer-links{display:grid;gap:7px}
+.void-drawer-links button{display:flex;align-items:center;gap:13px;width:100%;min-height:48px;padding:0 13px;border:1px solid transparent;border-radius:14px;background:transparent;color:var(--ink);text-align:left;font-weight:600}
+.void-drawer-links button:hover,.void-drawer-links button:focus-visible{background:var(--surface-2);border-color:var(--line)}
+.void-drawer-links button>span{display:grid;place-items:center;width:29px;height:29px;border:1px solid var(--line);border-radius:10px;background:var(--surface);font-size:16px}
+.void-drawer-links button[hidden]{display:none}
+.void-drawer-foot{margin-top:auto;letter-spacing:.16em}
+body.void-drawer-open{overflow:hidden}
+.void-key-backdrop{z-index:60}
+.void-key-modal{position:relative;width:min(470px,100%);padding:30px;border:1px solid var(--line);border-radius:24px;background:var(--page);color:var(--ink);box-shadow:0 35px 100px rgba(0,0,0,.5)}
+.void-key-modal h2{margin:10px 0;font:650 30px 'Space Grotesk',sans-serif;letter-spacing:-.04em}
+.void-key-modal>p{color:var(--muted);font-size:13px;line-height:1.7}
+.void-key-close{position:absolute;right:18px;top:18px}
+.void-key-progress{display:flex;align-items:center;gap:12px;margin:22px 0;padding:15px;border:1px solid var(--line);border-radius:14px;background:var(--surface)}
+.void-key-spinner{width:19px;height:19px;border:2px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:void-key-spin .7s linear infinite}
+@keyframes void-key-spin{to{transform:rotate(360deg)}}
+.void-key-value-row{display:flex;gap:8px;margin:8px 0}
+.void-key-value-row input{min-width:0;flex:1;padding:12px;border:1px solid var(--line);border-radius:11px;background:var(--surface);color:var(--ink);font-family:ui-monospace,monospace;font-weight:700;letter-spacing:.04em}
+#voidKeyDone{margin-top:8px}
+#voidKeyError[data-state="error"],#voidScriptSaveStatus[data-state="error"]{color:#ff8585}
+.admin-modal{overscroll-behavior:contain;scrollbar-gutter:stable}
+.admin-tabs{flex-wrap:wrap;max-height:150px;overflow:auto;scrollbar-width:thin}
+.admin-content{min-width:0}
+.admin-script-row{min-width:0}
+.admin-script-info{min-width:0;flex:1}
+.admin-script-info b,.admin-script-info small{overflow-wrap:anywhere}
+@media(max-width:680px){
+  .nav.void-nav-hidden{transform:translateY(-140%)}
+  .void-side-toggle{right:10px;width:43px;height:50px}
+  .void-key-modal{padding:24px 18px;border-radius:20px}
+  .admin-modal{width:100%;height:calc(100dvh - 16px);max-height:calc(100dvh - 16px);border-radius:18px;overflow:auto}
+  .admin-tabs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));max-height:190px;padding:10px 14px}
+  .admin-tab{min-width:0;padding:10px 7px;text-align:left}
+  .admin-content{padding:18px 14px}
+  .admin-script-row{display:grid;grid-template-columns:32px minmax(0,1fr) auto auto;gap:6px}
+  .admin-script-info small{max-width:100%;white-space:normal}
+}
+@media(prefers-reduced-motion:reduce){.nav,.void-side-toggle,.void-side-shade,.void-side-drawer{transition:none}.void-key-spinner{animation:none}}
