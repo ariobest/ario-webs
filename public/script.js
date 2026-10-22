@@ -52,6 +52,18 @@
     if (syncPortal) document.dispatchEvent(new CustomEvent("voidDevelopment:theme-change", { detail: { id: theme } }));
   }
 
+  // voidDevelopment:shortcut-guard — discourages casual copy/select shortcuts on the public page.
+  // This is only a UI deterrent; it cannot make client-visible information secret.
+  document.addEventListener("keydown", event => {
+    if (!(event.ctrlKey || event.metaKey) || event.altKey) return;
+    const key = String(event.key || "").toLowerCase();
+    if (!["a", "c", "v"].includes(key)) return;
+    const target = event.target;
+    const editable = target && (target.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName));
+    if (editable) return;
+    event.preventDefault();
+  }, true);
+
   function escapeHTML(value) {
     return String(value ?? "").replace(/[&<>"']/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char]);
   }
@@ -85,7 +97,7 @@
     $("#favoritesToggle").classList.toggle("active", showFavorites);
     $("#favoritesToggle").setAttribute("aria-pressed", String(showFavorites));
     $("#favoritesToggle").textContent = showFavorites ? "♥ Favorites" : "♡ Favorites";
-    $("#scriptGrid").innerHTML = filtered.map((item, index) => `<article class="script-card" id="script-${escapeHTML(item.slug || item.id)}" style="--card-index:${index}"><div class="script-card-top"><span class="script-icon">${item.category === "Utility" ? "⌁" : item.category === "Tools" ? "⌘" : "✧"}</span><span class="pill">${escapeHTML(item.category)}</span><button class="favorite-btn ${favorites.has(item.id) ? "is-favorite" : ""}" data-favorite-id="${escapeHTML(item.id)}" type="button" aria-label="${favorites.has(item.id) ? "Remove from" : "Add to"} favorites" aria-pressed="${favorites.has(item.id)}">${favorites.has(item.id) ? "♥" : "♡"}</button><details class="script-more"><summary aria-label="More script options" title="More options">•••</summary><div class="script-more-menu"><button type="button" data-copy-link="${escapeHTML(item.slug || item.id)}">Copy script link</button><button type="button" data-copy-name="${escapeHTML(item.name)}">Copy script name</button></div></details></div><h3>${escapeHTML(item.name)}</h3><p>${escapeHTML(item.description)}</p><div class="script-card-actions"><button class="copy-btn" data-copy-loader="${escapeHTML(item.slug || item.id)}" type="button">Copy script <span>↗</span></button><a class="open-script" href="/scripts/${encodeURIComponent(item.slug || item.id)}">Details ↗</a>${item.link ? `<a class="open-script" href="${escapeHTML(item.link)}" target="_blank" rel="noopener noreferrer">Project ↗</a>` : ""}</div></article>`).join("");
+    $("#scriptGrid").innerHTML = filtered.map((item, index) => `<article class="script-card" id="script-${escapeHTML(item.slug || item.id)}" style="--card-index:${index}"><div class="script-card-top"><span class="script-icon">${item.category === "Utility" ? "⌁" : item.category === "Tools" ? "⌘" : "✧"}</span><span class="pill">${escapeHTML(item.category)}</span><button class="favorite-btn ${favorites.has(item.id) ? "is-favorite" : ""}" data-favorite-id="${escapeHTML(item.id)}" type="button" aria-label="${favorites.has(item.id) ? "Remove from" : "Add to"} favorites" aria-pressed="${favorites.has(item.id)}">${favorites.has(item.id) ? "♥" : "♡"}</button><details class="script-more"><summary aria-label="More script options" title="More options">•••</summary><div class="script-more-menu"><button type="button" data-copy-link="${escapeHTML(item.slug || item.id)}">Copy script link</button><button type="button" data-copy-name="${escapeHTML(item.name)}">Copy script name</button></div></details></div><h3>${escapeHTML(item.name)}</h3><p>${escapeHTML(item.description)}</p><div class="script-card-actions"><button class="copy-btn" data-copy-loader="${escapeHTML(item.slug || item.id)}" type="button">Copy script <span>↗</span></button><a class="open-script" href="/scripts/${encodeURIComponent(item.slug || item.id)}">View details ↗</a>${item.link ? `<a class="open-script" href="${escapeHTML(item.link)}" target="_blank" rel="noopener noreferrer">Project ↗</a>` : ""}</div></article>`).join("");
     $("#emptyState").textContent = showFavorites && filtered.length === 0 ? "No favorites yet — tap the heart on a script to save it." : "No scripts match that search.";
     $("#emptyState").hidden = filtered.length !== 0;
     if (requestedScript) renderScriptDetail(requestedScript);
