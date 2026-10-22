@@ -243,7 +243,7 @@ footer{border-top-color:var(--line)}
 body{background:radial-gradient(ellipse at 50% -15%,rgba(255,255,255,.075),transparent 48%),radial-gradient(ellipse at 78% 20%,rgba(73,100,160,.11),transparent 35%),var(--page)}
 .nav,.admin-modal,.auth-modal,.script-card,.theme-choice,.code-window,.admin-pane,.cookie-notice{backdrop-filter:blur(26px) saturate(150%);-webkit-backdrop-filter:blur(26px) saturate(150%)}
 .nav{background:rgba(7,8,12,.72);border-bottom:1px solid rgba(255,255,255,.11);box-shadow:0 10px 35px rgba(0,0,0,.12)}
-.brand-logo{width:40px;height:40px;padding:2px;border-radius:13px;border:1px solid rgba(255,255,255,.72);outline:1px solid rgba(255,255,255,.16);outline-offset:2px;filter:drop-shadow(0 0 12px rgba(255,255,255,.16)) drop-shadow(0 0 18px rgba(81,117,255,.15))}
+.brand-logo{width:40px;height:40px;padding:2px;border-radius:13px;border:1px solid rgba(255,255,255,.72);outline:1px solid rgba(255,255,255,.16);outline-offset:2px;filter:drop-shadow(0 0 12px rgba(255,255,255,.16))}
 .brand>span{font-size:12px;letter-spacing:.12em}.brand>span span{color:var(--ink);opacity:.72}
 .hero-brand-mark{display:flex;align-items:center;justify-content:center;gap:12px;margin:0 0 24px;color:var(--muted);font-size:11px;font-weight:800;letter-spacing:.2em}.hero-brand-mark img{width:58px;height:58px;object-fit:contain;padding:4px;border:1px solid rgba(255,255,255,.78);outline:1px solid rgba(255,255,255,.16);outline-offset:3px;border-radius:18px;filter:drop-shadow(0 0 22px rgba(255,255,255,.13))}
 .hero h1{letter-spacing:-.065em;line-height:.98}.hero h1 span{background:linear-gradient(100deg,#fff 5%,#c8d1e4 52%,#7c8ba8 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
@@ -295,3 +295,5 @@ footer .brand>span{color:var(--ink)}
 .about-admin-card img{width:90px;height:90px;object-fit:contain;filter:drop-shadow(0 0 20px rgba(255,255,255,.18))}
 .about-admin-card h4{font:700 24px 'Space Grotesk',sans-serif;margin:16px 0 8px}.about-admin-card p{color:var(--muted);line-height:1.7}
 @media(max-width:580px){.admin-overview-grid{grid-template-columns:1fr}.admin-overview-card{padding:16px}.appearance-options{display:grid;grid-template-columns:1fr 1fr}.appearance-options .theme-choice{min-width:0}}
+
+.footer-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.footer-admin{cursor:pointer}.footer-admin:hover{color:var(--ink)}
