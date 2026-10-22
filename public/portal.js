@@ -181,7 +181,7 @@
     $("#scriptForm").addEventListener("submit",async e=>{
       if(!admin||!user||!client)return;
       e.preventDefault();e.stopImmediatePropagation();
-      const name=$("#newScriptName").value.trim(),slug=$("#newScriptSlug").value.trim().toLowerCase(),category=$("#newScriptCategory").value,description=$("#newScriptDescription").value.trim(),link=$("#newScriptLink").value.trim(),id=$("#editScriptId").value;
+      const name=$("#newScriptName").value.trim(),slug=$("#newScriptSlug").value.trim().toLowerCase(),category=$("#newScriptCategory").value,status=$("#newScriptStatus").value,description=$("#newScriptDescription").value.trim(),link=$("#newScriptLink").value.trim(),id=$("#editScriptId").value;
       if(!name||!description||!slug){showToast("Enter a script name, slug and description.");return;}
       if(!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)){showToast("Slug must use lowercase letters, numbers and hyphens.");$("#newScriptSlug").focus();return;}
       const duplicate = await client.from("scripts").select("id").eq("slug", slug).neq("id", id || "00000000-0000-0000-0000-000000000000").maybeSingle();
@@ -189,7 +189,7 @@
       if (duplicate.data) { showToast("That slug is already in use. Choose a unique slug."); $("#newScriptSlug").focus(); return; }
       const content=$("#newScriptContent").value.trim();
       if(content.length>200000){showToast("Lua source is too large (200,000 characters maximum).");return;}
-      const record={name,slug,category,description,link:link||null,content:content||null,status:"published",owner_id:user.id};
+      const record={name,slug,category,description,link:link||null,content:content||null,status,owner_id:user.id,updated_at:new Date().toISOString()};
       let result;
       if(id&&/^[0-9a-f-]{36}$/i.test(id)) result=await client.from("scripts").update(record).eq("id",id);
       else result=await client.from("scripts").insert({...record,slug});
@@ -520,8 +520,25 @@
     $("#adminScriptList").addEventListener("click", async event => {
       const edit = event.target.closest("[data-edit-script]");
       if (!edit || !admin || !client || !/^[0-9a-f-]{36}$/i.test(edit.dataset.editScript)) return;
-      const { data, error } = await client.from("scripts").select("content").eq("id", edit.dataset.editScript).maybeSingle();
-      if (!error) { $("#newScriptContent").value = data?.content || ""; $("#sourceCharCount").textContent = $("#newScriptContent").value.length.toLocaleString() + " characters"; }
+      event.preventDefault(); event.stopImmediatePropagation();
+      try {
+        const { data, error } = await client.from("scripts").select("id,name,slug,category,description,link,content,status").eq("id", edit.dataset.editScript).maybeSingle();
+        if (error || !data) throw error || new Error("Script unavailable.");
+        $("#editScriptId").value = data.id;
+        $("#newScriptName").value = data.name || "";
+        $("#newScriptSlug").value = data.slug || "";
+        $("#newScriptSlug").dataset.touched = "true";
+        $("#newScriptCategory").value = data.category || "Utility";
+        $("#newScriptStatus").value = data.status || "draft";
+        $("#newScriptDescription").value = data.description || "";
+        $("#newScriptLink").value = data.link || "";
+        $("#newScriptContent").value = data.content || "";
+        $("#sourceCharCount").textContent = $("#newScriptContent").value.length.toLocaleString() + " characters";
+        $("#scriptSlugPreview").textContent = "Public page: /scripts/" + (data.slug || "your-script") + " · loader: /script/" + (data.slug || "your-script");
+        $("#scriptFormTitle").textContent = "Edit script";
+        $("#scriptForm").hidden = false;
+        $("#newScriptName").focus();
+      } catch (error) { showToast("Could not load this script for editing.", "error"); }
     }, true);
     if(client){
       client.auth.getSession().then(({data})=>refresh(data.session&&data.session.user||null));
