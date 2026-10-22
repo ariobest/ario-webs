@@ -429,40 +429,93 @@
       if (file.size > 200000) { $("#protectorStatus").textContent = "Lua source must be 200,000 bytes or smaller."; return; }
       try {
         $("#protectorSource").value = await file.text();
-        $("#protectorStatus").textContent = "Imported " + file.name + ". Save the source in Scripts first if you want to deliver it through the protected loader.";
+        const guessedName = file.name.replace(/\\.(lua|luau|txt)$/i, "");
+        if (!$("#protectorName").value.trim()) $("#protectorName").value = guessedName;
+        if (!$("#protectorSlug").value.trim()) $("#protectorSlug").value = guessedName.toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 80);
+        $("#protectorStatus").textContent = "Imported " + file.name + ". Click Create script + generate loadstring to publish it.";
       } catch (error) { $("#protectorStatus").textContent = error.message || "Could not read the Lua file."; }
     });
+    $("#protectorName").addEventListener("input", () => {
+      const slugField = $("#protectorSlug");
+      if (!slugField || slugField.dataset.touched === "true") return;
+      slugField.value = $("#protectorName").value.toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 80);
+    });
+    $("#protectorSlug").addEventListener("input", event => {
+      event.target.dataset.touched = "true";
+      event.target.value = event.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "").replace(/-{2,}/g, "-").replace(/^-|-$/g, "").slice(0, 80);
+    });
     $("#clearProtector").addEventListener("click", () => {
+      $("#protectorName").value = "";
+      $("#protectorSlug").value = "";
+      $("#protectorSlug").dataset.touched = "false";
       $("#protectorSource").value = "";
       $("#protectorFile").value = "";
+      $("#protectedScriptUrl").value = "";
       $("#protectedLoaderOutput").value = "";
       $("#protectorStatus").textContent = "Protector cleared.";
     });
-    $("#generateProtectedLoader").addEventListener("click", () => {
-      if (!admin) { showToast("Administrator access required.", "error"); return; }
+    $("#generateProtectedLoader").addEventListener("click", async () => {
+      if (!admin || !user || !client) { showToast("Administrator access required.", "error"); return; }
+      const name = $("#protectorName").value.trim();
       const slug = $("#protectorSlug").value.trim().toLowerCase();
-      const key = $("#protectorKey").value.trim();
-      if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) {
-        $("#protectorStatus").textContent = "Enter a valid published script slug using lowercase letters, numbers and hyphens.";
-        $("#protectorSlug").focus(); return;
+      const source = $("#protectorSource").value;
+      if (!name) { $("#protectorStatus").textContent = "Enter a script name."; $("#protectorName").focus(); return; }
+      if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) { $("#protectorStatus").textContent = "Use a valid slug with lowercase letters, numbers and hyphens."; $("#protectorSlug").focus(); return; }
+      if (!source.trim()) { $("#protectorStatus").textContent = "Paste or import Lua/Luau source first."; $("#protectorSource").focus(); return; }
+      if (new TextEncoder().encode(source).length > 200000) { $("#protectorStatus").textContent = "Lua source must be 200,000 bytes or smaller."; return; }
+      const status = $("#protectorStatus");
+      const createButton = $("#generateProtectedLoader");
+      createButton.disabled = true;
+      status.textContent = "Checking slug and publishing your script…";
+      try {
+        const duplicate = await client.from("scripts").select("id").eq("slug", slug).maybeSingle();
+        if (duplicate.error) throw new Error("Could not verify slug uniqueness: " + duplicate.error.message);
+        if (duplicate.data) throw new Error("That slug already exists. Choose a different slug.");
+        const safeName = slug + ".lua";
+        const objectPath = "scripts/" + safeName;
+        const upload = await client.storage.from("void-files").upload(objectPath, new Blob([source], { type: "text/plain; charset=utf-8" }), {
+          contentType: "text/plain; charset=utf-8",
+          cacheControl: "60",
+          upsert: false
+        });
+        if (upload.error) throw new Error("Could not upload source to the void-files bucket: " + upload.error.message);
+        const publicResult = client.storage.from("void-files").getPublicUrl(objectPath);
+        const sourceUrl = publicResult?.data?.publicUrl;
+        if (!sourceUrl) throw new Error("Storage uploaded the file but did not return a public URL.");
+        const record = {
+          name,
+          slug,
+          category: "Utility",
+          description: "Published from the Script Protector.",
+          link: sourceUrl,
+          content: source,
+          status: "published",
+          owner_id: user.id,
+          updated_at: new Date().toISOString()
+        };
+        const saved = await client.from("scripts").insert(record);
+        if (saved.error) {
+          await client.storage.from("void-files").remove([objectPath]);
+          throw new Error("The file uploaded, but the script record could not be saved: " + saved.error.message);
+        }
+        const loader = 'loadstring(game:HttpGet(' + JSON.stringify(sourceUrl) + '))()';
+        $("#protectedScriptUrl").value = sourceUrl;
+        $("#protectedLoaderOutput").value = loader;
+        status.textContent = "Script published successfully. Copy the loadstring below. The hosted URL is public and has no access key.";
+        showToast("Script published and loadstring generated.", "success");
+        if (typeof loadAdminScripts === "function") loadAdminScripts();
+      } catch (error) {
+        status.textContent = error?.message || "Could not create the hosted script.";
+        showToast(status.textContent, "error");
+      } finally {
+        createButton.disabled = false;
       }
-      if (!key) { $("#protectorStatus").textContent = "Paste an access key created for this script in the Access keys tab."; $("#protectorKey").focus(); return; }
-      const keyLiteral = JSON.stringify(key);
-      $("#protectedLoaderOutput").value = [
-        'local HttpService = game:GetService("HttpService")',
-        "local KEY = " + keyLiteral,
-        'local URL = "https://arioscripts.cyou/script/" .. ' + JSON.stringify(slug) + ' .. "?key=" .. HttpService:UrlEncode(KEY)',
-        'local source = game:HttpGet(URL)',
-        'assert(type(source) == "string" and #source > 0, "Protected script could not be loaded")',
-        'loadstring(source)()'
-      ].join("\n");
-      $("#protectorStatus").textContent = "Loader generated. Confirm this slug is published and the key belongs to it. This is access control, not unbreakable obfuscation.";
     });
     $("#copyProtectedLoader").addEventListener("click", async () => {
       const output = $("#protectedLoaderOutput").value;
-      if (!output) { $("#protectorStatus").textContent = "Generate the loader first."; return; }
-      try { await navigator.clipboard.writeText(output); showToast("Protected loader copied.", "success"); }
-      catch { window.prompt("Copy protected loader:", output); }
+      if (!output) { $("#protectorStatus").textContent = "Create the script first."; return; }
+      try { await navigator.clipboard.writeText(output); showToast("Loadstring copied.", "success"); }
+      catch { window.prompt("Copy Roblox loadstring:", output); }
     });
     $("#mediaUploadForm").addEventListener("submit", async event => {
       event.preventDefault();
