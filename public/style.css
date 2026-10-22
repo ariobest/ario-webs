@@ -793,7 +793,6 @@ body.void-drawer-open{overflow:hidden}
   }
   #adminBackdrop .admin-tabs {
     grid-column: 1;
-    grid-row: 2 / span 2;
     align-self: stretch;
     display: flex !important;
     flex-direction: column;
@@ -824,7 +823,6 @@ body.void-drawer-open{overflow:hidden}
   }
   #adminBackdrop .admin-content {
     grid-column: 2;
-    grid-row: 2 / span 2;
     min-width: 0;
     padding: 22px;
   }
@@ -842,7 +840,6 @@ body.void-drawer-open{overflow:hidden}
   }
   #adminBackdrop .admin-tabs {
     grid-column: 1;
-    grid-row: 2 / span 2;
     display: flex !important;
     flex-direction: column;
     flex-wrap: nowrap !important;
@@ -870,7 +867,6 @@ body.void-drawer-open{overflow:hidden}
   }
   #adminBackdrop .admin-content {
     grid-column: 2;
-    grid-row: 2 / span 2;
     min-width: 0;
     padding: 14px 10px;
   }
