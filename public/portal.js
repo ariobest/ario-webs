@@ -145,27 +145,27 @@
     if($("#authWebsite").value.trim()){showToast("Could not submit this form. Try again.","error");return;}
     if(user&&mode!=="newpassword"){mode="account";updateAuthMode();$("#authStatus").textContent="You are already signed in as "+(user.email||"your account")+". Sign out first if you need to use another account.";showToast("You are already signed in.","info");return;}
     if(!client){$("#authStatus").textContent="Supabase client did not load.";showToast("Authentication is unavailable right now.","error");return;}
-    const email=$("#authEmail").value.trim(),password=$("#authPassword").value,username=$("#authUsername").value.trim();
+    const email=$("#authEmail").value.trim().toLowerCase(),password=$("#authPassword").value,username=$("#authUsername").value.trim();
     if(mode==="signup"&&!/^[a-zA-Z0-9_.-]{3,32}$/.test(username)){ $("#authStatus").textContent="Username must be 3–32 letters, numbers, dot, dash or underscore.";return; }
     if((mode==="reset"||mode==="newpassword")&&!email&&mode==="reset"){ $("#authStatus").textContent="Enter your account email first.";return; }
     authBusy=true;$("#authSubmit").disabled=true;$("#authStatus").textContent="Please wait…";
     try{
       if(mode==="signup"){
-        const result=await client.auth.signUp({email,password,options:{data:{username:username},emailRedirectTo:window.location.origin}});
-        if(result.error)throw result.error;
+        const result=await client.auth.signUp({email,password,options:{data:{username:username},emailRedirectTo:window.location.origin+"/?auth=confirmed"}});
+        if(result.error){const message=String(result.error.message||"");if(/already registered|already been registered|user already exists/i.test(message))throw new Error("This email already has an account. Choose Log in, or use Forgot password.");throw result.error;}
         if(result.data.session&&result.data.user){
-          await client.from("profiles").upsert({id:result.data.user.id,username:username},{onConflict:"id"});
+          const profileSave=await client.from("profiles").upsert({id:result.data.user.id,username:username},{onConflict:"id"});if(profileSave.error)console.warn("Profile setup could not be completed:",profileSave.error.message);
           await refresh(result.data.user);mode="account";updateAuthMode();$("#authStatus").textContent="Account created and signed in. Welcome to VOID DEVELOPMENT!";showToast("Account created successfully.","success");
         }else { $("#resendConfirmation").hidden=false; $("#authStatus").textContent="Account created. Check your inbox and spam folder for the VOID DEVELOPMENT confirmation email.";showToast("Confirmation email requested. Check your inbox.","success"); }
       }else if(mode==="reset"){
-        const result=await client.auth.resetPasswordForEmail(email,{redirectTo:window.location.origin});
+        const result=await client.auth.resetPasswordForEmail(email,{redirectTo:window.location.origin+"/?auth=recovery"});
         if(result.error)throw result.error;
         $("#authStatus").textContent="If that account exists, a password-reset email has been requested. Check your inbox and spam folder.";showToast("If the account exists, a reset email is on its way.","success");
       }else if(mode==="newpassword"){
         const result=await client.auth.updateUser({password});if(result.error)throw result.error;
         await refresh(result.data.user);mode="account";updateAuthMode();$("#authStatus").textContent="Password updated successfully.";showToast("Password updated.","success");
       }else{
-        const result=await client.auth.signInWithPassword({email,password});if(result.error)throw result.error;
+        const result=await client.auth.signInWithPassword({email,password});if(result.error){const message=String(result.error.message||"");if(/invalid login credentials/i.test(message))throw new Error("Email or password is incorrect. Check your details or use Forgot password.");if(/email not confirmed/i.test(message))throw new Error("Please confirm your email first. Use Resend confirmation email, then check your inbox and spam folder.");throw result.error;}
         const signedInUser=result.data.user;
         const savedUsername=String((signedInUser.user_metadata&&signedInUser.user_metadata.username)||username||"").trim();
         if(savedUsername) { const profileResult=await client.from("profiles").upsert({id:signedInUser.id,username:savedUsername},{onConflict:"id"}); if(profileResult.error) console.warn("Profile username sync failed:",profileResult.error.message); }
@@ -215,9 +215,9 @@
     $("#authBackdrop").addEventListener("click",e=>{if(e.target===$("#authBackdrop"))closeAuth();});
     $$(".auth-mode").forEach(b=>b.addEventListener("click",()=>{mode=b.dataset.authMode;updateAuthMode();}));
     $("#authForm").addEventListener("submit",handleAuth);
-    const authParams=new URLSearchParams(location.search);if(authParams.get("auth")==="signup"||location.hash==="#signup")showAuth("signup");
+    const authParams=new URLSearchParams(location.search);if(authParams.get("auth")==="signup"||location.hash==="#signup")showAuth("signup");if(authParams.get("auth")==="confirmed"){showAuth("login");$("#authStatus").textContent="Email link opened. If your account is confirmed, log in with your email and password.";history.replaceState(null,"",location.pathname+location.hash);}
     $("#forgotPassword").addEventListener("click",()=>{mode="reset";updateAuthMode();$("#authStatus").textContent="Enter your email and we will send a secure reset link.";});
-    $("#resendConfirmation").addEventListener("click",async()=>{if(!client)return;const email=$("#authEmail").value.trim();if(!email){$("#authStatus").textContent="Enter the email address you signed up with first.";return;}const b=$("#resendConfirmation");b.disabled=true;try{const {error}=await client.auth.resend({type:"signup",email,options:{emailRedirectTo:window.location.origin}});if(error)throw error;$("#authStatus").textContent="If confirmation is still needed, a new email has been requested. Check your inbox and spam folder.";showToast("Confirmation email requested.","success");}catch(e){$("#authStatus").textContent=e.message||"Could not resend confirmation.";showToast(e.message||"Could not resend confirmation.","error");}finally{b.disabled=false;}});
+    $("#resendConfirmation").addEventListener("click",async()=>{if(!client)return;const email=$("#authEmail").value.trim().toLowerCase();if(!email){$("#authStatus").textContent="Enter the email address you signed up with first.";return;}const b=$("#resendConfirmation");b.disabled=true;try{const {error}=await client.auth.resend({type:"signup",email,options:{emailRedirectTo:window.location.origin}});if(error)throw error;$("#authStatus").textContent="If confirmation is still needed, a new email has been requested. Check your inbox and spam folder.";showToast("Confirmation email requested.","success");}catch(e){$("#authStatus").textContent=e.message||"Could not resend confirmation.";showToast(e.message||"Could not resend confirmation.","error");}finally{b.disabled=false;}});
     $("#signOutButton").addEventListener("click",async()=>{if(!client)return;const {error}=await client.auth.signOut();if(error){$("#authStatus").textContent=error.message;showToast(error.message,"error");return;}await refresh(null);mode="login";updateAuthMode();$("#authStatus").textContent="You have signed out.";showToast("Signed out.","success");});
     $("#adminTabs").addEventListener("click",e=>{
       const b=e.target.closest("[data-admin-tab]");if(!b)return;
@@ -805,7 +805,7 @@
     if(client){
       client.auth.getSession().then(({data})=>refresh(data.session&&data.session.user||null));
       client.auth.onAuthStateChange((event,session)=>{refresh(session&&session.user||null);if(session&&session.user){if(session.user.email)$("#authEmail").value=session.user.email;$("#authUsername").value=String((session.user.user_metadata&&session.user.user_metadata.username)||"");if(mode==="signup"||mode==="login"){mode="account";updateAuthMode();$("#authStatus").textContent="You are already signed in as "+(session.user.email||"your account")+". Your account details are filled in below.";}}if(event==="PASSWORD_RECOVERY"){mode="newpassword";showAuth("newpassword");$("#authStatus").textContent="Choose a new password to finish resetting your account.";}});
-      if(location.hash.includes("type=recovery")||new URLSearchParams(location.search).get("type")==="recovery"){mode="newpassword";showAuth("newpassword");$("#authStatus").textContent="Choose a new password to finish resetting your account.";}
+      if(location.hash.includes("type=recovery")||new URLSearchParams(location.search).get("type")==="recovery"||new URLSearchParams(location.search).get("auth")==="recovery"){mode="newpassword";showAuth("newpassword");$("#authStatus").textContent="Choose a new password to finish resetting your account.";}
     }else $("#authStatus").textContent="Supabase client library unavailable.";
     updateUI();
   }
