@@ -29,7 +29,7 @@
   let favorites = new Set(safeRead(STORAGE.favorites, []));
   let showFavorites = false;
   let currentTheme = safeRead(STORAGE.theme, "dark");
-  if (!validThemes.includes(currentTheme)) currentTheme = "summer";
+  if (!validThemes.includes(currentTheme)) currentTheme = "dark";
 
   function applyTheme(theme, announce = false, syncPortal = true) {
     if (!validThemes.includes(theme)) return;
