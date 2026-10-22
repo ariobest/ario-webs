@@ -82,13 +82,13 @@
   }
   function updateUI(){
     $("#openAuth").textContent=user?(admin?"Admin account ▾":"My account ▾"):"Sign up / Log in";
-    // Show the panel entry point for signed-in users; sensitive actions still require the verified admin role.
-    $("#openAdmin").hidden=!user;$("#openAdminFooter").hidden=!user;
+    // Admin navigation is shown only after the Supabase role check succeeds.
+    $("#openAdmin").hidden=!admin;$("#openAdminFooter").hidden=!admin;
     $("#signOutButton").hidden=!user;
     const notice=$("#adminAccessNotice");
     if(notice){
       notice.hidden=!user;
-      notice.textContent=!user?"Sign in to view account tools.":admin?"Administrator access verified.":"You are signed in, but this account does not have the administrator role. The panel is visible, while protected database/API actions remain locked.";
+      notice.textContent=!user?"Sign in with an administrator account to continue.":admin?"Administrator access verified.":"This account is not authorized to access the admin panel.";
       notice.dataset.state=admin?"authorized":user?"restricted":"signed-out";
     }
     if(user)$("#authStatus").textContent="Signed in as "+(user.email||"account")+(admin?" · Admin access verified.":adminRoleError?" · Could not verify admin role: "+adminRoleError:" · Signed in; administrator role not found.");
@@ -107,6 +107,18 @@
     if(checkId!==authCheckId)return;
     updateUI();
     if(admin)loadAdminScripts();
+    const adminRouteRequested = location.pathname.replace(/\\/+$/, "") === "/admin" || new URLSearchParams(location.search).get("admin") === "1";
+    if(adminRouteRequested){
+      if(admin){
+        if($("#adminBackdrop").hidden)$("#openAdmin").click();
+      }else if(!user){
+        showAuth("login");
+        $("#authStatus").textContent="Sign in with an administrator account to open the admin panel.";
+      }else{
+        history.replaceState({}, "", "/");
+        showToast("Access denied. This account does not have the administrator role.", "error");
+      }
+    }
     if(!user&&!$("#adminBackdrop").hidden)$("#adminBackdrop").hidden=true;
   }
   async function loadAdminScripts() {
