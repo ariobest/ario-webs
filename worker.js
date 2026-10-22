@@ -7,7 +7,7 @@ export default {
     if (route.startsWith("/script/") && request.method === "GET") {
       const slug = decodeURIComponent(route.slice("/script/".length));
       const key = incoming.searchParams.get("key") || "";
-      if (!slug) return new Response("THIS SCRIPT IS PROTECTE BY SUNNY DEV", { status: 404, headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store" } });
+      if (!slug) return new Response("THIS SCRIPT IS PROTECTED BY ARIO DEVELOPMENT — BETTER LUCK NEXT TIME.", { status: 404, headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store" } });
       const api = new URL("https://cqtwmxojwwyeasstuhgb.supabase.co/functions/v1/script-api");
       api.searchParams.set("action", "load");
       api.searchParams.set("script", slug);
