@@ -400,7 +400,7 @@
         menu.hidden = true;
         trigger.setAttribute("aria-expanded", "false");
         picker.classList.remove("is-open");
-        $(".void-picker-option", menu).forEach(button => button.setAttribute("aria-selected", String(button === option)));
+        $$(".void-picker-option", menu).forEach(button => button.setAttribute("aria-selected", String(button === option)));
       });
       document.addEventListener("click", event => {
         if (picker && !picker.contains(event.target)) {
