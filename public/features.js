@@ -255,9 +255,9 @@
   }
   async function loadNotifications() {
     if(!user||!db){$("#voidNotifications").innerHTML='<p class="saved-note">Sign in to view notifications.</p>';return;}
-    const {data,error}=await db.from("void_notifications").select("id,title,body,kind,link,created_at,read_at").or("user_id.is.null,user_id.eq."+user.id).order("created_at",{ascending:false}).limit(20);
+    const {data,error}=await db.from("void_notifications").select("id,user_id,title,body,kind,link,created_at,read_at").or("user_id.is.null,user_id.eq."+user.id).order("created_at",{ascending:false}).limit(20);
     if(error){$("#voidNotifications").innerHTML='<p class="saved-note">'+esc(error.message)+'</p>';return;}
-    $("#voidNotifications").innerHTML=(data||[]).map(n=>'<article class="void-list-item '+(n.read_at?"":"is-unread")+'"><div><b>'+esc(n.title)+'</b><small>'+esc(n.body)+'</small><time>'+esc(date(n.created_at))+'</time></div>'+(n.read_at?"":'<button type="button" class="secondary small" data-read-notice="'+esc(n.id)+'">Mark read</button>')+'</article>').join("")||'<p class="saved-note">You are all caught up.</p>';
+    $("#voidNotifications").innerHTML=(data||[]).map(n=>'<article class="void-list-item '+(n.read_at?"":"is-unread")+'"><div><b>'+esc(n.title)+'</b><small>'+esc(n.body)+'</small><time>'+esc(date(n.created_at))+'</time></div>'+(n.read_at?"":(n.user_id===user.id?'<button type="button" class="secondary small" data-read-notice="'+esc(n.id)+'">Mark read</button>':'<small>Site-wide</small>'))+'</article>').join("")||'<p class="saved-note">You are all caught up.</p>';
     $("#voidNotifications").querySelectorAll("[data-read-notice]").forEach(btn=>btn.addEventListener("click",async()=>{const r=await db.from("void_notifications").update({read_at:new Date().toISOString()}).eq("id",btn.dataset.readNotice).eq("user_id",user.id);if(r.error){toast(r.error.message);return;}loadNotifications();}));
   }
   async function trackEvent(type, scriptId) {
