@@ -95,6 +95,8 @@
     sources.forEach(source=>{const label=(source.textContent||"").replace(/\s+/g," ").trim(),icon=source.querySelector("span")?.textContent?.trim()||"•";publicHost.append(makeLink(label,icon,()=>{source.click();const target=source.dataset.view==="scripts"?"#scripts":source.dataset.view==="themes"?"#themes":source.dataset.view==="about"?"#about":null;if(target&&$(target))$(target).scrollIntoView({behavior:"smooth",block:"start"});else window.scrollTo({top:0,behavior:"smooth"});}));});
     $("#voidDrawerAccount").append(makeLink("Toggle appearance","◐",()=>$("#themeQuick")?.click()));
     $("#voidDrawerAccount").append(makeLink("Sign in / account","↗",()=>{const p=$("#openProfile"),auth=$("#openAuth");if(p&&!p.hidden)p.click();else auth?.click();}));
+    $("#voidDrawerAccount").append(makeLink("Get a key","⚿",()=>$("#openKeySystem")?.click()));
+    const discord=$("#discordLink"); if(discord){$("#voidDrawerAccount").append(makeLink("Discord","↗",()=>window.open(discord.href,"_blank","noopener,noreferrer")));}
     const adminSection=$("#voidDrawerAdminSection"),adminLinks=$("#voidDrawerAdminLinks");
     adminLinks.append(makeLink("Admin panel","⚙",()=>$("#openAdmin")?.click()));
     adminLinks.append(makeLink("Manage scripts","⌘",()=>{$("#openAdmin")?.click();setTimeout(()=>$('#adminTabs [data-admin-tab="scripts"]')?.click(),150);}));
