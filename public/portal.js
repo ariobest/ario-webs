@@ -804,7 +804,10 @@
         $("#newScriptSlug").value = data.slug || "";
         $("#newScriptSlug").dataset.touched = "true";
         $("#newScriptCategory").value = data.category || "Utility";
-        $("#newScriptStatus").value = data.status || "draft";\n        if($("#newScriptReleaseStatus"))$("#newScriptReleaseStatus").value=data.release_status||"active";\n        if($("#newScriptBannerUrl"))$("#newScriptBannerUrl").value=data.banner_url||"";\n        if($("#newScriptShowcaseUrl"))$("#newScriptShowcaseUrl").value=data.showcase_url||"";\n        if($("#newScriptReleaseStatus"))$("#newScriptReleaseStatus").value=data.release_status||"active";\n        if($("#newScriptBannerUrl"))$("#newScriptBannerUrl").value=data.banner_url||"";\n        if($("#newScriptShowcaseUrl"))$("#newScriptShowcaseUrl").value=data.showcase_url||"";
+        $("#newScriptStatus").value = data.status || "draft";
+        if ($("#newScriptReleaseStatus")) $("#newScriptReleaseStatus").value = data.release_status || "active";
+        if ($("#newScriptBannerUrl")) $("#newScriptBannerUrl").value = data.banner_url || "";
+        if ($("#newScriptShowcaseUrl")) $("#newScriptShowcaseUrl").value = data.showcase_url || "";
         $("#newScriptDescription").value = data.description || "";
         $("#newScriptLink").value = data.link || "";
         $("#newScriptContent").value = data.content || "";
