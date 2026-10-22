@@ -115,7 +115,7 @@
   function resetScriptForm() { $("#scriptForm").reset(); $("#editScriptId").value = ""; $("#scriptFormTitle").textContent = "Add a script"; $("#scriptForm").hidden = true; }
   function editScript(id) {
     const item = scripts.find(script => script.id === id); if (!item) return;
-    $("#editScriptId").value = item.id; $("#newScriptName").value = item.name; $("#newScriptSlug").value = item.slug || item.name.toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,""); $("#newScriptSlug").dataset.touched="false"; if($("#scriptSlugPreview"))$("#scriptSlugPreview").textContent="/script/"+$("#newScriptSlug").value; $("#newScriptCategory").value = item.category; $("#newScriptDescription").value = item.description; $("#newScriptLink").value = item.link || ""; $("#scriptFormTitle").textContent = "Edit script"; $("#scriptForm").hidden = false; $("#newScriptName").focus();
+    $("#editScriptId").value = item.id; $("#newScriptName").value = item.name; $("#newScriptSlug").value = item.slug || item.name.toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,""); $("#newScriptSlug").dataset.touched="false"; if($("#scriptSlugPreview"))$("#scriptSlugPreview").textContent="Public page: /scripts/"+($("#newScriptSlug").value||"your-script")+" · loader: /script/"+($("#newScriptSlug").value||"your-script"); $("#newScriptCategory").value = item.category; $("#newScriptDescription").value = item.description; $("#newScriptLink").value = item.link || ""; $("#scriptFormTitle").textContent = "Edit script"; $("#scriptForm").hidden = false; $("#newScriptName").focus();
   }
   function activeSupabaseConfig() {
     const custom = safeRead(STORAGE.supabase, null);
@@ -227,8 +227,8 @@
   window.addEventListener("scroll", () => $("#backToTop").classList.toggle("visible", window.scrollY > 500), { passive: true });
   $("#newScriptBtn").addEventListener("click", () => { resetScriptForm(); $("#scriptForm").hidden = false; $("#newScriptName").focus(); });
   $("#cancelScript").addEventListener("click", resetScriptForm);
-  $("#newScriptName").addEventListener("input",()=>{const field=$("#newScriptSlug");if(!field||field.dataset.touched==="true")return;field.value=$("#newScriptName").value.toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");if($("#scriptSlugPreview"))$("#scriptSlugPreview").textContent="/script/"+(field.value||"your-script");});
-  $("#newScriptSlug").addEventListener("input",e=>{e.target.dataset.touched="true";e.target.value=e.target.value.toLowerCase().replace(/[^a-z0-9-]/g,"").replace(/-{2,}/g,"-").replace(/^-|-$/g,"");if($("#scriptSlugPreview"))$("#scriptSlugPreview").textContent="/script/"+(e.target.value||"your-script");});
+  $("#newScriptName").addEventListener("input",()=>{const field=$("#newScriptSlug");if(!field||field.dataset.touched==="true")return;field.value=$("#newScriptName").value.toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");if($("#scriptSlugPreview"))$("#scriptSlugPreview").textContent="Public page: /scripts/"+(field.value||"your-script")+" · loader: /script/"+(field.value||"your-script");});
+  $("#newScriptSlug").addEventListener("input",e=>{e.target.dataset.touched="true";e.target.value=e.target.value.toLowerCase().replace(/[^a-z0-9-]/g,"").replace(/-{2,}/g,"-").replace(/^-|-$/g,"");if($("#scriptSlugPreview"))$("#scriptSlugPreview").textContent="Public page: /scripts/"+(e.target.value||"your-script")+" · loader: /script/"+(e.target.value||"your-script");});
   $("#scriptForm").addEventListener("submit", event => {
     event.preventDefault();
     showToast("Local-only script saving is disabled. Sign in with an authorized administrator account and ensure Supabase is available.");
