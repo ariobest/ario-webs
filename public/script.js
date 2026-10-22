@@ -96,6 +96,7 @@
   }
   function renderAdminScripts() {
     const host = $("#adminScriptList");
+    if (host.dataset.adminDatabaseLoaded === "true") return;
     host.innerHTML = scripts.length ? scripts.map(item => `<div class="admin-script-row"><div class="admin-script-symbol">⌘</div><div class="admin-script-info"><b>${escapeHTML(item.name)}</b><small>${escapeHTML(item.category)} · ${escapeHTML(item.description)}</small></div><button class="text-action" data-edit-script="${escapeHTML(item.id)}">Edit</button><button class="text-action danger" data-delete-script="${escapeHTML(item.id)}">Delete</button></div>`).join("") : '<p class="empty-state">No scripts yet. Add your first one above.</p>';
   }
   function openAdmin(tab = "scripts") {
