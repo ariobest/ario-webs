@@ -300,6 +300,15 @@
       const tagline = $("#heroTagline"); if (tagline && value.tagline) tagline.textContent = value.tagline;
       const banner = $("#siteAnnouncement");
       if (banner) { banner.textContent = value.announcement || ""; banner.hidden = !(value.announcementEnabled && value.announcement); }
+      const discordLink = $("#discordLink");
+      if (discordLink && typeof value.discordUrl === "string") {
+        try {
+          const parsed = new URL(value.discordUrl);
+          const validHost = parsed.hostname === "discord.gg" || parsed.hostname === "discord.com" || parsed.hostname === "www.discord.com";
+          const validPath = parsed.hostname === "discord.gg" || parsed.pathname.startsWith("/invite/");
+          if (parsed.protocol === "https:" && validHost && validPath) discordLink.href = parsed.href;
+        } catch {}
+      }
       if (value.defaultTheme && validThemes.includes(value.defaultTheme)) applyTheme(value.defaultTheme, false, false);
     } catch (error) { console.warn("Public site settings could not be loaded:", error); }
   }
