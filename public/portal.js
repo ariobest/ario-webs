@@ -158,18 +158,20 @@
     $("#scriptForm").addEventListener("submit",async e=>{
       if(!admin||!user||!client)return;
       e.preventDefault();e.stopImmediatePropagation();
-      const name=$("#newScriptName").value.trim(),category=$("#newScriptCategory").value,description=$("#newScriptDescription").value.trim(),link=$("#newScriptLink").value.trim(),id=$("#editScriptId").value;
-      if(!name||!description){showToast("Enter a script name and description.");return;}
-      const slug=name.toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")+"-"+Date.now().toString(36);
+      const name=$("#newScriptName").value.trim(),slug=$("#newScriptSlug").value.trim().toLowerCase(),category=$("#newScriptCategory").value,description=$("#newScriptDescription").value.trim(),link=$("#newScriptLink").value.trim(),id=$("#editScriptId").value;
+      if(!name||!description||!slug){showToast("Enter a script name, slug and description.");return;}
+      if(!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)){showToast("Slug must use lowercase letters, numbers and hyphens.");$("#newScriptSlug").focus();return;}
       const content=$("#newScriptContent").value.trim();
       if(content.length>200000){showToast("Lua source is too large (200,000 characters maximum).");return;}
-      const record={name,category,description,link:link||null,content:content||null,status:"published",owner_id:user.id};
+      const record={name,slug,category,description,link:link||null,content:content||null,status:"published",owner_id:user.id};
       let result;
       if(id&&/^[0-9a-f-]{36}$/i.test(id)) result=await client.from("scripts").update(record).eq("id",id);
       else result=await client.from("scripts").insert({...record,slug});
       if(result.error){showToast("Supabase save failed: "+result.error.message);return;}
       showToast("Script saved to Supabase.");location.reload();
     },true);
+    $("#newScriptName").addEventListener("input",()=>{const field=$("#newScriptSlug");if(!field||field.dataset.touched==="true")return;field.value=$("#newScriptName").value.toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");if($("#scriptSlugPreview"))$("#scriptSlugPreview").textContent="/script/"+(field.value||"your-script");});
+    $("#newScriptSlug").addEventListener("input",e=>{e.target.dataset.touched="true";e.target.value=e.target.value.toLowerCase().replace(/[^a-z0-9-]/g,"").replace(/-{2,}/g,"-").replace(/^-|-$/g,"");if($("#scriptSlugPreview"))$("#scriptSlugPreview").textContent="/script/"+(e.target.value||"your-script");});
     $("#adminScriptList").addEventListener("click",async e=>{
       const button=e.target.closest("[data-delete-script]");if(!button||!admin||!client)return;
       const id=button.dataset.deleteScript;if(!/^[0-9a-f-]{36}$/i.test(id))return;
