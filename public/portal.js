@@ -107,7 +107,7 @@
     if(checkId!==authCheckId)return;
     updateUI();
     if(admin)loadAdminScripts();
-    const adminRouteRequested = location.pathname.replace(/\\/+$/, "") === "/admin" || new URLSearchParams(location.search).get("admin") === "1";
+    const adminRouteRequested = location.pathname === "/admin" || new URLSearchParams(location.search).get("admin") === "1";
     if(adminRouteRequested){
       if(admin){
         if($("#adminBackdrop").hidden)$("#openAdmin").click();
