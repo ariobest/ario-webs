@@ -213,7 +213,7 @@
 @media(max-width:480px){.media-grid{grid-template-columns:1fr}.media-preview{height:180px}.source-meta{flex-direction:column;gap:3px}.mac-dot{width:11px;height:11px;min-width:11px}}
 
 
-/* ARIO STUDIOS premium dark glass design */
+/* VOID DEVELOPMENT premium dark glass design */
 :root{--page:#07090f;--surface:#0d111b;--surface-2:#121a2a;--ink:#f4f7ff;--muted:#929eb4;--line:rgba(132,164,220,.16);--accent:#5b8cff;--accent-strong:#3268e8;--glow:rgba(58,111,244,.22);--hero-glow:rgba(40,89,220,.19);color-scheme:dark;scroll-behavior:smooth}
 body{background:radial-gradient(ellipse at 72% 0%,rgba(32,70,151,.18),transparent 42%),var(--page)}
 .brand{gap:11px;letter-spacing:.035em}.brand>span{font-weight:800;letter-spacing:.075em}.brand>span span{color:var(--accent)}
