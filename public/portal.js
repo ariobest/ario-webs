@@ -452,6 +452,10 @@
       $("#protectorFile").value = "";
       $("#protectedScriptUrl").value = "";
       $("#protectedLoaderOutput").value = "";
+      const progress = $("#protectedProgress"); if (progress) { progress.dataset.state = "idle"; progress.setAttribute("aria-valuenow", "0"); }
+      if ($("#protectedProgressFill")) $("#protectedProgressFill").style.width = "0%";
+      if ($("#protectedProgressLabel")) $("#protectedProgressLabel").textContent = "Waiting for a script";
+      if ($("#protectedProgressPercent")) $("#protectedProgressPercent").textContent = "0%";
       $("#protectorStatus").textContent = "Protector cleared.";
     });
     $("#generateProtectedLoader").addEventListener("click", async () => {
@@ -466,8 +470,23 @@
       const status = $("#protectorStatus");
       const createButton = $("#generateProtectedLoader");
       createButton.disabled = true;
+      const progress = $("#protectedProgress");
+      const progressFill = $("#protectedProgressFill");
+      const progressLabel = $("#protectedProgressLabel");
+      const progressPercent = $("#protectedProgressPercent");
+      const setProgress = (value, label, state = "loading") => {
+        if (!progress || !progressFill) return;
+        const safeValue = Math.max(0, Math.min(100, value));
+        progress.dataset.state = state;
+        progress.setAttribute("aria-valuenow", String(safeValue));
+        progressFill.style.width = safeValue + "%";
+        if (progressLabel) progressLabel.textContent = label;
+        if (progressPercent) progressPercent.textContent = safeValue + "%";
+      };
+      setProgress(8, "Checking slug…");
       status.textContent = "Checking slug and publishing your script…";
       try {
+        setProgress(24, "Checking availability…");
         const duplicate = await client.from("scripts").select("id").eq("slug", slug).maybeSingle();
         if (duplicate.error) throw new Error("Could not verify slug uniqueness: " + duplicate.error.message);
         if (duplicate.data) throw new Error("That slug already exists. Choose a different slug.");
@@ -482,8 +501,10 @@
           owner_id: user.id,
           updated_at: new Date().toISOString()
         };
+        setProgress(48, "Saving script source…");
         const saved = await client.from("scripts").insert(record);
         if (saved.error) throw new Error("Could not publish script: " + saved.error.message);
+        setProgress(76, "Generating protected URL…");
         const pathWords = ["amber","atlas","birch","black","blue","cedar","cloud","cobalt","comet","coral","dawn","delta","drift","echo","ember","fern","frost","ghost","glacier","gold","harbor","hollow","indigo","ivory","jade","lunar","maple","marble","midnight","moss","nova","onyx","orbit","pearl","pine","quiet","raven","river","shadow","silver","solar","stone","velvet","void","willow","winter"];
         const randomWord = () => pathWords[crypto.getRandomValues(new Uint32Array(1))[0] % pathWords.length];
         const publicPath = [randomWord(), randomWord(), randomWord(), randomWord()].join("-");
@@ -491,10 +512,12 @@
         const loader = "loadstring(game:HttpGet(" + JSON.stringify(sourceUrl) + "))()";
         $("#protectedScriptUrl").value = sourceUrl;
         $("#protectedLoaderOutput").value = loader;
+        setProgress(100, "Protected URL ready", "done");
         status.textContent = "Script published. Opening the URL in a browser shows the VOID DEVELOPMENT protection page; a loader request receives the published source.";
         showToast("Script published and protected URL generated.", "success");
         loadAdminScripts();
       } catch (error) {
+        if (typeof setProgress === "function") setProgress(100, "Publishing failed — review the message below", "error");
         status.textContent = error?.message || "Could not create the hosted script.";
         showToast(status.textContent, "error");
       } finally {
