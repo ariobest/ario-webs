@@ -38,7 +38,7 @@
     document.documentElement.dataset.theme = theme;
     const themeNames = { summer:"SUMMER EDITION",light:"LIGHT EDITION",dark:"MIDNIGHT EDITION",winter:"WINTER EDITION",autumn:"AUTUMN EDITION",spring:"SPRING EDITION",ocean:"OCEAN EDITION",sunset:"SUNSET EDITION",lavender:"LAVENDER EDITION",rose:"ROSE EDITION",forest:"FOREST EDITION",mint:"MINT EDITION",cyber:"CYBER EDITION",crimson:"CRIMSON EDITION",gold:"GOLD EDITION",slate:"SLATE EDITION",mono:"BLACK VOID",candy:"CANDY EDITION",sakura:"SAKURA EDITION",arctic:"ARCTIC EDITION" };
     $("#themeLabel").textContent = themeNames[theme];
-    const colors = { summer:"#101a2b",light:"#f7f9fc",dark:"#0a1020",winter:"#071827",autumn:"#1b120f",spring:"#0e1c19",ocean:"#071c2a",sunset:"#21101f",lavender:"#181326",rose:"#24111d",forest:"#0b1c15",mint:"#0a1e1b",cyber:"#071318",crimson:"#200e12",gold:"#201a0b",slate:"#111820",mono:"#111111",candy:"#241529",sakura:"#21141d",arctic:"#101d2a" };
+    const colors = { summer:"#101a2b",light:"#f7f9fc",dark:"#0a1020",winter:"#071827",autumn:"#1b120f",spring:"#0e1c19",ocean:"#071c2a",sunset:"#21101f",lavender:"#181326",rose:"#24111d",forest:"#0b1c15",mint:"#0a1e1b",cyber:"#071318",crimson:"#200e12",gold:"#201a0b",slate:"#111820",mono:"#050505",candy:"#241529",sakura:"#21141d",arctic:"#101d2a" };
     $('meta[name="theme-color"]').content = colors[theme];
     safeWrite(STORAGE.theme, theme);
     $$("[data-public-theme]").forEach(button => { const selected = button.dataset.publicTheme === theme; button.classList.toggle("selected", selected); button.setAttribute("aria-pressed", String(selected)); });
