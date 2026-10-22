@@ -179,7 +179,7 @@
     const id = event.detail?.id;
     if (validThemes.includes(id) && currentTheme !== id) applyTheme(id, false, false);
   });
-  $("#themeQuick").addEventListener("click", () => { const index = validThemes.indexOf(currentTheme); applyTheme(validThemes[(index + 1) % validThemes.length], true); });
+  $("#themeQuick").addEventListener("click", () => applyTheme(currentTheme === "light" ? "mono" : "light", true));
   // Public Themes tab: one delegated handler survives theme-grid rerenders.
   $("#publicThemeGrid")?.addEventListener("click", event => {
     const button = event.target.closest("[data-public-theme]");
