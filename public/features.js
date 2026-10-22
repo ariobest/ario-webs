@@ -5,7 +5,7 @@
   const $ = (s, root = document) => root.querySelector(s);
   const esc = value => String(value ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const date = value => value ? new Date(value).toLocaleString() : "—";
-  let db = null, user = null, isAdmin = false, currentEditorScript = null, editorLoadedSource = "", editorVersions = [], luaEditor = null;
+  let db = null, user = null, isAdmin = false, currentEditorScript = null, editorLoadedSource = "", editorVersions = [], luaEditor = null, liveChannel = null;
   const status = (id, msg, error = false) => { const el = $("#" + id); if (el) { el.textContent = msg; el.dataset.state = error ? "error" : "ok"; } };
   const toast = msg => { const el = $("#toast"); if (el) { el.textContent = msg; el.dataset.kind = "info"; el.classList.add("show"); setTimeout(() => el.classList.remove("show"), 2600); } else console.info("[VOID]", msg); };
   const isAdminUser = async () => {
@@ -41,7 +41,7 @@
     ];
     panes.forEach(p => content.insertAdjacentHTML("beforeend", p));
     const luaTextarea=$("#voidLuaSource");
-    if(window.CodeMirror&&luaTextarea){luaEditor=window.CodeMirror.fromTextArea(luaTextarea,{mode:"lua",theme:"material-darker",lineNumbers:true,matchBrackets:true,indentUnit:4,tabSize:4,indentWithTabs:true,viewportMargin:Infinity});luaEditor.setSize("100%","420px");luaEditor.on("change",()=>{$("#voidEditorLines").textContent=luaEditor.getValue().split("\n").length+" lines";});}
+    if(window.CodeMirror&&luaTextarea){luaEditor=window.CodeMirror.fromTextArea(luaTextarea,{mode:"lua",theme:"material-darker",lineNumbers:true,matchBrackets:true,indentUnit:4,tabSize:4,indentWithTabs:true,viewportMargin:Infinity});luaEditor.setSize("100%","420px");luaEditor.setOption("readOnly",true);luaEditor.on("change",()=>{$("#voidEditorLines").textContent=luaEditor.getValue().split("\n").length+" lines";});}
     tabs.addEventListener("click", e => {
       const button = e.target.closest("[data-admin-tab]");
       if (!button || !tabNames.some(x => x[0] === button.dataset.adminTab)) return;
@@ -290,6 +290,8 @@
   async function onSession(session) {
     user=session?.user||null;
     isAdmin=await isAdminUser();
+    if(liveChannel&&db){db.removeChannel(liveChannel);liveChannel=null;}
+    if(user&&db){liveChannel=db.channel("void-live-"+user.id).on("postgres_changes",{event:"INSERT",schema:"public",table:"void_notifications"},payload=>{const n=payload.new||{};if(!n.user_id||n.user_id===user?.id){loadNotifications();if(n.title)toast("New update: "+n.title);}}).on("postgres_changes",{event:"INSERT",schema:"public",table:"script_events"},()=>{if(isAdmin&&$("#voidActivityPane")&&!$("#voidActivityPane").hidden)loadActivity();}).subscribe();}
     const openProfile=$("#openProfile");
     if(openProfile){openProfile.hidden=!user;openProfile.textContent=user?"Profile":"Profile";}
     if(user){loadProfile();}else if($("#voidProfileSection")){status("voidProfileStatus","Sign in to save your profile and sync favorites.");}
