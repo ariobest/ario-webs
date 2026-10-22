@@ -192,10 +192,10 @@
       const content=$("#newScriptContent").value;
       if(!content.trim()){showToast("Add the Lua source before saving.");$("#newScriptContent").focus();return;}
       if(content.length>200000){showToast("Lua source is too large (200,000 characters maximum).");return;}
-      const record={name,slug,category,description,link:link||null,content:content||null,status,owner_id:user.id,updated_at:new Date().toISOString()};
+      const record={name,slug,category,description,link:link||null,content:content||null,status,updated_at:new Date().toISOString()};
       let result;
       if(id&&/^[0-9a-f-]{36}$/i.test(id)) result=await client.from("scripts").update(record).eq("id",id);
-      else result=await client.from("scripts").insert({...record,slug});
+      else result=await client.from("scripts").insert({...record,owner_id:user.id});
       if(result.error){showToast(result.error.code==="23505"?"That slug is already in use. Choose a unique slug.":"Could not save the script. Check your permissions and try again.");return;}
       showToast("Script saved to Supabase.");location.reload();
     },true);
