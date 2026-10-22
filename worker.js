@@ -27,6 +27,12 @@ export default {
     if (route === "/signup" || route === "/login") {
       url.pathname = "/";
       url.searchParams.set("auth", route === "/signup" ? "signup" : "login");
+    } else if (route.startsWith("/scripts/") && route !== "/scripts") {
+      const slug = decodeURIComponent(route.slice("/scripts/".length));
+      if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) return new Response("Not found", { status: 404, headers: { "Content-Type": "text/plain; charset=utf-8", "X-Content-Type-Options": "nosniff" } });
+      url.pathname = "/";
+      url.searchParams.set("view", "scripts");
+      url.searchParams.set("script", slug);
     } else if (route === "/themes" || route === "/about" || route === "/scripts") {
       url.pathname = "/";
       url.searchParams.set("view", route === "/scripts" ? "scripts" : route.slice(1));
