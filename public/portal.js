@@ -226,6 +226,7 @@
       $$(".admin-pane").forEach(x=>{x.hidden=x.dataset.pane!==b.dataset.adminTab;x.classList.toggle("active",!x.hidden);});
       if(b.dataset.adminTab==="keys")loadKeys();
       if(b.dataset.adminTab==="api")checkApiStatus();
+      if(b.dataset.adminTab==="verification")loadVerificationPanel();
       if(b.dataset.adminTab==="media")loadMedia();
       if(b.dataset.adminTab==="settings"||b.dataset.adminTab==="discord")loadSiteSettings();
       if(b.dataset.adminTab==="overview")loadAdminOverview();
@@ -325,6 +326,93 @@
         host.innerHTML = '<span class="status-dot api-dot-offline"></span><span>Could not reach the API. Check the function deployment and network.</span>';
       }
     }
+    async function loadVerificationPanel() {
+      const host = $("#verificationApiStatus");
+      const menu = $("#verificationScriptMenu");
+      if (host) host.innerHTML = '<span class="status-dot"></span><span>Checking verification endpoint…</span>';
+      if (menu) menu.innerHTML = '<p class="saved-note">Loading published scripts…</p>';
+      try {
+        const response = await fetch(API_URL + "?action=health", { cache: "no-store" });
+        const result = await response.json();
+        if (!response.ok || !result.ok) throw new Error("Health check failed.");
+        if (host) host.innerHTML = '<span class="status-dot"></span><span>Online · ' + esc(result.service || "Script API") + ' · v' + esc(result.version) + ' · ' + esc(new Date(result.timestamp).toLocaleTimeString()) + '</span>';
+      } catch (error) {
+        if (host) host.innerHTML = '<span class="status-dot api-dot-offline"></span><span>Offline or unreachable. Check the deployed script-api function.</span>';
+      }
+      if (!client || !admin || !menu) return;
+      try {
+        const { data, error } = await client.from("scripts").select("name,slug").eq("status", "published").order("name", { ascending: true });
+        if (error) throw error;
+        const rows = data || [];
+        menu.innerHTML = rows.length ? rows.map(script => '<button type="button" class="void-picker-option" role="option" data-verification-slug="' + esc(script.slug) + '" data-verification-name="' + esc(script.name) + '"><span>' + esc(script.name) + '</span><small>' + esc(script.slug) + '</small></button>').join("") : '<p class="saved-note">No published scripts are available.</p>';
+        if (!rows.some(script => script.slug === $("#verificationScriptSlug")?.value)) {
+          $("#verificationScriptSlug").value = "";
+          $("#verificationScriptLabel").textContent = "Choose a published script";
+        }
+      } catch (error) {
+        menu.innerHTML = '<p class="saved-note">Could not load published scripts. Check database permissions.</p>';
+      }
+    }
+    async function testVerificationKey() {
+      const slug = $("#verificationScriptSlug")?.value || "";
+      const key = ($("#verificationKeyInput")?.value || "").trim().toUpperCase();
+      const status = $("#verificationTestResult");
+      const button = $("#testVerificationKey");
+      if (!slug) { status.textContent = "Choose a published script first."; return; }
+      if (!/^(?:VOID|ARIO)-[A-Z0-9]{2}-[A-Z0-9]{3}-[A-Z0-9]{4}$/.test(key)) { status.textContent = "Use the format VOID-XX-XXX-XXXX."; return; }
+      button.disabled = true;
+      status.textContent = "Validating key without consuming a load…";
+      try {
+        const result = await callScriptApi({ action: "validate", key, script: slug }, false);
+        status.textContent = "Valid ✓ " + (result.script?.name || slug) + (result.remaining_uses === null ? " · unlimited loads" : " · " + result.remaining_uses + " remaining load(s)") + (result.expires_at ? " · expires " + new Date(result.expires_at).toLocaleString() : "");
+        status.dataset.state = "success";
+      } catch (error) {
+        status.textContent = error.message || "Key verification failed.";
+        status.dataset.state = "error";
+      } finally { button.disabled = false; }
+    }
+    function bindVerificationControls() {
+      const trigger = $("#verificationScriptTrigger"), menu = $("#verificationScriptMenu"), picker = $("#verificationScriptPicker");
+      trigger?.addEventListener("click", () => {
+        const opening = menu.hidden;
+        menu.hidden = !opening;
+        trigger.setAttribute("aria-expanded", String(opening));
+        picker.classList.toggle("is-open", opening);
+      });
+      menu?.addEventListener("click", event => {
+        const option = event.target.closest("[data-verification-slug]");
+        if (!option) return;
+        $("#verificationScriptSlug").value = option.dataset.verificationSlug;
+        $("#verificationScriptLabel").textContent = option.dataset.verificationName + " · " + option.dataset.verificationSlug;
+        menu.hidden = true;
+        trigger.setAttribute("aria-expanded", "false");
+        picker.classList.remove("is-open");
+        $(".void-picker-option", menu).forEach(button => button.setAttribute("aria-selected", String(button === option)));
+      });
+      document.addEventListener("click", event => {
+        if (picker && !picker.contains(event.target)) {
+          menu.hidden = true;
+          trigger?.setAttribute("aria-expanded", "false");
+          picker.classList.remove("is-open");
+        }
+      });
+      $("#testVerificationKey")?.addEventListener("click", testVerificationKey);
+      $("#refreshVerification")?.addEventListener("click", loadVerificationPanel);
+      $("#clearVerificationTest")?.addEventListener("click", () => {
+        $("#verificationKeyInput").value = "";
+        $("#verificationTestResult").textContent = "Select a script and enter a key to test.";
+        $("#verificationTestResult").dataset.state = "";
+      });
+      $("#verificationKeyInput")?.addEventListener("input", event => {
+        event.target.value = event.target.value.toUpperCase().replace(/[^A-Z0-9-]/g, "").slice(0, 19);
+      });
+      $("#copyVerificationSample")?.addEventListener("click", async () => {
+        const sample = $("#verificationSampleCode")?.value || "";
+        try { await navigator.clipboard.writeText(sample); $("#copyVerificationSample").textContent = "Copied ✓"; setTimeout(() => $("#copyVerificationSample").textContent = "Copy sample", 1400); }
+        catch { $("#verificationSampleCode").select(); document.execCommand("copy"); }
+      });
+    }
+    bindVerificationControls();
     async function loadMedia() {
       const host = $("#mediaGrid");
       const status = $("#mediaStatus");
