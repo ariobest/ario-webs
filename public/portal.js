@@ -364,7 +364,10 @@
     $("#siteSettingsForm").addEventListener("submit", async event => {
       event.preventDefault();
       if (!admin || !client || !user) { showToast("Administrator access required.", "error"); return; }
+      const existingSettings = await client.from("site_settings").select("value").eq("key", "site_config").maybeSingle();
+      if (existingSettings.error) { $("#siteSettingsStatus").textContent = "Could not load existing settings; nothing was overwritten."; return; }
       const value = {
+        ...(existingSettings.data?.value || {}),
         siteName: $("#settingSiteName").value.trim() || "VOID DEVELOPMENT",
         tagline: $("#settingTagline").value.trim(),
         announcement: $("#settingAnnouncement").value.trim(),
