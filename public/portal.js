@@ -380,6 +380,38 @@
       } catch (error) { $("#siteSettingsStatus").textContent = error.message || "Could not save settings."; }
       finally { button.disabled = false; }
     });
+    $("#discordSettingsForm").addEventListener("submit", async event => {
+      event.preventDefault();
+      const status = $("#discordSettingsStatus");
+      const button = $("#saveDiscordSettings");
+      if (!admin || !client || !user) { status.textContent = "Administrator access required."; return; }
+      const raw = $("#settingDiscordUrl").value.trim();
+      const description = $("#settingDiscordDescription").value.trim();
+      let discordUrl = "";
+      if (raw) {
+        try {
+          const parsed = new URL(raw);
+          const validHost = parsed.hostname === "discord.gg" || parsed.hostname === "discord.com" || parsed.hostname === "www.discord.com";
+          const validPath = parsed.hostname === "discord.gg" || parsed.pathname.startsWith("/invite/");
+          if (parsed.protocol !== "https:" || !validHost || !validPath) throw new Error("Use an HTTPS Discord invite URL, such as https://discord.gg/your-invite.");
+          discordUrl = parsed.href;
+        } catch (error) { status.textContent = error.message || "Enter a valid Discord invite URL."; return; }
+      }
+      button.disabled = true;
+      status.textContent = "Saving Discord settings…";
+      try {
+        const result = await client.from("site_settings").select("value").eq("key", "site_config").maybeSingle();
+        if (result.error) throw result.error;
+        const value = { ...(result.data?.value || {}), discordUrl, discordDescription: description };
+        const saved = await client.from("site_settings").upsert({ key: "site_config", value, is_public: true, updated_by: user.id, updated_at: new Date().toISOString() }, { onConflict: "key" });
+        if (saved.error) throw saved.error;
+        status.textContent = "Discord settings saved.";
+        const link = $("#discordLink");
+        if (link && discordUrl) link.href = discordUrl;
+        showToast("Discord settings saved.", "success");
+      } catch (error) { status.textContent = error.message || "Could not save Discord settings."; }
+      finally { button.disabled = false; }
+    });
     $("#keyForm").addEventListener("submit", async event => {
       event.preventDefault();
       if (!admin) { showToast("Administrator access required."); return; }
