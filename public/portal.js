@@ -183,6 +183,8 @@
       e.preventDefault();e.stopImmediatePropagation();
       const name=$("#newScriptName").value.trim(),slug=$("#newScriptSlug").value.trim().toLowerCase(),category=$("#newScriptCategory").value,status=$("#newScriptStatus").value,description=$("#newScriptDescription").value.trim(),link=$("#newScriptLink").value.trim(),id=$("#editScriptId").value;
       if(!name||!description||!slug){showToast("Enter a script name, slug and description.");return;}
+      if(slug.length>80){showToast("Slug must be 80 characters or fewer.");$("#newScriptSlug").focus();return;}
+      if(!["published","draft","hidden"].includes(status)){showToast("Choose a valid publication status.");return;}
       if(!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)){showToast("Slug must use lowercase letters, numbers and hyphens.");$("#newScriptSlug").focus();return;}
       const duplicate = await client.from("scripts").select("id").eq("slug", slug).neq("id", id || "00000000-0000-0000-0000-000000000000").maybeSingle();
       if (duplicate.error) { showToast("Could not verify slug uniqueness. Please retry."); return; }
@@ -194,7 +196,7 @@
       let result;
       if(id&&/^[0-9a-f-]{36}$/i.test(id)) result=await client.from("scripts").update(record).eq("id",id);
       else result=await client.from("scripts").insert({...record,slug});
-      if(result.error){showToast("Supabase save failed: "+result.error.message);return;}
+      if(result.error){showToast(result.error.code==="23505"?"That slug is already in use. Choose a unique slug.":"Could not save the script. Check your permissions and try again.");return;}
       showToast("Script saved to Supabase.");location.reload();
     },true);
     $("#newScriptName").addEventListener("input",()=>{const field=$("#newScriptSlug");if(!field||field.dataset.touched==="true")return;field.value=$("#newScriptName").value.toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");if($("#scriptSlugPreview"))$("#scriptSlugPreview").textContent="Public page: /scripts/"+(field.value||"your-script")+" · loader: /script/"+(field.value||"your-script");});
@@ -205,7 +207,7 @@
       e.preventDefault();e.stopImmediatePropagation();
       if(!confirm("Delete this script from Supabase?"))return;
       const result=await client.from("scripts").delete().eq("id",id);
-      if(result.error){showToast("Delete failed: "+result.error.message);return;}
+      if(result.error){showToast("Could not delete the script. Check administrator permissions and try again.");return;}
       showToast("Script deleted from Supabase.");location.reload();
     },true);
     const API_URL = "https://cqtwmxojwwyeasstuhgb.supabase.co/functions/v1/script-api";
