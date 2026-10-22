@@ -241,7 +241,7 @@
     $("#scriptForm").addEventListener("submit",async e=>{
       if(!admin||!user||!client)return;
       e.preventDefault();e.stopImmediatePropagation();
-      const name=$("#newScriptName").value.trim(),slug=$("#newScriptSlug").value.trim().toLowerCase(),category=$("#newScriptCategory").value,status=$("#newScriptStatus").value,description=$("#newScriptDescription").value.trim(),link=$("#newScriptLink").value.trim(),id=$("#editScriptId").value;
+      const name=$("#newScriptName").value.trim(),slug=$("#newScriptSlug").value.trim().toLowerCase(),category=$("#newScriptCategory").value,status=$("#newScriptStatus").value,release_status=$("#newScriptReleaseStatus")?.value||"active",banner_url=$("#newScriptBannerUrl")?.value.trim()||null,showcase_url=$("#newScriptShowcaseUrl")?.value.trim()||null,description=$("#newScriptDescription").value.trim(),link=$("#newScriptLink").value.trim(),id=$("#editScriptId").value;
       if(!name||!description||!slug){showToast("Enter a script name, slug and description.");return;}
       if(slug.length>80){showToast("Slug must be 80 characters or fewer.");$("#newScriptSlug").focus();return;}
       if(!["published","draft","hidden"].includes(status)){showToast("Choose a valid publication status.");return;}
@@ -252,7 +252,7 @@
       const content=$("#newScriptContent").value;
       if(!content.trim()){showToast("Add the Lua source before saving.");$("#newScriptContent").focus();return;}
       if(content.length>200000){showToast("Lua source is too large (200,000 characters maximum).");return;}
-      const record={name,slug,category,description,link:link||null,content:content||null,status,updated_at:new Date().toISOString()};
+      const record={name,slug,category,description,link:link||null,content:content||null,status,release_status,banner_url,showcase_url,updated_at:new Date().toISOString()};
       let result;
       if(id&&/^[0-9a-f-]{36}$/i.test(id)) result=await client.from("scripts").update(record).eq("id",id);
       else result=await client.from("scripts").insert({...record,owner_id:user.id});
@@ -525,7 +525,7 @@
         const guessedName = file.name.replace(/\\.(lua|luau|txt)$/i, "");
         if (!$("#protectorName").value.trim()) $("#protectorName").value = guessedName;
         if (!$("#protectorSlug").value.trim()) $("#protectorSlug").value = guessedName.toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 80);
-        $("#protectorStatus").textContent = "Imported " + file.name + ". Click Create script + generate loadstring to publish it.";
+        $("#protectorStatus").textContent = "Imported " + file.name + ". Click Create script + generate loadstring to save a protected draft; publish it manually later.";
       } catch (error) { $("#protectorStatus").textContent = error.message || "Could not read the Lua file."; }
     });
     $("#protectorName").addEventListener("input", () => {
@@ -577,7 +577,7 @@
         if (progressPercent) progressPercent.textContent = safeValue + "%";
       };
       setProgress(8, "Checking slug…");
-      status.textContent = "Checking slug and publishing your script…";
+      status.textContent = "Checking slug and preparing a protected draft…";
       try {
         setProgress(24, "Checking availability…");
         const duplicate = await client.from("scripts").select("id").eq("slug", slug).maybeSingle();
@@ -597,7 +597,7 @@
         setProgress(48, "Saving script source…");
         const saved = await client.from("scripts").insert(record);
         if (saved.error) throw new Error("Could not publish script: " + saved.error.message);
-        setProgress(76, "Generating protected URL…");
+        setProgress(76, "Generating protected draft URL…");
         const pathWords = ["amber","atlas","birch","black","blue","cedar","cloud","cobalt","comet","coral","dawn","delta","drift","echo","ember","fern","frost","ghost","glacier","gold","harbor","hollow","indigo","ivory","jade","lunar","maple","marble","midnight","moss","nova","onyx","orbit","pearl","pine","quiet","raven","river","shadow","silver","solar","stone","velvet","void","willow","winter"];
         const randomWord = () => pathWords[crypto.getRandomValues(new Uint32Array(1))[0] % pathWords.length];
         const publicPath = [randomWord(), randomWord(), randomWord(), randomWord()].join("-");
@@ -606,8 +606,8 @@
         $("#protectedScriptUrl").value = sourceUrl;
         $("#protectedLoaderOutput").value = loader;
         setProgress(100, "Protected URL ready", "done");
-        status.textContent = "Script published. Opening the URL in a browser shows the VOID DEVELOPMENT protection page; a loader request receives the published source.";
-        showToast("Script published and protected URL generated.", "success");
+        status.textContent = "Protected draft saved. It is NOT public yet. Review it in Scripts and manually choose Published when ready.";
+        showToast("Protected draft saved — not released.", "success");
         loadAdminScripts();
       } catch (error) {
         if (typeof setProgress === "function") setProgress(100, "Publishing failed — review the message below", "error");
@@ -783,14 +783,14 @@
       if (!edit || !admin || !client || !/^[0-9a-f-]{36}$/i.test(edit.dataset.editScript)) return;
       event.preventDefault(); event.stopImmediatePropagation();
       try {
-        const { data, error } = await client.from("scripts").select("id,name,slug,category,description,link,content,status").eq("id", edit.dataset.editScript).maybeSingle();
+        const { data, error } = await client.from("scripts").select("id,name,slug,category,description,link,content,status,release_status,banner_url,showcase_url").eq("id", edit.dataset.editScript).maybeSingle();
         if (error || !data) throw error || new Error("Script unavailable.");
         $("#editScriptId").value = data.id;
         $("#newScriptName").value = data.name || "";
         $("#newScriptSlug").value = data.slug || "";
         $("#newScriptSlug").dataset.touched = "true";
         $("#newScriptCategory").value = data.category || "Utility";
-        $("#newScriptStatus").value = data.status || "draft";
+        $("#newScriptStatus").value = data.status || "draft";\n        if($("#newScriptReleaseStatus"))$("#newScriptReleaseStatus").value=data.release_status||"active";\n        if($("#newScriptBannerUrl"))$("#newScriptBannerUrl").value=data.banner_url||"";\n        if($("#newScriptShowcaseUrl"))$("#newScriptShowcaseUrl").value=data.showcase_url||"";
         $("#newScriptDescription").value = data.description || "";
         $("#newScriptLink").value = data.link || "";
         $("#newScriptContent").value = data.content || "";
@@ -810,3 +810,23 @@
   }
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);else init();
 })();
+/* VOID Pro roadmap tracker: transparent, manually maintained progress estimates. */
+(() => {
+  const KEY="voidDevelopment.voidProRoadmap.v1";
+  const $=s=>document.querySelector(s);
+  const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  const read=()=>{try{const x=JSON.parse(localStorage.getItem(KEY)||"[]");return Array.isArray(x)?x:[]}catch{return []}};
+  const write=items=>{try{localStorage.setItem(KEY,JSON.stringify(items));return true}catch{return false}};
+  const render=()=>{
+    const list=$("#voidProList");if(!list)return;const items=read();
+    $("#voidProCount").textContent=String(items.length);
+    $("#voidProAverage").textContent=(items.length?Math.round(items.reduce((a,x)=>a+x.percent,0)/items.length):0)+"%";
+    list.innerHTML=items.length?items.map(x=>'<article class="void-pro-item" data-roadmap-id="'+esc(x.id)+'"><div class="void-pro-item-head"><div><b>'+esc(x.name)+'</b><br><small>'+esc(x.notes||"No implementation notes yet.")+'</small></div><strong>'+x.percent+'%</strong></div><div class="void-pro-meter" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+x.percent+'"><span style="width:'+x.percent+'%"></span></div><div class="void-pro-item-foot"><span class="void-pro-status">'+esc(({planned:"Planned",working:"Working on it",patched:"Patched / testing",active:"Active"})[x.status]||"Planned")+'</span><div class="void-pro-item-actions"><button class="secondary small" type="button" data-roadmap-edit="'+esc(x.id)+'">Edit %</button><button class="text-action danger" type="button" data-roadmap-delete="'+esc(x.id)+'">Remove</button></div></div></article>').join(""):'<p class="saved-note">No roadmap items yet. Add the first Void Pro feature above.</p>';
+  };
+  document.addEventListener("submit",e=>{if(e.target.id!=="voidProForm")return;e.preventDefault();const name=$("#voidProName").value.trim(),notes=$("#voidProNotes").value.trim(),percent=Number($("#voidProPercent").value),status=$("#voidProStatus").value;if(!name||!Number.isFinite(percent)||percent<0||percent>100)return;const items=read();items.unshift({id:crypto.randomUUID(),name,notes,percent:Math.round(percent),status,updated_at:new Date().toISOString()});if(!write(items)){alert("Could not save roadmap in this browser.");return;}e.target.reset();$("#voidProPercent").value="1";render();});
+  document.addEventListener("click",e=>{const del=e.target.closest("[data-roadmap-delete]");if(del){const items=read().filter(x=>x.id!==del.dataset.roadmapDelete);write(items);render();return;}const edit=e.target.closest("[data-roadmap-edit]");if(edit){const items=read(),item=items.find(x=>x.id===edit.dataset.roadmapEdit);if(!item)return;const answer=prompt("Set progress percentage (0–100):",String(item.percent));if(answer===null)return;const value=Number(answer);if(!Number.isInteger(value)||value<0||value>100){alert("Enter a whole percentage from 0 to 100.");return;}item.percent=value;item.updated_at=new Date().toISOString();write(items);render();}});
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",render,{once:true});else render();
+})();
+
+/* VOID Pro progress tracker */
+(()=>{const KEY="voidDevelopment.voidProRoadmap.v1",q=s=>document.querySelector(s),esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));const read=()=>{try{const v=JSON.parse(localStorage.getItem(KEY)||"[]");return Array.isArray(v)?v:[]}catch{return[]}};const save=v=>{try{localStorage.setItem(KEY,JSON.stringify(v));return true}catch{return false}};function render(){if(!q("#voidProList"))return;const a=read();q("#voidProCount").textContent=a.length;q("#voidProAverage").textContent=(a.length?Math.round(a.reduce((s,x)=>s+x.percent,0)/a.length):0)+"%";q("#voidProList").innerHTML=a.length?a.map(x=>'<article class="void-pro-item"><div class="void-pro-item-head"><div><b>'+esc(x.name)+'</b><br><small>'+esc(x.notes||"No notes")+'</small></div><strong>'+x.percent+'%</strong></div><div class="void-pro-meter" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+x.percent+'"><span style="width:'+x.percent+'%"></span></div><div class="void-pro-item-foot"><span class="void-pro-status">'+esc(({planned:"Planned",working:"Working on it",patched:"Patched / testing",active:"Active"})[x.status]||"Planned")+'</span><div class="void-pro-item-actions"><button class="secondary small" type="button" data-roadmap-edit="'+esc(x.id)+'">Edit %</button><button class="text-action danger" type="button" data-roadmap-delete="'+esc(x.id)+'">Remove</button></div></div></article>').join(""):'<p class="saved-note">No roadmap items yet. Add your first Void Pro feature above.</p>'}document.addEventListener("submit",e=>{if(e.target.id!=="voidProForm")return;e.preventDefault();const name=q("#voidProName").value.trim(),notes=q("#voidProNotes").value.trim(),percent=Number(q("#voidProPercent").value),status=q("#voidProStatus").value;if(!name||!Number.isInteger(percent)||percent<0||percent>100)return;const a=read();a.unshift({id:crypto.randomUUID(),name,notes,percent,status});if(!save(a)){alert("Could not save this roadmap in your browser.");return}e.target.reset();q("#voidProPercent").value="1";render()});document.addEventListener("click",e=>{const d=e.target.closest("[data-roadmap-delete]");if(d){save(read().filter(x=>x.id!==d.dataset.roadmapDelete));render();return}const b=e.target.closest("[data-roadmap-edit]");if(b){const a=read(),x=a.find(i=>i.id===b.dataset.roadmapEdit);if(!x)return;const v=prompt("Set progress percentage (0–100):",x.percent);if(v===null)return;const n=Number(v);if(!Number.isInteger(n)||n<0||n>100){alert("Enter a whole percentage from 0 to 100.");return}x.percent=n;save(a);render()}});if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",render,{once:true});else render()})();
