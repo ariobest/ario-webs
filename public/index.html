@@ -15,13 +15,13 @@
   <header class="nav">
     <a class="brand" href="#home" aria-label="VOID DEVELOPMENT home"><img class="brand-logo" src="https://cdn.phototourl.com/member/2026-10-22-2137bbb7-82d5-48bb-855c-03c7361f95a8.png" alt=""><span>VOID <span>DEVELOPMENT</span></span></a>
     <nav aria-label="Main navigation"><button class="nav-link active" data-view="home"><span aria-hidden="true">⌂</span> Home</button><button class="nav-link" data-view="scripts"><span aria-hidden="true">⌘</span> Scripts</button><button class="nav-link" data-view="about"><span aria-hidden="true">ⓘ</span> About</button><button class="nav-link" data-view="themes"><span aria-hidden="true">◈</span> Themes</button></nav>
-    <div class="nav-actions"><button class="icon-button" id="themeQuick" title="Toggle Light / Black Void" aria-label="Toggle Light / Black Void">◐</button><button class="nav-button" id="openAdmin" hidden>Admin panel ↗</button><a class="secondary discord-button" href="https://discord.com/" target="_blank" rel="noopener noreferrer" id="discordLink">Discord ↗</a><button class="secondary account-button" id="openAuth">Sign up / Log in</button></div>
+    <div class="nav-actions"><button class="icon-button" id="themeQuick" title="Toggle Light / Black Void" aria-label="Toggle Light / Black Void">◐</button><button class="nav-button" id="openAdmin" hidden>Admin panel ↗</button><a class="secondary discord-button" href="https://discord.com/" target="_blank" rel="noopener noreferrer" id="discordLink">Discord ↗</a><button class="secondary profile-button" id="openProfile" hidden>Profile</button><button class="secondary account-button" id="openAuth">Sign up / Log in</button></div>
   </header>
   <div id="siteAnnouncement" class="site-announcement" hidden></div>
   <main id="home">
     <section class="hero" id="hero">
       <div class="hero-copy">
-        <div class="hero-brand-mark"><img src="https://cdn.phototourl.com/member/2026-10-22-2137bbb7-82d5-48bb-855c-03c7361f95a8.png" alt="VOID DEVELOPMENT logo"><span>VOID DEVELOPMENT</span></div>
+        
         <div class="eyebrow"><span class="status-dot"></span> VOID DEVELOPMENT <span id="themeLabel">DARK EDITION</span></div>
         <h1>Your Scripts.<br><span>One Void.</span></h1>
         <p id="heroTagline">Discover and manage Roblox script projects in one focused, minimalist workspace.</p>
@@ -67,6 +67,31 @@
         <section class="admin-pane" data-pane="supabase" hidden><div class="security-note"><b>Public client configuration</b><p>Only use your Supabase project URL and publishable/anon key here. Never enter a service-role key. Custom values are saved in this browser's local storage, not in the GitHub repository or Cloudflare secrets.</p></div><form id="supabaseForm" class="editor-form visible-form"><label>Supabase project URL<input id="supabaseUrl" type="url" placeholder="https://your-project.supabase.co" autocomplete="url"></label><label>Publishable / anon key<textarea id="supabaseKey" rows="3" placeholder="sb_publishable_… or your anon JWT" autocomplete="off" spellcheck="false"></textarea></label><div class="form-actions"><button type="button" class="secondary small" id="clearSupabase">Clear saved values</button><button class="small-primary" type="submit">Save configuration</button></div><p id="supabaseStatus" class="saved-note" role="status">No configuration saved in this browser.</p></form><p class="config-help">This connects the public script library to Supabase and remembers custom values in this browser. Script publishing still needs a signed-in admin workflow.</p></section>
       </div>
       <div class="admin-foot"><span><span class="status-dot"></span> Supabase-backed public library</span><button class="secondary small" id="closeAdminBottom">Done</button></div>
+    </section>
+  </div>
+  <div class="access-denied-backdrop" id="accessDeniedBackdrop" hidden>
+    <section class="access-denied-card" role="alertdialog" aria-modal="true" aria-labelledby="accessDeniedTitle">
+      <div class="denied-orbit" aria-hidden="true"><span>×</span></div>
+      <div class="denied-eyebrow"><span class="status-dot"></span> VOID SECURITY GATE</div>
+      <h1 id="accessDeniedTitle">YOU AREN'T AN ADMIN</h1>
+      <p>This account doesn't have permission to enter the control center. This area is only for verified administrators.</p>
+      <div class="denied-account" id="deniedAccountLabel">SIGNED IN ACCOUNT</div>
+      <a class="denied-home-button" href="/">GO TO THE MAIN WEBSITE <span aria-hidden="true">↗</span></a>
+      <button class="denied-switch-button" id="deniedSwitchAccount" type="button">Switch account</button>
+    </section>
+  </div>
+  <div class="profile-backdrop" id="profileBackdrop" hidden>
+    <section class="profile-modal" role="dialog" aria-modal="true" aria-labelledby="profileTitle">
+      <header class="profile-head"><div class="profile-avatar" id="profileAvatar">V</div><div><span class="eyebrow">ACCOUNT CENTER</span><h2 id="profileTitle">Your profile</h2><p id="profileSubtitle">Your account details at a glance.</p></div><button class="icon-button" id="closeProfile" aria-label="Close profile">×</button></header>
+      <div class="profile-details">
+        <div class="profile-detail"><span>Username</span><strong id="profileUsername">—</strong></div>
+        <div class="profile-detail"><span>Email address</span><strong id="profileEmail">—</strong></div>
+        <div class="profile-detail"><span>Account role</span><strong id="profileRole">Member</strong></div>
+        <div class="profile-detail"><span>Member since</span><strong id="profileJoined">—</strong></div>
+        <div class="profile-detail"><span>User ID</span><strong id="profileUserId">—</strong><button class="secondary small" id="copyProfileId" type="button">Copy ID</button></div>
+      </div>
+      <div class="profile-actions"><button class="secondary" id="profileManageAccount" type="button">Account settings</button><button class="small-primary" id="profileSignOut" type="button">Sign out</button></div>
+      <p class="saved-note" id="profileStatus" role="status">Profile details are loaded from your signed-in session.</p>
     </section>
   </div>
   <div class="modal-backdrop" id="authBackdrop" hidden>
