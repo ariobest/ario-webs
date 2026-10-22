@@ -228,6 +228,14 @@
   mobileNavScrim?.addEventListener("click", closeMobileNav);
   $("#mobileThemeToggle")?.addEventListener("click", () => { applyTheme(currentTheme === "light" ? "mono" : "light", true); closeMobileNav(); });
   $("#mobileAdminLink")?.addEventListener("click", () => { closeMobileNav(); openAdmin(); });
+  const syncMobileAdminVisibility = () => {
+    const desktopAdmin = $("#openAdmin");
+    const mobileAdmin = $("#mobileAdminLink");
+    if (desktopAdmin && mobileAdmin) mobileAdmin.hidden = desktopAdmin.hidden;
+  };
+  const mobileAdminVisibilityObserver = new MutationObserver(syncMobileAdminVisibility);
+  if ($("#openAdmin")) mobileAdminVisibilityObserver.observe($("#openAdmin"), { attributes: true, attributeFilter: ["hidden"] });
+  syncMobileAdminVisibility();
   $("#mobileAuthLink")?.addEventListener("click", () => { closeMobileNav(); $("#openAuth")?.click(); });
   document.addEventListener("keydown", event => { if (event.key === "Escape") closeMobileNav(); });
 
