@@ -93,7 +93,23 @@
       if(!error&&data&&data.role==="admin")admin=true;
     }
     updateUI();
+    if (admin) loadAdminScripts();
     if(!admin&&!$("#adminBackdrop").hidden)$("#adminBackdrop").hidden=true;
+  }
+  async function loadAdminScripts() {
+    const host = $("#adminScriptList");
+    if (!host || !admin || !client) return;
+    host.innerHTML = '<p class="saved-note">Loading scripts from Supabase…</p>';
+    try {
+      const { data, error } = await client.from("scripts").select("id,name,slug,category,description,status,updated_at").order("updated_at", { ascending: false });
+      if (error) throw error;
+      const rows = data || [];
+      host.dataset.adminDatabaseLoaded = "true";
+      host.innerHTML = rows.length ? rows.map(item => '<div class="admin-script-row"><div class="admin-script-symbol">⌘</div><div class="admin-script-info"><b>' + esc(item.name) + '</b><small>' + esc(item.slug) + ' · ' + esc(item.category || "Utility") + ' · ' + esc(item.status || "draft") + '</small></div><button class="text-action" data-edit-script="' + esc(item.id) + '" type="button">Edit</button><button class="text-action" data-toggle-script-status="' + esc(item.id) + '" data-next-status="' + (item.status === "published" ? "draft" : "published") + '" type="button">' + (item.status === "published" ? "Unpublish" : "Publish") + '</button><button class="text-action danger" data-delete-script="' + esc(item.id) + '" type="button">Delete</button></div>').join("") : '<p class="empty-state">No scripts yet. Add your first one above.</p>';
+    } catch (error) {
+      host.dataset.adminDatabaseLoaded = "false";
+      host.innerHTML = '<p class="saved-note">Could not load scripts from Supabase. Check administrator permissions and retry.</p><button type="button" class="secondary small" id="retryAdminScripts">Retry</button>';
+    }
   }
   async function handleAuth(event){
     event.preventDefault();if(authBusy)return;
@@ -485,6 +501,22 @@
       catch { $("#newKeyValue").select(); document.execCommand("copy"); showToast("Select and copy the key."); }
     });
     $("#checkApiStatus").addEventListener("click", checkApiStatus);
+    $("#adminScriptList").addEventListener("click", async event => {
+      if (event.target.closest("#retryAdminScripts")) { loadAdminScripts(); return; }
+      const toggle = event.target.closest("[data-toggle-script-status]");
+      if (!toggle || !admin || !client || !user) return;
+      const id = toggle.dataset.toggleScriptStatus;
+      const nextStatus = toggle.dataset.nextStatus;
+      if (!["published", "draft"].includes(nextStatus)) return;
+      if (nextStatus === "draft" && !window.confirm("Unpublish this script? It will disappear from the public catalog.")) return;
+      toggle.disabled = true;
+      try {
+        const { error } = await client.from("scripts").update({ status: nextStatus, updated_at: new Date().toISOString() }).eq("id", id);
+        if (error) throw error;
+        showToast(nextStatus === "published" ? "Script published." : "Script unpublished.", "success");
+        location.reload();
+      } catch (error) { showToast("Could not update publication status. Check permissions and retry.", "error"); toggle.disabled = false; }
+    });
     $("#adminScriptList").addEventListener("click", async event => {
       const edit = event.target.closest("[data-edit-script]");
       if (!edit || !admin || !client || !/^[0-9a-f-]{36}$/i.test(edit.dataset.editScript)) return;
