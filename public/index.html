@@ -131,7 +131,37 @@ verify.Activated:Connect(function()
     end
     local data = {}
     pcall(function() data = HttpService:JSONDecode(result.Body) end)
-    status.Text = (result.Success and data.valid) and "Key accepted" or (data.error or "Invalid key")
+    if not (result.Success and data.valid) then
+        status.Text = data.error or "Invalid key"
+        return
+    end
+
+    status.Text = "Key accepted — loading script..."
+    local loadOk, source = pcall(function()
+        return HttpService:RequestAsync({
+            Url = API,
+            Method = "POST",
+            Headers = { ["Content-Type"] = "application/json" },
+            Body = HttpService:JSONEncode({
+                action = "load",
+                key = keyBox.Text,
+                script = SCRIPT_SLUG
+            })
+        })
+    end)
+    if not loadOk or not source.Success then
+        status.Text = "Key accepted, but script loading failed"
+        return
+    end
+    status.Text = "Key accepted"
+    local runOk, runError = pcall(function()
+        local runner = loadstring(source.Body)
+        assert(runner, "Could not compile the returned script")
+        runner()
+    end)
+    if not runOk then
+        status.Text = "Script error: " .. tostring(runError)
+    end
 end)</textarea>
             <p class="security-note">This is a sample UI and validation flow, not a way to keep delivered source secret. Some Roblox environments do not allow arbitrary HTTP requests or CoreGui access; use supported APIs for your own experience.</p>
           </div>
