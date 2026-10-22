@@ -233,8 +233,21 @@
     }
     window.scrollTo({ top: 0, behavior: "auto" });
   }
-  $$("[data-view]").forEach(button => button.addEventListener("click", () => setPage(button.dataset.view)));
-  $$("[data-scroll-scripts]").forEach(button => button.addEventListener("click", () => setPage("scripts")));
+  $("[data-view]").forEach(button => button.addEventListener("click", () => setPage(button.dataset.view)));
+  // The logo/title is a reliable Home control, including from nested script-detail routes.
+  $(".brand").forEach(brand => brand.addEventListener("click", event => {
+    event.preventDefault();
+    const url = new URL(location.href);
+    url.pathname = "/";
+    url.searchParams.delete("view");
+    url.searchParams.delete("script");
+    url.searchParams.delete("admin");
+    url.hash = "";
+    history.pushState({ view: "home" }, "", url);
+    setPage("home", false);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }));
+  $("[data-scroll-scripts]").forEach(button => button.addEventListener("click", () => setPage("scripts")));
   window.addEventListener("popstate", () => {
     const route = location.pathname.replace(/\/+$/, "") || "/";
     const fromPath = route === "/scripts" ? "scripts" : route === "/themes" ? "themes" : route === "/about" ? "about" : "home";
