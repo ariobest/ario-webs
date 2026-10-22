@@ -278,3 +278,11 @@ body{background:radial-gradient(ellipse at 50% -15%,rgba(255,255,255,.075),trans
 .cookie-options{flex-basis:100%;display:flex;flex-wrap:wrap;align-items:center;gap:14px;padding-top:12px;color:var(--muted);font-size:12px}.cookie-options[hidden]{display:none}.cookie-options label{display:flex;align-items:center;gap:6px}
 footer .brand>span{color:var(--ink)}
 @media(max-width:580px){:root[data-theme="mono"] .hero{min-height:auto;padding:54px 0 64px}:root[data-theme="mono"] .hero-brand-mark img{width:120px;height:120px}:root[data-theme="mono"] .hero h1{font-size:clamp(44px,12vw,62px)}.nav nav{display:flex;gap:2px;overflow-x:auto;max-width:45vw}.nav-link{padding:8px 7px;font-size:11px}.nav-actions{gap:5px}.discord-button{display:none}}
+
+.script-tools[hidden],#scriptGrid[hidden],.script-detail-view[hidden]{display:none!important}
+.script-detail-view{margin-top:24px;animation:card-in .22s ease both}
+.script-detail-card{max-width:860px;margin:22px auto;padding:clamp(24px,5vw,48px);border:1px solid var(--line);border-radius:24px;background:color-mix(in srgb,var(--surface) 82%,transparent);box-shadow:0 24px 90px rgba(0,0,0,.18);backdrop-filter:blur(24px)}
+.script-detail-card h2{font:700 clamp(34px,6vw,58px)/1.05 'Space Grotesk',sans-serif;letter-spacing:-.045em;margin:18px 0}
+.script-detail-card>p{color:var(--muted);line-height:1.8;max-width:680px}
+.script-detail-meta{display:flex;flex-wrap:wrap;gap:10px;margin:22px 0}
+.script-detail-meta span{padding:7px 11px;border:1px solid var(--line);border-radius:999px;color:var(--muted);font-size:12px}
