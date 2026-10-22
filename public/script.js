@@ -1,7 +1,7 @@
 (() => {
   "use strict";
-  const LOGO_URL = "https://www.image2url.com/r2/default/images/1792591024054-9d66ce25-9de6-4662-93d2-a3c6e127a298.png";
-  const STORAGE = { theme: "sunnyScripts.theme.v1", scripts: "sunnyScripts.library.v1", supabase: "sunnyScripts.supabase.public.v1", favorites: "sunnyScripts.favorites.v1" };
+  const LOGO_URL = "https://cdn.phototourl.com/member/2026-10-22-7c95dd20-c163-423e-94cf-4ee3e782ed21.png";
+  const STORAGE = { theme: "arioStudios.theme.v1", scripts: "arioStudios.library.v1", supabase: "arioStudios.supabase.public.v1", favorites: "arioStudios.favorites.v1" };
   const DEFAULT_SUPABASE = { url: "https://cqtwmxojwwyeasstuhgb.supabase.co", key: "sb_publishable_qBPb1ltQbHNZ-fO3PFmDeg_IQj0QfNB" };
   let supabaseClient = null;
   let databaseConnected = false;
@@ -48,7 +48,7 @@
     });
     if (announce) showToast(themeNames[theme].replace(" EDITION", "").toLowerCase() + " theme applied");
     // Keep the Theme Studio's inline palette and this switcher's state in sync.
-    if (syncPortal) document.dispatchEvent(new CustomEvent("sunnyScripts:theme-change", { detail: { id: theme } }));
+    if (syncPortal) document.dispatchEvent(new CustomEvent("arioStudios:theme-change", { detail: { id: theme } }));
   }
 
   function escapeHTML(value) {
@@ -132,7 +132,7 @@
     } catch (error) {
       databaseConnected = false;
       if (status) status.textContent = "Supabase connection failed: " + (error?.message || "check Data API exposure and table grants.");
-      console.warn("SunnyScripts Supabase read failed:", error);
+      console.warn("ARIO STUDIOS Supabase read failed:", error);
     }
   }
   function initSupabase() {
@@ -147,11 +147,11 @@
       loadDatabaseScripts();
     } catch (error) {
       databaseConnected = false;
-      console.warn("SunnyScripts Supabase setup failed:", error);
+      console.warn("ARIO STUDIOS Supabase setup failed:", error);
     }
   }
 
-  document.addEventListener("sunnyScripts:theme-change", event => {
+  document.addEventListener("arioStudios:theme-change", event => {
     const id = event.detail?.id;
     if (validThemes.includes(id) && currentTheme !== id) applyTheme(id, false, false);
   });
@@ -235,7 +235,7 @@
     const api = "https://cqtwmxojwwyeasstuhgb.supabase.co/functions/v1/script-api";
     const safeSlug = String(slug || "").replace(/[^a-zA-Z0-9_-]/g, "");
     return [
-      "-- SunnyScripts protected loader",
+      "-- ARIO STUDIOS protected loader",
       "-- Paste your access key below. Source is delivered only after server-side key verification.",
       'local HttpService = game:GetService("HttpService")',
       'local API_URL = "' + api + '"',
@@ -262,7 +262,7 @@
       "",
       "local status = response.StatusCode or response.Status or 0",
       'local body = response.Body or response.body or ""',
-      'assert(status == 200, "SunnyScripts key verification failed: " .. tostring(body))',
+      'assert(status == 200, "ARIO STUDIOS key verification failed: " .. tostring(body))',
       "local run, loadError = loadstring(body)",
       'assert(type(run) == "function", "Could not load authorized script: " .. tostring(loadError))',
       "run()"
@@ -320,7 +320,7 @@
   });
 
   // Keep the supplied brand image consistent for all logo placements.
-  $$(".brand-logo").forEach(image => { image.src = LOGO_URL; image.addEventListener("error", () => { image.alt = "SunnyScripts"; }); });
+  $$(".brand-logo").forEach(image => { image.src = LOGO_URL; image.addEventListener("error", () => { image.alt = "ARIO STUDIOS"; }); });
   applyTheme(currentTheme);
   const initialRoute = location.pathname.replace(/\/+$/, "") || "/";
   const initialView = new URLSearchParams(location.search).get("view") || (initialRoute === "/themes" ? "themes" : initialRoute === "/about" ? "about" : "scripts");
