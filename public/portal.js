@@ -487,7 +487,7 @@
         const pathWords = ["amber","atlas","birch","black","blue","cedar","cloud","cobalt","comet","coral","dawn","delta","drift","echo","ember","fern","frost","ghost","glacier","gold","harbor","hollow","indigo","ivory","jade","lunar","maple","marble","midnight","moss","nova","onyx","orbit","pearl","pine","quiet","raven","river","shadow","silver","solar","stone","velvet","void","willow","winter"];
         const randomWord = () => pathWords[crypto.getRandomValues(new Uint32Array(1))[0] % pathWords.length];
         const publicPath = [randomWord(), randomWord(), randomWord(), randomWord()].join("-");
-        const sourceUrl = location.origin + "/" + publicPath + "?s=" + encodeURIComponent(slug);
+        const sourceUrl = "https://arioscripts.cyou/" + publicPath + "?s=" + encodeURIComponent(slug);
         const loader = "loadstring(game:HttpGet(" + JSON.stringify(sourceUrl) + "))()";
         $("#protectedScriptUrl").value = sourceUrl;
         $("#protectedLoaderOutput").value = loader;
