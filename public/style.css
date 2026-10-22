@@ -309,3 +309,15 @@ footer .brand>span{color:var(--ink)}
 .hero-visual{position:relative;z-index:1}
 @media(max-width:760px){.hero{padding-top:118px}.hero:before{height:320px}.hero-brand-mark{top:24px}.hero-brand-mark img{width:46px;height:46px}}
 @media(max-width:420px){.hero{padding-top:112px}.hero-brand-mark{top:20px;gap:8px;letter-spacing:.12em}.hero-brand-mark img{width:40px;height:40px}.hero-brand-mark span{font-size:9px}}
+
+
+/* Clean, transparent brand treatment: no divider line or framed logo tile. */
+.nav{background:rgba(5,5,5,.28)!important;border-bottom:0!important;box-shadow:none!important;backdrop-filter:blur(18px)}
+.hero-brand-mark img,.brand-logo{border:0!important;outline:0!important;outline-offset:0!important;border-radius:0!important;box-shadow:none!important;filter:drop-shadow(0 0 20px rgba(255,255,255,.10))}
+.hero-brand-mark{left:50%;right:auto;width:max-content;max-width:calc(100vw - 28px);justify-content:center;text-align:center}
+.hero-brand-mark span{white-space:nowrap}
+.admin-access-notice{margin:0 22px 12px;padding:12px 15px;border:1px solid var(--line);border-radius:13px;background:rgba(255,255,255,.035);color:var(--muted);font-size:13px;line-height:1.6}
+.admin-access-notice[hidden]{display:none!important}
+/* Keep normal text selection inside forms, while discouraging casual selection on script cards. */
+.script-card,.script-detail-card{-webkit-user-select:none;user-select:none}
+.script-card input,.script-card textarea,.script-detail-card input,.script-detail-card textarea{user-select:text;-webkit-user-select:text}
