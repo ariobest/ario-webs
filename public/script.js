@@ -28,14 +28,14 @@
   const validThemes = ["summer","light","dark","winter","autumn","spring","ocean","sunset","lavender","rose","forest","mint","cyber","crimson","gold","slate","mono","candy","sakura","arctic"];
   let favorites = new Set(safeRead(STORAGE.favorites, []));
   let showFavorites = false;
-  let currentTheme = safeRead(STORAGE.theme, "dark");
-  if (!validThemes.includes(currentTheme)) currentTheme = "dark";
+  let currentTheme = safeRead(STORAGE.theme, "mono");
+  if (!validThemes.includes(currentTheme)) currentTheme = "mono";
 
   function applyTheme(theme, announce = false, syncPortal = true) {
     if (!validThemes.includes(theme)) return;
     currentTheme = theme;
     document.documentElement.dataset.theme = theme;
-    const themeNames = { summer:"SUMMER EDITION",light:"LIGHT EDITION",dark:"MIDNIGHT EDITION",winter:"WINTER EDITION",autumn:"AUTUMN EDITION",spring:"SPRING EDITION",ocean:"OCEAN EDITION",sunset:"SUNSET EDITION",lavender:"LAVENDER EDITION",rose:"ROSE EDITION",forest:"FOREST EDITION",mint:"MINT EDITION",cyber:"CYBER EDITION",crimson:"CRIMSON EDITION",gold:"GOLD EDITION",slate:"SLATE EDITION",mono:"MONO EDITION",candy:"CANDY EDITION",sakura:"SAKURA EDITION",arctic:"ARCTIC EDITION" };
+    const themeNames = { summer:"SUMMER EDITION",light:"LIGHT EDITION",dark:"MIDNIGHT EDITION",winter:"WINTER EDITION",autumn:"AUTUMN EDITION",spring:"SPRING EDITION",ocean:"OCEAN EDITION",sunset:"SUNSET EDITION",lavender:"LAVENDER EDITION",rose:"ROSE EDITION",forest:"FOREST EDITION",mint:"MINT EDITION",cyber:"CYBER EDITION",crimson:"CRIMSON EDITION",gold:"GOLD EDITION",slate:"SLATE EDITION",mono:"BLACK VOID",candy:"CANDY EDITION",sakura:"SAKURA EDITION",arctic:"ARCTIC EDITION" };
     $("#themeLabel").textContent = themeNames[theme];
     const colors = { summer:"#101a2b",light:"#f7f9fc",dark:"#0a1020",winter:"#071827",autumn:"#1b120f",spring:"#0e1c19",ocean:"#071c2a",sunset:"#21101f",lavender:"#181326",rose:"#24111d",forest:"#0b1c15",mint:"#0a1e1b",cyber:"#071318",crimson:"#200e12",gold:"#201a0b",slate:"#111820",mono:"#111111",candy:"#241529",sakura:"#21141d",arctic:"#101d2a" };
     $('meta[name="theme-color"]').content = colors[theme];
@@ -170,8 +170,8 @@
   $$(".admin-tab").forEach(button => button.addEventListener("click", () => selectAdminTab(button.dataset.adminTab)));
   $$("[data-theme-choice]").forEach(button => button.addEventListener("click", () => applyTheme(button.dataset.themeChoice, true)));
   function setPage(view, updateAddress = true) {
-    const page = ["scripts", "themes", "about"].includes(view) ? view : "scripts";
-    $("#hero").hidden = page !== "scripts";
+    const page = ["home", "scripts", "themes", "about"].includes(view) ? view : "home";
+    $("#hero").hidden = page !== "home";
     $("#scripts").hidden = page !== "scripts";
     $("#themes").hidden = page !== "themes";
     $("#about").hidden = page !== "about";
@@ -182,7 +182,7 @@
     });
     if (updateAddress) {
       const url = new URL(location.href);
-      url.pathname = page === "scripts" ? "/scripts" : "/" + page;
+      url.pathname = page === "home" ? "/" : "/" + page;
       url.searchParams.delete("view");
       history.pushState({ view: page }, "", url);
     }
@@ -192,7 +192,7 @@
   $$("[data-scroll-scripts]").forEach(button => button.addEventListener("click", () => setPage("scripts")));
   window.addEventListener("popstate", () => {
     const route = location.pathname.replace(/\/+$/, "") || "/";
-    const fromPath = route === "/themes" ? "themes" : route === "/about" ? "about" : "scripts";
+    const fromPath = route === "/scripts" ? "scripts" : route === "/themes" ? "themes" : route === "/about" ? "about" : "home";
     setPage(new URLSearchParams(location.search).get("view") || fromPath, false);
   });
   $("#scriptSearch").addEventListener("input", renderScripts);
@@ -207,12 +207,8 @@
   $("#newScriptSlug").addEventListener("input",e=>{e.target.dataset.touched="true";e.target.value=e.target.value.toLowerCase().replace(/[^a-z0-9-]/g,"").replace(/-{2,}/g,"-").replace(/^-|-$/g,"");if($("#scriptSlugPreview"))$("#scriptSlugPreview").textContent="/script/"+(e.target.value||"your-script");});
   $("#scriptForm").addEventListener("submit", event => {
     event.preventDefault();
-    const id = $("#editScriptId").value || (window.crypto?.randomUUID?.() || "script-" + Date.now());
-    const name = $("#newScriptName").value.trim(); const slug = $("#newScriptSlug").value.trim().toLowerCase(); const item = { id, name, slug, category: $("#newScriptCategory").value, description: $("#newScriptDescription").value.trim(), link: $("#newScriptLink").value.trim() };
-    if (!item.name || !item.description || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(item.slug)) { showToast("Enter a valid slug using lowercase letters, numbers and hyphens."); return; }
-    const index = scripts.findIndex(script => script.id === id);
-    if (index >= 0) scripts[index] = item; else scripts.unshift(item);
-    if (safeWrite(STORAGE.scripts, scripts)) { resetScriptForm(); renderScripts(); showToast("Script saved on this device."); }
+    showToast("Local-only script saving is disabled. Sign in with an authorized administrator account and ensure Supabase is available.");
+    return;
   });
   $("#adminScriptList").addEventListener("click", event => {
     const edit = event.target.closest("[data-edit-script]");
@@ -325,11 +321,11 @@
   $$(".brand-logo").forEach(image => { image.src = LOGO_URL; image.addEventListener("error", () => { image.alt = "VOID DEVELOPMENT"; }); });
   applyTheme(currentTheme);
   const initialRoute = location.pathname.replace(/\/+$/, "") || "/";
-  const initialView = new URLSearchParams(location.search).get("view") || (initialRoute === "/themes" ? "themes" : initialRoute === "/about" ? "about" : "scripts");
+  const initialView = new URLSearchParams(location.search).get("view") || (initialRoute === "/scripts" ? "scripts" : initialRoute === "/themes" ? "themes" : initialRoute === "/about" ? "about" : "home");
   setPage(initialView, false);
   observeRiseElements();
   renderScripts();
   initSupabase();
 })();
-(function(){const init=()=>{const n=document.querySelector("#cookieNotice");if(!n)return;let saved=null;try{saved=localStorage.getItem("voidDevelopment.cookieChoice.v1");}catch{}if(!saved)n.hidden=false;const choose=value=>{try{localStorage.setItem("voidDevelopment.cookieChoice.v1",value);}catch{}n.hidden=true;};document.querySelector("#cookieAccept")?.addEventListener("click",()=>choose("accepted"));document.querySelector("#cookieReject")?.addEventListener("click",()=>choose("essential-only"));};if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init,{once:true});else init();})();
+(function(){const init=()=>{const n=document.querySelector("#cookieNotice");if(!n)return;let saved=null;try{saved=JSON.parse(localStorage.getItem("voidDevelopment.cookieChoice.v2")||"null");}catch{}if(!saved)n.hidden=false;const options=document.querySelector("#cookieOptions");const analytics=document.querySelector("#cookieAnalytics");const choose=value=>{const record={version:2,necessary:true,analytics:Boolean(value.analytics),choice:value.choice,updatedAt:new Date().toISOString()};try{localStorage.setItem("voidDevelopment.cookieChoice.v2",JSON.stringify(record));localStorage.setItem("voidDevelopment.cookieChoice.v1",value.choice);}catch{}n.hidden=true;};if(saved&&saved.version===2)n.hidden=true;document.querySelector("#cookieAccept")?.addEventListener("click",()=>choose({choice:"accepted",analytics:true}));document.querySelector("#cookieReject")?.addEventListener("click",()=>choose({choice:"essential-only",analytics:false}));document.querySelector("#cookieCustomize")?.addEventListener("click",()=>{options.hidden=!options.hidden;});document.querySelector("#cookieSave")?.addEventListener("click",()=>choose({choice:"customized",analytics:analytics?.checked===true}));};if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init,{once:true});else init();})();;
 document.addEventListener("click",e=>{const home=e.target.closest('[data-view="home"]');if(home){e.preventDefault();window.scrollTo({top:0,behavior:"smooth"});document.querySelectorAll("[data-view]").forEach(b=>b.classList.toggle("active",b===home));}});
