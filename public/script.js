@@ -28,7 +28,7 @@
   const validThemes = ["summer","light","dark","winter","autumn","spring","ocean","sunset","lavender","rose","forest","mint","cyber","crimson","gold","slate","mono","candy","sakura","arctic"];
   let favorites = new Set(safeRead(STORAGE.favorites, []));
   let showFavorites = false;
-  let currentTheme = safeRead(STORAGE.theme, "summer");
+  let currentTheme = safeRead(STORAGE.theme, "dark");
   if (!validThemes.includes(currentTheme)) currentTheme = "summer";
 
   function applyTheme(theme, announce = false, syncPortal = true) {
