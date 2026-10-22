@@ -11,7 +11,23 @@ function randomHex(bytes=16){return Array.from(crypto.getRandomValues(new Uint8A
 function randomArioKey(){const chars="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";const r=()=>Array.from(crypto.getRandomValues(new Uint8Array(4)),b=>chars[b%chars.length]).join("");return `VOID-${r().slice(0,2)}-${r().slice(0,3)}-${r().slice(0,4)}`}
 async function hash(value:string){const bytes=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(value));return Array.from(new Uint8Array(bytes),b=>b.toString(16).padStart(2,"0")).join("")}
 async function requireAdmin(req:Request){const token=req.headers.get("Authorization")?.match(/^Bearer\s+(.+)$/i)?.[1];if(!token)return{error:"Sign in as an administrator first.",status:401 as const};const {data,error}=await db.auth.getUser(token);if(error||!data.user)return{error:"Your session is invalid or expired.",status:401 as const};const {data:role,error:re}=await db.from("user_roles").select("role").eq("user_id",data.user.id).eq("role","admin").maybeSingle();if(re||!role)return{error:"Administrator access required.",status:403 as const};return{user:data.user}}
-async function checkKey(key:string,slug:string){if(!/^(?:VOID|ARIO)-[A-Z0-9]{2}-[A-Z0-9]{3}-[A-Z0-9]{4}$/.test(key)||!slug)return{error:"THIS SCRIPT IS PROTECTED BY VOID DEVELOPMENT — BETTER LUCK NEXT TIME.",status:401 as const,protected:true};const key_hash=await hash(key);const {data:grant,error}=await db.from("script_keys").select("id,script_id,expires_at,revoked_at,max_uses,use_count").eq("key_hash",key_hash).maybeSingle();if(error||!grant||grant.revoked_at)return{error:"THIS SCRIPT IS PROTECTED BY VOID DEVELOPMENT — BETTER LUCK NEXT TIME.",status:401 as const,protected:true};if(grant.expires_at&&Date.parse(grant.expires_at)<=Date.now())return{error:"THIS SCRIPT IS PROTECTED BY VOID DEVELOPMENT — BETTER LUCK NEXT TIME.",status:401 as const,protected:true};if(grant.max_uses!==null&&grant.use_count>=grant.max_uses)return{error:"THIS SCRIPT IS PROTECTED BY VOID DEVELOPMENT — BETTER LUCK NEXT TIME.",status:403 as const,protected:true};const {data:script,error:se}=await db.from("scripts").select("id,name,slug,status,content").eq("id",grant.script_id).eq("slug",slug).eq("status","published").maybeSingle();if(se||!script)return{error:"THIS SCRIPT IS PROTECTED BY VOID DEVELOPMENT — BETTER LUCK NEXT TIME.",status:403 as const,protected:true};return{grant,script}}
+async function checkKey(key:string,slug:string){
+ if(!key||!slug)return{error:"Enter both the key and script slug.",code:"INVALID_REQUEST",status:400 as const,protected:true};
+ if(!/^(?:VOID|ARIO)-[A-Z0-9]{2}-[A-Z0-9]{3}-[A-Z0-9]{4}$/.test(key))return{error:"WRONG KEY",code:"KEY_NOT_FOUND",status:401 as const,protected:true};
+ const key_hash=await hash(key);
+ const {data:grant,error}=await db.from("script_keys").select("id,script_id,expires_at,revoked_at,max_uses,use_count").eq("key_hash",key_hash).maybeSingle();
+ if(error){console.error("key lookup failed",error);return{error:"Key service could not check the database. Please try again.",code:"BACKEND_ERROR",status:500 as const,protected:true}}
+ if(!grant)return{error:"WRONG KEY",code:"KEY_NOT_FOUND",status:401 as const,protected:true};
+ if(grant.revoked_at)return{error:"This key has been revoked. Request a new key.",code:"KEY_REVOKED",status:403 as const,protected:true};
+ if(grant.expires_at&&Date.parse(grant.expires_at)<=Date.now())return{error:"This key has expired. Request a new key.",code:"KEY_EXPIRED",status:401 as const,protected:true};
+ if(grant.max_uses!==null&&grant.use_count>=grant.max_uses)return{error:"This key has reached its usage limit.",code:"KEY_LIMIT_REACHED",status:403 as const,protected:true};
+ const {data:script,error:se}=await db.from("scripts").select("id,name,slug,status,content").eq("id",grant.script_id).maybeSingle();
+ if(se){console.error("script lookup failed",se);return{error:"Key service could not check the script. Please try again.",code:"BACKEND_ERROR",status:500 as const,protected:true}}
+ if(!script)return{error:"The script authorized by this key no longer exists.",code:"SCRIPT_NOT_FOUND",status:404 as const,protected:true};
+ if(script.slug!==slug)return{error:"This key is not authorized for the requested script.",code:"WRONG_SCRIPT",status:403 as const,protected:true};
+ if(script.status!=="published")return{error:"This script is not published.",code:"SCRIPT_UNPUBLISHED",status:403 as const,protected:true};
+ return{grant,script};
+}
 async function loadWithKey(key:string,slug:string){const checked=await checkKey(key,slug);if("error"in checked)return checked; if(typeof checked.script.content!=="string"||!checked.script.content.trim())return{error:"THIS SCRIPT IS PROTECTED BY VOID DEVELOPMENT — BETTER LUCK NEXT TIME.",status:404 as const,protected:true}; const next=checked.grant.use_count+1;const {data:updated,error:ue}=await db.from("script_keys").update({use_count:next,last_used_at:new Date().toISOString()}).eq("id",checked.grant.id).eq("use_count",checked.grant.use_count).is("revoked_at",null).select("id").maybeSingle();if(ue||!updated)return{error:"Key was used concurrently or revoked.",status:409 as const};await db.from("script_events").insert({script_id:checked.script.id,event_type:"download"});return{content:checked.script.content,status:200 as const}}
 Deno.serve(async(req:Request)=>{
  try {
@@ -22,7 +38,7 @@ Deno.serve(async(req:Request)=>{
    if(action==="health")return json({ok:true,service:"VOID DEVELOPMENT Script API",version:4,timestamp:new Date().toISOString()});
    if(action==="load"){
      const result=await loadWithKey(clean(url.searchParams.get("key"),180),clean(url.searchParams.get("script"),120));
-     if("error"in result)return json({error:result.error,protected:true},result.status);
+     if("error"in result)return json({error:result.error,code:result.code||"KEY_INVALID",protected:true},result.status);
      return new Response(result.content,{status:200,headers:{...cors,"Content-Type":"text/plain; charset=utf-8","Cache-Control":"no-store, max-age=0","Pragma":"no-cache","X-Content-Type-Options":"nosniff"}});
    }
    return json({error:"Use ?action=load&script=SCRIPT_SLUG&key=VOID-XX-XXX-XXXX or the POST API."},400);
@@ -70,7 +86,7 @@ Deno.serve(async(req:Request)=>{
  if(action==="revoke-key"){const access=await requireAdmin(req);if("error"in access)return json({error:access.error},access.status);const id=clean(body.id,80);const {data,error}=await db.from("script_keys").update({revoked_at:new Date().toISOString()}).eq("id",id).is("revoked_at",null).select("id").maybeSingle();if(error)return json({error:"Could not revoke key."},500);if(!data)return json({error:"Key was not found or already revoked."},404);return json({ok:true})}
  if(action==="validate"){
    const key=clean(body.key,180),slug=clean(body.script,120),result=await checkKey(key,slug);
-   if("error"in result)return json({valid:false,error:result.error,protected:true},result.status);
+   if("error"in result)return json({valid:false,error:result.error,code:result.code||"KEY_INVALID",protected:true},result.status);
    return json({valid:true,script:{slug:result.script.slug,name:result.script.name},expires_at:result.grant.expires_at,remaining_uses:result.grant.max_uses===null?null:Math.max(0,result.grant.max_uses-result.grant.use_count)});
  }
  if(action==="load"){
