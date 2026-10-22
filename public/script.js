@@ -86,7 +86,12 @@
       view.innerHTML = '<a class="secondary small" href="/scripts">← Back to scripts</a><h2>Script not found</h2><p>This script may be unpublished, unavailable, or the URL may be incorrect.</p>';
       return;
     }
-    view.innerHTML = '<a class="secondary small" href="/scripts">← Back to scripts</a><div class="script-detail-card"><span class="eyebrow">VOID DEVELOPMENT · SCRIPT DETAILS</span><h2>' + escapeHTML(item.name) + '</h2><p>' + escapeHTML(item.description || "No description provided.") + '</p><div class="script-detail-meta"><span>' + escapeHTML(item.category || "Script") + '</span><span>Slug: ' + escapeHTML(item.slug || item.id) + '</span></div>' + (item.link ? '<a class="secondary" href="' + escapeHTML(item.link) + '" target="_blank" rel="noopener noreferrer">Open project link ↗</a>' : '') + '<p class="saved-note">Source remains protected and is delivered only through the authorized key-checked loader.</p></div>';
+    const releaseStatus = String(item.release_status || "active");
+    const statusLabels = { active: "Active", patched: "Patched", working_on: "Working on it" };
+    const banner = /^https:\/\//i.test(String(item.banner_url || "")) ? item.banner_url : "";
+    const showcase = /^https:\/\//i.test(String(item.showcase_url || "")) ? item.showcase_url : "";
+    const heroStyle = banner ? ' style="--script-banner-image:url(&quot;' + escapeHTML(banner) + '&quot;)"' : "";
+    view.innerHTML = '<a class="secondary small script-detail-back" href="/scripts">← Back to scripts</a><article class="script-detail-showcase"><div class="script-detail-banner"' + heroStyle + '><div class="script-detail-banner-noise"></div><span class="script-detail-brand">VOID <i>DEVELOPMENT</i></span><span class="script-detail-orbit" aria-hidden="true">V</span><div class="script-detail-banner-copy"><span class="eyebrow">SCRIPT SHOWCASE / ' + escapeHTML(item.category || "SCRIPT") + '</span><h1>' + escapeHTML(item.name) + '</h1><p>' + escapeHTML(item.description || "A protected script experience from VOID DEVELOPMENT.") + '</p><div class="script-detail-badges"><span class="script-release-status status-' + escapeHTML(releaseStatus) + '">' + escapeHTML(statusLabels[releaseStatus] || "Active") + '</span><span class="script-category-pill">' + escapeHTML(item.category || "Script") + '</span></div></div></div><div class="script-showcase-body"><div class="script-showcase-main"><span class="eyebrow">OVERVIEW</span><h2>Built for your workflow.</h2><p>' + escapeHTML(item.description || "A protected script experience from VOID DEVELOPMENT.") + '</p>' + (showcase ? '<div class="script-showcase-image-wrap"><img class="script-showcase-image" src="' + escapeHTML(showcase) + '" alt="' + escapeHTML(item.name) + ' showcase" loading="lazy"></div>' : '<div class="script-showcase-placeholder"><div class="showcase-window"><div class="showcase-window-dots"><i></i><i></i><i></i></div><span>VOID / SCRIPT PREVIEW</span><div class="showcase-line wide"></div><div class="showcase-line"></div><div class="showcase-line short"></div><div class="showcase-chip">PROTECTED SOURCE</div></div></div>') + '</div><aside class="script-showcase-side"><div class="script-info-tile"><span>RELEASE STATUS</span><strong>' + escapeHTML(statusLabels[releaseStatus] || "Active") + '</strong></div><div class="script-info-tile"><span>TYPE</span><strong>' + escapeHTML(item.category || "Script") + '</strong></div><div class="script-info-tile"><span>ACCESS</span><strong>Key protected</strong></div>' + (item.link ? '<a class="small-primary script-project-link" href="' + escapeHTML(item.link) + '" target="_blank" rel="noopener noreferrer">Open project ↗</a>' : '') + '<button class="small-primary script-detail-getkey" type="button" data-copy-loader="' + escapeHTML(item.slug || item.id) + '">Get key <span aria-hidden="true">↗</span></button><p class="saved-note">Source is delivered only through the authorized key-checked loader.</p></aside></div></article>';
   }
   function renderScripts() {
     const query = ($("#scriptSearch").value || "").trim().toLowerCase();
@@ -149,7 +154,7 @@
     try {
       const { data, error } = await supabaseClient
         .from("published_script_metadata")
-        .select("id,name,slug,category,description,link,created_at")
+        .select("id,name,slug,category,description,link,release_status,banner_url,showcase_url,created_at")
         .order("created_at", { ascending: false });
       if (error) throw error;
       scripts = (data || []).map(item => ({
