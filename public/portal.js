@@ -110,8 +110,8 @@
         if(result.error)throw result.error;
         if(result.data.session&&result.data.user){
           await client.from("profiles").upsert({id:result.data.user.id,username:username},{onConflict:"id"});
-          await refresh(result.data.user);mode="account";updateAuthMode();$("#authStatus").textContent="Account created and signed in. Welcome to ARIO STUDIOS!";showToast("Account created successfully.","success");
-        }else { $("#resendConfirmation").hidden=false; $("#authStatus").textContent="Account created. Check your inbox and spam folder for the ARIO STUDIOS confirmation email.";showToast("Confirmation email requested. Check your inbox.","success"); }
+          await refresh(result.data.user);mode="account";updateAuthMode();$("#authStatus").textContent="Account created and signed in. Welcome to VOID DEVELOPMENT!";showToast("Account created successfully.","success");
+        }else { $("#resendConfirmation").hidden=false; $("#authStatus").textContent="Account created. Check your inbox and spam folder for the VOID DEVELOPMENT confirmation email.";showToast("Confirmation email requested. Check your inbox.","success"); }
       }else if(mode==="reset"){
         const result=await client.auth.resetPasswordForEmail(email,{redirectTo:window.location.origin});
         if(result.error)throw result.error;
@@ -279,7 +279,7 @@
         const { data, error } = await client.from("site_settings").select("value,is_public").eq("key", "site_config").maybeSingle();
         if (error) throw error;
         const value = data?.value || {};
-        $("#settingSiteName").value = value.siteName || "ARIO STUDIOS";
+        $("#settingSiteName").value = value.siteName || "VOID DEVELOPMENT";
         $("#settingTagline").value = value.tagline || "";
         $("#settingAnnouncement").value = value.announcement || "";
         $("#settingAnnouncementEnabled").checked = Boolean(value.announcementEnabled);
@@ -358,7 +358,7 @@
       event.preventDefault();
       if (!admin || !client || !user) { showToast("Administrator access required.", "error"); return; }
       const value = {
-        siteName: $("#settingSiteName").value.trim() || "ARIO STUDIOS",
+        siteName: $("#settingSiteName").value.trim() || "VOID DEVELOPMENT",
         tagline: $("#settingTagline").value.trim(),
         announcement: $("#settingAnnouncement").value.trim(),
         announcementEnabled: $("#settingAnnouncementEnabled").checked,
