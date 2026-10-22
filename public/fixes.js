@@ -80,53 +80,31 @@
   function installSideNav() {
     const nav = $(".nav");
     if (!nav || $("#voidSideNavToggle")) return;
-    const toggle = document.createElement("button");
-    toggle.id = "voidSideNavToggle"; toggle.className = "void-side-toggle"; toggle.type = "button";
-    toggle.setAttribute("aria-label","Open site navigation"); toggle.setAttribute("aria-expanded","false");
-    toggle.innerHTML = '<span></span><span></span><span></span>';
-    const shade = document.createElement("button");
-    shade.type = "button"; shade.className = "void-side-shade"; shade.setAttribute("aria-label","Close navigation");
-    const drawer = document.createElement("aside");
-    drawer.id = "voidSideNav"; drawer.className = "void-side-drawer"; drawer.setAttribute("aria-label","Side navigation");
-    drawer.innerHTML = '<div class="void-drawer-head"><img src="https://cdn.phototourl.com/member/2026-10-22-2137bbb7-82d5-48bb-855c-03c7361f95a8.png" alt=""><div><b>VOID DEVELOPMENT</b><small>Creator workspace</small></div><button type="button" class="icon-button" id="voidDrawerClose" aria-label="Close navigation">×</button></div><div class="void-drawer-links"><button type="button" data-view="home"><span>⌂</span>Home</button><button type="button" data-view="scripts"><span>⌘</span>Scripts</button><button type="button" data-view="themes"><span>◈</span>Themes</button><button type="button" data-view="about"><span>ⓘ</span>About</button><button type="button" id="voidDrawerTheme"><span>◐</span>Toggle appearance</button><button type="button" id="voidDrawerAuth"><span>↗</span>Sign in / account</button><button type="button" id="voidDrawerAdmin" hidden><span>⚙</span>Admin panel</button></div><p class="void-drawer-foot">BLACK VOID · WHITE SPOTLIGHT</p>';
-    document.body.append(shade, drawer, toggle);
-    const close = () => { drawer.classList.remove("open"); shade.classList.remove("open"); toggle.setAttribute("aria-expanded","false"); document.body.classList.remove("void-drawer-open"); };
-    const open = () => { drawer.classList.add("open"); shade.classList.add("open"); toggle.setAttribute("aria-expanded","true"); document.body.classList.add("void-drawer-open"); };
-    toggle.addEventListener("click", () => drawer.classList.contains("open") ? close() : open());
-    shade.addEventListener("click", close); $("#voidDrawerClose").addEventListener("click", close);
-    drawer.querySelectorAll("[data-view]").forEach(b => b.addEventListener("click", () => { close(); window.scrollTo({top:0,behavior:"smooth"}); }));
-    $("#voidDrawerTheme").addEventListener("click", () => { $("#themeQuick")?.click(); close(); });
-    $("#voidDrawerAuth").addEventListener("click", () => { $("#openProfile")?.hidden === false ? $("#openProfile").click() : $("#openAuth")?.click(); close(); });
-    $("#voidDrawerAdmin").addEventListener("click", () => { $("#openAdmin")?.click(); close(); });
-    let lastY = window.scrollY, raf = false;
-    const updateScroll = () => {
-      const y = window.scrollY, down = y > lastY;
-      if (y < 70) nav.classList.remove("void-nav-hidden");
-      else if (down && y > 150 && !document.body.classList.contains("modal-open")) nav.classList.add("void-nav-hidden");
-      else if (!down) nav.classList.remove("void-nav-hidden");
-      toggle.classList.toggle("is-visible", y > 150);
-      lastY = y; raf = false;
-    };
-    window.addEventListener("scroll", () => { if (!raf) { raf = true; requestAnimationFrame(updateScroll); } }, {passive:true});
-    document.addEventListener("keydown", e => { if (e.key === "Escape") close(); });
-    const syncAdmin = async session => {
-      let allowed = false;
-      if (session?.user && client) {
-        const {data,error} = await client.from("user_roles").select("role").eq("user_id",session.user.id).eq("role","admin").maybeSingle();
-        allowed = !error && Boolean(data);
-      }
-      $("#voidDrawerAdmin").hidden = !allowed;
-      if ($("#openAdmin")) $("#openAdmin").hidden = !allowed;
-      if ($("#openAdminFooter")) $("#openAdminFooter").hidden = !allowed;
-    };
-    if (window.supabase?.createClient) {
-      try {
-        client = window.supabase.createClient(SUPABASE_URL,PUBLIC_KEY);
-        client.auth.getSession().then(({data}) => syncAdmin(data.session));
-        client.auth.onAuthStateChange((_event,session) => setTimeout(() => syncAdmin(session),0));
-      } catch (e) { console.warn("VOID navigation auth check failed",e); }
-    }
-    $("#voidDrawerAuth").hidden = false;
+    const toggle=document.createElement("button"); toggle.id="voidSideNavToggle";toggle.className="void-side-toggle is-visible";toggle.type="button";
+    toggle.setAttribute("aria-label","Open site navigation");toggle.setAttribute("aria-expanded","false");toggle.setAttribute("aria-controls","voidSideNav");
+    toggle.innerHTML='<span></span><span></span><span></span>';
+    const shade=document.createElement("button");shade.type="button";shade.className="void-side-shade";shade.setAttribute("aria-label","Close navigation");shade.tabIndex=-1;
+    const drawer=document.createElement("aside");drawer.id="voidSideNav";drawer.className="void-side-drawer";drawer.setAttribute("aria-label","Site navigation");drawer.setAttribute("role","dialog");drawer.setAttribute("aria-modal","true");
+    const logo=nav.querySelector(".brand-logo")?.getAttribute("src")||document.querySelector(".hero-brand-mark img")?.getAttribute("src")||"";
+    drawer.innerHTML='<div class="void-drawer-head"><img src="'+esc(logo)+'" alt="VOID DEVELOPMENT logo"><div><b>VOID DEVELOPMENT</b><small>Creator workspace</small></div><button type="button" class="icon-button" id="voidDrawerClose" aria-label="Close navigation">×</button></div><div class="void-drawer-section"><small>EXPLORE</small><nav class="void-drawer-links" id="voidDrawerPublic" aria-label="Public pages"></nav></div><div class="void-drawer-section"><small>ACCOUNT</small><div class="void-drawer-links" id="voidDrawerAccount"></div></div><div class="void-drawer-section" id="voidDrawerAdminSection" hidden><small>ADMINISTRATION</small><div class="void-drawer-links" id="voidDrawerAdminLinks"></div></div><p class="void-drawer-foot">BLACK VOID · WHITE SPOTLIGHT</p>';
+    document.body.append(shade,drawer,toggle);
+    const close=()=>{drawer.classList.remove("open");shade.classList.remove("open");toggle.setAttribute("aria-expanded","false");document.body.classList.remove("void-drawer-open");};
+    const open=()=>{drawer.classList.add("open");shade.classList.add("open");toggle.setAttribute("aria-expanded","true");document.body.classList.add("void-drawer-open");$("#voidDrawerClose")?.focus({preventScroll:true});};
+    const makeLink=(label,icon,action)=>{const b=document.createElement("button");b.type="button";b.className="void-drawer-link";b.innerHTML='<span class="void-drawer-icon" aria-hidden="true">'+esc(icon)+'</span><span>'+esc(label)+'</span>';b.addEventListener("click",()=>{close();action();});return b;};
+    const publicHost=$("#voidDrawerPublic"),sources=[...nav.querySelectorAll("[data-view]")];
+    sources.forEach(source=>{const label=(source.textContent||"").replace(/\\s+/g," ").trim(),icon=source.querySelector("span")?.textContent?.trim()||"•";publicHost.append(makeLink(label,icon,()=>{source.click();const target=source.dataset.view==="scripts"?"#scripts":source.dataset.view==="themes"?"#themes":source.dataset.view==="about"?"#about":null;if(target&&$(target))$(target).scrollIntoView({behavior:"smooth",block:"start"});else window.scrollTo({top:0,behavior:"smooth"});}));});
+    $("#voidDrawerAccount").append(makeLink("Toggle appearance","◐",()=>$("#themeQuick")?.click()));
+    $("#voidDrawerAccount").append(makeLink("Sign in / account","↗",()=>{const p=$("#openProfile"),auth=$("#openAuth");if(p&&!p.hidden)p.click();else auth?.click();}));
+    const adminSection=$("#voidDrawerAdminSection"),adminLinks=$("#voidDrawerAdminLinks");
+    adminLinks.append(makeLink("Admin panel","⚙",()=>$("#openAdmin")?.click()));
+    adminLinks.append(makeLink("Manage scripts","⌘",()=>{$("#openAdmin")?.click();setTimeout(()=>$('#adminTabs [data-admin-tab="scripts"]')?.click(),150);}));
+    const syncAdmin=async session=>{let allowed=false;if(session?.user&&client){try{const {data,error}=await client.from("user_roles").select("role").eq("user_id",session.user.id).eq("role","admin").maybeSingle();allowed=!error&&Boolean(data);}catch{allowed=false;}}adminSection.hidden=!allowed;if($("#openAdmin"))$("#openAdmin").hidden=!allowed;if($("#openAdminFooter"))$("#openAdminFooter").hidden=!allowed;};
+    const updateScroll=()=>{nav.classList.toggle("void-nav-hidden",window.scrollY>80);toggle.classList.add("is-visible");};
+    window.addEventListener("scroll",updateScroll,{passive:true});updateScroll();
+    toggle.addEventListener("click",()=>drawer.classList.contains("open")?close():open());shade.addEventListener("click",close);$("#voidDrawerClose").addEventListener("click",close);
+    document.addEventListener("keydown",e=>{if(e.key==="Escape"&&drawer.classList.contains("open")){close();toggle.focus({preventScroll:true});}});
+    document.addEventListener("click",e=>{if(drawer.classList.contains("open")&&!drawer.contains(e.target)&&!toggle.contains(e.target)&&!shade.contains(e.target))close();});
+    if(window.supabase?.createClient){try{if(!client)client=window.supabase.createClient(SUPABASE_URL,PUBLIC_KEY);client.auth.getSession().then(({data})=>syncAdmin(data?.session)).catch(()=>syncAdmin(null));client.auth.onAuthStateChange((_event,session)=>setTimeout(()=>syncAdmin(session),0));}catch(e){console.warn("VOID navigation permission check failed",e);}}
   }
 
   async function requireAdmin() {
