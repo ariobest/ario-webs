@@ -196,8 +196,8 @@
       if(result.error){showToast("Supabase save failed: "+result.error.message);return;}
       showToast("Script saved to Supabase.");location.reload();
     },true);
-    $("#newScriptName").addEventListener("input",()=>{const field=$("#newScriptSlug");if(!field||field.dataset.touched==="true")return;field.value=$("#newScriptName").value.toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");if($("#scriptSlugPreview"))$("#scriptSlugPreview").textContent="/script/"+(field.value||"your-script");});
-    $("#newScriptSlug").addEventListener("input",e=>{e.target.dataset.touched="true";e.target.value=e.target.value.toLowerCase().replace(/[^a-z0-9-]/g,"").replace(/-{2,}/g,"-").replace(/^-|-$/g,"");if($("#scriptSlugPreview"))$("#scriptSlugPreview").textContent="/script/"+(e.target.value||"your-script");});
+    $("#newScriptName").addEventListener("input",()=>{const field=$("#newScriptSlug");if(!field||field.dataset.touched==="true")return;field.value=$("#newScriptName").value.toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");if($("#scriptSlugPreview"))$("#scriptSlugPreview").textContent="Public page: /scripts/"+(field.value||"your-script")+" · loader: /script/"+(field.value||"your-script");});
+    $("#newScriptSlug").addEventListener("input",e=>{e.target.dataset.touched="true";e.target.value=e.target.value.toLowerCase().replace(/[^a-z0-9-]/g,"").replace(/-{2,}/g,"-").replace(/^-|-$/g,"");if($("#scriptSlugPreview"))$("#scriptSlugPreview").textContent="Public page: /scripts/"+(e.target.value||"your-script")+" · loader: /script/"+(e.target.value||"your-script");});
     $("#adminScriptList").addEventListener("click",async e=>{
       const button=e.target.closest("[data-delete-script]");if(!button||!admin||!client)return;
       const id=button.dataset.deleteScript;if(!/^[0-9a-f-]{36}$/i.test(id))return;
