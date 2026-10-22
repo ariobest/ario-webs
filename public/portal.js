@@ -161,6 +161,9 @@
       const name=$("#newScriptName").value.trim(),slug=$("#newScriptSlug").value.trim().toLowerCase(),category=$("#newScriptCategory").value,description=$("#newScriptDescription").value.trim(),link=$("#newScriptLink").value.trim(),id=$("#editScriptId").value;
       if(!name||!description||!slug){showToast("Enter a script name, slug and description.");return;}
       if(!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)){showToast("Slug must use lowercase letters, numbers and hyphens.");$("#newScriptSlug").focus();return;}
+      const duplicate = await client.from("scripts").select("id").eq("slug", slug).neq("id", id || "00000000-0000-0000-0000-000000000000").maybeSingle();
+      if (duplicate.error) { showToast("Could not verify slug uniqueness. Please retry."); return; }
+      if (duplicate.data) { showToast("That slug is already in use. Choose a unique slug."); $("#newScriptSlug").focus(); return; }
       const content=$("#newScriptContent").value.trim();
       if(content.length>200000){showToast("Lua source is too large (200,000 characters maximum).");return;}
       const record={name,slug,category,description,link:link||null,content:content||null,status:"published",owner_id:user.id};
