@@ -521,3 +521,8 @@ option{background:#080808!important;color:#fff!important}
 #voidProfileSection{scroll-margin-top:100px}
 @media(max-width:900px){.void-stat-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.void-profile-layout{grid-template-columns:1fr}}
 @media(max-width:600px){.void-list-item{align-items:flex-start;flex-wrap:wrap}.void-list-item time{width:100%;text-align:left}.void-lua-source{min-height:260px;font-size:12px}.void-stat-grid article{padding:12px}.void-stat-grid article strong{font-size:22px}.void-extra-tab{font-size:11px}}
+
+.void-editor-meta{margin-top:14px}
+.CodeMirror{height:420px!important;width:100%;border:1px solid var(--line);border-radius:13px;font:13px/1.65 ui-monospace,SFMono-Regular,Menlo,monospace;z-index:1}
+.CodeMirror-gutters{border-right:1px solid rgba(255,255,255,.08)}
+@media(max-width:600px){.CodeMirror{height:320px!important;font-size:12px}}
