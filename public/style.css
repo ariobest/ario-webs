@@ -777,3 +777,119 @@ body.void-drawer-open{overflow:hidden}
 .admin-header h2{margin-left:auto;margin-right:auto;text-align:center;}
 .admin-header>p{margin-left:auto;margin-right:auto;text-align:center;}
 @media(max-width:680px){.admin-header{padding-top:20px;padding-left:48px;padding-right:48px}.admin-header-logo{width:76px;height:76px}.admin-header h2{font-size:clamp(22px,6vw,30px)}}
+
+
+/* Requested layout refinement: admin tabs form a left sidebar, not a row of pills. */
+@media (min-width: 581px) {
+  #adminBackdrop .admin-modal {
+    display: grid;
+    grid-template-columns: minmax(190px, 230px) minmax(0, 1fr);
+    align-items: stretch;
+  }
+  #adminBackdrop .admin-header,
+  #adminBackdrop #adminAccessNotice,
+  #adminBackdrop .admin-foot {
+    grid-column: 1 / -1;
+  }
+  #adminBackdrop .admin-tabs {
+    grid-column: 1;
+    grid-row: 2 / span 2;
+    align-self: stretch;
+    display: flex !important;
+    flex-direction: column;
+    flex-wrap: nowrap !important;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: 7px !important;
+    max-height: none !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    white-space: normal;
+    padding: 16px 12px !important;
+    border-right: 1px solid var(--line);
+    border-bottom: 0;
+    background: color-mix(in srgb, var(--surface) 88%, transparent);
+  }
+  #adminBackdrop .admin-tabs .admin-tab {
+    width: 100%;
+    min-width: 0;
+    flex: 0 0 auto;
+    display: flex;
+    justify-content: flex-start;
+    text-align: left;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    padding: 11px 12px;
+    min-height: 42px;
+  }
+  #adminBackdrop .admin-content {
+    grid-column: 2;
+    grid-row: 2 / span 2;
+    min-width: 0;
+    padding: 22px;
+  }
+}
+@media (max-width: 580px) {
+  #adminBackdrop .admin-modal {
+    display: grid;
+    grid-template-columns: 112px minmax(0, 1fr);
+    align-items: stretch;
+  }
+  #adminBackdrop .admin-header,
+  #adminBackdrop #adminAccessNotice,
+  #adminBackdrop .admin-foot {
+    grid-column: 1 / -1;
+  }
+  #adminBackdrop .admin-tabs {
+    grid-column: 1;
+    grid-row: 2 / span 2;
+    display: flex !important;
+    flex-direction: column;
+    flex-wrap: nowrap !important;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: 6px !important;
+    max-height: none !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    padding: 10px 7px !important;
+    border-right: 1px solid var(--line);
+    border-bottom: 0;
+  }
+  #adminBackdrop .admin-tabs .admin-tab {
+    width: 100%;
+    min-width: 0;
+    min-height: 40px;
+    justify-content: flex-start;
+    text-align: left;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    padding: 9px 7px;
+    font-size: 10px;
+    gap: 5px;
+  }
+  #adminBackdrop .admin-content {
+    grid-column: 2;
+    grid-row: 2 / span 2;
+    min-width: 0;
+    padding: 14px 10px;
+  }
+  #adminBackdrop .admin-header {
+    padding: 20px 42px 16px 16px;
+  }
+  #adminBackdrop .admin-header-logo {
+    width: 76px;
+    height: 76px;
+  }
+}
+@media (min-width: 761px) {
+  .nav .brand-logo { width: 76px !important; height: 76px !important; }
+}
+@media (max-width: 760px) {
+  .nav .brand-logo { width: 60px !important; height: 60px !important; }
+}
+@media (max-width: 390px) {
+  #adminBackdrop .admin-modal { grid-template-columns: 98px minmax(0, 1fr); }
+  #adminBackdrop .admin-tabs .admin-tab { font-size: 9px; padding: 8px 5px; }
+  #adminBackdrop .admin-content { padding: 12px 8px; }
+}
