@@ -25,7 +25,7 @@
     ["crimson","Crimson","Bold red","#ff9d9d","#df4747","#200e12","#30151b","#451d26","#d8a8af"],
     ["gold","Gold","Premium gold","#f5d782","#d9a82e","#201a0b","#302710","#453719","#d5c69a"],
     ["slate","Slate","Minimal graphite","#b8c5d6","#8194ad","#111820","#1b2632","#273646","#afbbc9"],
-    ["mono","Mono","Black and white","#f1f1f1","#b8b8b8","#111111","#1c1c1c","#2b2b2b","#c0c0c0"],
+    ["mono","Black Void","Black canvas, white spotlight","#ffffff","#f4f4f5","#050505","#0a0a0a","#101010","#d4d4d8"],
     ["candy","Candy","Playful pastel","#ffb5d2","#e779b0","#241529","#35203b","#4a2b50","#d9b8dc"],
     ["sakura","Sakura","Cherry blossom","#ffc1d1","#e884a2","#21141d","#30202b","#44303e","#d5b7c8"],
     ["arctic","Arctic","Ice and silver","#c1efff","#70bde8","#101d2a","#192b3b","#263f52","#b0c8d8"]
@@ -39,7 +39,7 @@
     root.setProperty("--muted",t.muted);root.setProperty("--glow",t.strong+"22");root.setProperty("--hero-glow",t.accent+"22");
     const label=$("#themeLabel");if(label)label.textContent=t.name.toUpperCase()+" EDITION";
     const meta=$('meta[name="theme-color"]');if(meta)meta.content=t.page;
-    try{localStorage.setItem("arioScripts.theme.v1",JSON.stringify(t.id));}catch{}
+    try{localStorage.setItem("voidDevelopment.theme.v1",JSON.stringify(t.id));}catch{}
     $$("#themeGrid [data-theme-choice]").forEach(b=>{b.classList.toggle("selected",b.dataset.themeChoice===id);b.setAttribute("aria-pressed",String(b.dataset.themeChoice===id));});
     if (broadcast) document.dispatchEvent(new CustomEvent("arioScripts:theme-change", { detail: { id } }));
   }
@@ -50,7 +50,7 @@
   function renderThemes() {
     const host=$("#themeGrid");if(!host)return;
     host.innerHTML=themes.map(t=>'<button type="button" class="theme-choice" data-theme-choice="'+t.id+'"><span class="theme-preview" style="background:linear-gradient(135deg,'+t.page+','+t.strong+');color:'+t.accent+'">✦</span><b>'+esc(t.name)+'</b><small>'+esc(t.desc)+'</small></button>').join("");
-    let current="summer";try{current=JSON.parse(localStorage.getItem("arioScripts.theme.v1")||'"summer"');}catch{}
+    let current="mono";try{current=JSON.parse(localStorage.getItem("voidDevelopment.theme.v1")||'"mono"');}catch{}
     setTheme(current);
   }
   function showAuth(which) {
@@ -285,7 +285,7 @@
         $("#settingTagline").value = value.tagline || "";
         $("#settingAnnouncement").value = value.announcement || "";
         $("#settingAnnouncementEnabled").checked = Boolean(value.announcementEnabled);
-        $("#settingDefaultTheme").value = value.defaultTheme || "summer";
+        $("#settingDefaultTheme").value = value.defaultTheme || "mono";
         status.textContent = data ? "Loaded from Supabase. Public fields are currently " + (data.is_public ? "published." : "private.") : "No saved settings yet. Save to create the site configuration.";
       } catch (error) { status.textContent = error.message || "Could not load site settings."; }
     }
