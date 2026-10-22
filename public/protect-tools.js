@@ -10,8 +10,7 @@
   function makeLoader(slug, key = issuedKey || "PASTE_YOUR_ARIO_KEY_HERE") {
     const url = `${location.origin}/script/${encodeURIComponent(slug)}?key=${encodeURIComponent(key)}`;
     const api = "https://cqtwmxojwwyeasstuhgb.supabase.co/functions/v1/script-api";
-    const lua = `local HttpService = game:GetService("HttpService")
-local API = "${api}"
+    const lua = `local API = "${api}"
 local KEY = "${key.replace(/\\/g,"\\\\").replace(/"/g,'\\"')}"
 local SCRIPT = "${slug.replace(/\\/g,"\\\\").replace(/"/g,'\\"')}"
 local function fail(message)
@@ -21,17 +20,25 @@ end
 if KEY == "PASTE_YOUR_ARIO_KEY_HERE" then
     return fail("WRONG KEY — paste the key you received from the website.")
 end
-local checked, response = pcall(function()
-    return HttpService:RequestAsync({
+local httpRequest = request or http_request or (syn and syn.request) or (fluxus and fluxus.request)
+if type(httpRequest) ~= "function" then
+    return fail("HTTP REQUEST NOT AVAILABLE IN THIS EXECUTOR.")
+end
+local HttpService = game:GetService("HttpService")
+local ok, response = pcall(function()
+    return httpRequest({
         Url = API, Method = "POST",
         Headers = { ["Content-Type"] = "application/json" },
         Body = HttpService:JSONEncode({ action = "validate", key = KEY, script = SCRIPT })
     })
 end)
-if not checked or not response then return fail("KEY SERVICE UNAVAILABLE — try again later.") end
+if not ok or type(response) ~= "table" then
+    return fail("KEY SERVICE UNAVAILABLE — try again later.")
+end
 local data = {}
-pcall(function() data = HttpService:JSONDecode(response.Body) end)
-if not response.Success or data.valid ~= true then
+pcall(function() data = HttpService:JSONDecode(response.Body or response.body or "{}") end)
+local status = tonumber(response.StatusCode or response.Status or response.status_code or 0)
+if (status < 200 or status >= 300) or data.valid ~= true then
     local code = data.code or ""
     if code == "KEY_NOT_FOUND" or code == "" then return fail("WRONG KEY") end
     if code == "KEY_EXPIRED" then return fail("KEY EXPIRED") end
@@ -42,15 +49,21 @@ if not response.Success or data.valid ~= true then
     return fail(data.error or "KEY VERIFICATION FAILED")
 end
 local loaded, sourceResponse = pcall(function()
-    return HttpService:RequestAsync({
+    return httpRequest({
         Url = API .. "?action=load&script=" .. HttpService:UrlEncode(SCRIPT) .. "&key=" .. HttpService:UrlEncode(KEY),
         Method = "GET"
     })
 end)
-if not loaded or not sourceResponse or not sourceResponse.Success then
+if not loaded or type(sourceResponse) ~= "table" then
     return fail("SCRIPT LOAD FAILED — key may have expired or been revoked.")
 end
-local source = sourceResponse.Body
+local loadStatus = tonumber(sourceResponse.StatusCode or sourceResponse.Status or sourceResponse.status_code or 0)
+if loadStatus < 200 or loadStatus >= 300 then
+    local errorData = {}
+    pcall(function() errorData = HttpService:JSONDecode(sourceResponse.Body or sourceResponse.body or "{}") end)
+    return fail(errorData.error or "SCRIPT LOAD FAILED — key may have expired or been revoked.")
+end
+local source = sourceResponse.Body or sourceResponse.body
 if type(source) ~= "string" or source == "" then return fail("SCRIPT SOURCE IS EMPTY.") end
 local compile, scriptFunction = pcall(loadstring, source)
 if not compile or type(scriptFunction) ~= "function" then return fail("SCRIPT SOURCE COULD NOT BE COMPILED.") end
