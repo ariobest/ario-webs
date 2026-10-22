@@ -471,39 +471,26 @@
         const duplicate = await client.from("scripts").select("id").eq("slug", slug).maybeSingle();
         if (duplicate.error) throw new Error("Could not verify slug uniqueness: " + duplicate.error.message);
         if (duplicate.data) throw new Error("That slug already exists. Choose a different slug.");
-        const safeName = slug + ".lua";
-        const objectPath = "scripts/" + safeName;
-        const upload = await client.storage.from("void-files").upload(objectPath, new Blob([source], { type: "text/plain; charset=utf-8" }), {
-          contentType: "text/plain; charset=utf-8",
-          cacheControl: "60",
-          upsert: false
-        });
-        if (upload.error) throw new Error("Could not upload source to the void-files bucket: " + upload.error.message);
-        const publicResult = client.storage.from("void-files").getPublicUrl(objectPath);
-        const sourceUrl = publicResult?.data?.publicUrl;
-        if (!sourceUrl) throw new Error("Storage uploaded the file but did not return a public URL.");
         const record = {
           name,
           slug,
           category: "Utility",
-          description: "Published from the Script Protector.",
-          link: sourceUrl,
+          description: "Published from the VOID DEVELOPMENT Script Protector.",
+          link: null,
           content: source,
           status: "published",
           owner_id: user.id,
           updated_at: new Date().toISOString()
         };
         const saved = await client.from("scripts").insert(record);
-        if (saved.error) {
-          await client.storage.from("void-files").remove([objectPath]);
-          throw new Error("The file uploaded, but the script record could not be saved: " + saved.error.message);
-        }
-        const loader = 'loadstring(game:HttpGet(' + JSON.stringify(sourceUrl) + '))()';
+        if (saved.error) throw new Error("Could not publish script: " + saved.error.message);
+        const sourceUrl = "https://cqtwmxojwwyeasstuhgb.supabase.co/functions/v1/ario-raw?s=" + encodeURIComponent(slug);
+        const loader = "loadstring(game:HttpGet(" + JSON.stringify(sourceUrl) + "))()";
         $("#protectedScriptUrl").value = sourceUrl;
         $("#protectedLoaderOutput").value = loader;
-        status.textContent = "Script published successfully. Copy the loadstring below. The hosted URL is public and has no access key.";
-        showToast("Script published and loadstring generated.", "success");
-        if (typeof loadAdminScripts === "function") loadAdminScripts();
+        status.textContent = "Script published. Opening the URL in a browser shows the VOID DEVELOPMENT protection page; a loader request receives the published source.";
+        showToast("Script published and protected URL generated.", "success");
+        loadAdminScripts();
       } catch (error) {
         status.textContent = error?.message || "Could not create the hosted script.";
         showToast(status.textContent, "error");
