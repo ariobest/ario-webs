@@ -483,3 +483,41 @@ option{background:#080808!important;color:#fff!important}
 @media(max-width:900px){.verification-endpoints{grid-template-columns:1fr}.verification-endpoint{padding:14px}}
 @media(max-width:760px){.admin-tabs{gap:7px}.admin-tab{white-space:nowrap}.admin-content{min-width:0}.verification-test-card,.verification-sample{padding:13px}.void-picker-menu{max-height:200px}.admin-modal{width:calc(100vw - 16px)!important;max-height:calc(100dvh - 16px)!important;margin:8px!important}}
 @media(max-width:420px){.verification-endpoint code{font-size:10px}.void-picker-option{align-items:flex-start;flex-direction:column;gap:4px}#verificationSampleCode{font-size:10px}}
+
+
+/* VOID DEVELOPMENT — integrated workspace features */
+.void-extra-tab{flex:0 0 auto}
+.void-stat-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:16px 0}
+.void-stat-grid article,.void-card{background:var(--surface-2);border:1px solid var(--line);border-radius:16px;padding:16px;min-width:0}
+.void-stat-grid article span{display:block;color:var(--muted);font-size:12px;margin-bottom:8px}
+.void-stat-grid article strong{font:600 25px 'Space Grotesk',sans-serif;overflow-wrap:anywhere}
+.void-card{margin:14px 0}
+.void-card h3,.void-card h4{margin:0 0 12px}
+.void-bars{display:grid;gap:10px}
+.void-bar-row{display:grid;grid-template-columns:46px minmax(20px,1fr) 32px;gap:10px;align-items:center;font-size:12px;color:var(--muted)}
+.void-bar-row>div{height:9px;background:var(--line);border-radius:999px;overflow:hidden}
+.void-bar-row i{display:block;height:100%;min-width:2px;border-radius:999px;background:var(--ink)}
+.void-bar-row b{color:var(--ink);text-align:right}
+.void-list{display:grid;gap:8px}
+.void-list-item{display:flex;gap:12px;align-items:center;justify-content:space-between;padding:13px 14px;border:1px solid var(--line);border-radius:13px;background:var(--surface);min-width:0}
+.void-list-item>div{min-width:0;display:grid;gap:5px}
+.void-list-item b{font-size:13px;overflow-wrap:anywhere}
+.void-list-item small,.void-list-item time{font-size:11px;color:var(--muted);overflow-wrap:anywhere}
+.void-list-item time{flex:0 0 auto;text-align:right}
+.void-list-item.is-unread{border-color:var(--ink);background:var(--glow)}
+.void-editor-meta{display:flex;justify-content:space-between;gap:12px;color:var(--muted);font-size:12px;margin:12px 0 8px}
+.void-lua-source{width:100%;min-height:340px;resize:vertical;box-sizing:border-box;background:#070707;color:#f4f4f5;border:1px solid rgba(255,255,255,.16);border-radius:14px;padding:16px;font:13px/1.65 ui-monospace,SFMono-Regular,Menlo,monospace;tab-size:4;white-space:pre;overflow:auto}
+.void-lua-source:disabled{opacity:.55}
+.void-profile-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:start}
+.void-profile-layout .void-card{margin:0}
+.void-profile-layout h3{font:600 18px 'Space Grotesk',sans-serif}
+.void-profile-layout label{display:grid;gap:7px;margin:12px 0;color:var(--muted);font-size:12px}
+.void-profile-layout input,.void-profile-layout textarea{width:100%;box-sizing:border-box;padding:12px 13px;border-radius:11px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font:inherit}
+.void-profile-layout textarea{resize:vertical}
+.void-badges{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
+.void-badge{display:inline-flex;gap:6px;align-items:center;border:1px solid var(--line);background:var(--glow);padding:7px 10px;border-radius:999px;font-size:12px}
+.void-notifications-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.void-public-updates .void-list-item{background:var(--surface)}
+#voidProfileSection{scroll-margin-top:100px}
+@media(max-width:900px){.void-stat-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.void-profile-layout{grid-template-columns:1fr}}
+@media(max-width:600px){.void-list-item{align-items:flex-start;flex-wrap:wrap}.void-list-item time{width:100%;text-align:left}.void-lua-source{min-height:260px;font-size:12px}.void-stat-grid article{padding:12px}.void-stat-grid article strong{font-size:22px}.void-extra-tab{font-size:11px}}
