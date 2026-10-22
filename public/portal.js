@@ -5,7 +5,7 @@
   const PROJECT_URL = "https://cqtwmxojwwyeasstuhgb.supabase.co";
   const PUBLIC_KEY = "sb_publishable_qBPb1ltQbHNZ-fO3PFmDeg_IQj0QfNB";
   const client = window.supabase && window.supabase.createClient ? window.supabase.createClient(PROJECT_URL, PUBLIC_KEY) : null;
-  let user = null, admin = false, mode = "login", authBusy = false, toastTimer = 0;
+  let user = null, admin = false, adminRoleError = "", authCheckId = 0, mode = "login", authBusy = false, toastTimer = 0;
   const showToast = (msg, kind = "info") => { const t=$("#toast"); if(t){t.textContent=msg;t.dataset.kind=kind;t.classList.add("show");clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove("show"),3200);} };
   const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const themes = [
@@ -82,19 +82,32 @@
   }
   function updateUI(){
     $("#openAuth").textContent=user?(admin?"Admin account ▾":"My account ▾"):"Sign up / Log in";
-    $("#openAdmin").hidden=!admin;$("#openAdminFooter").hidden=!admin;
+    // Show the panel entry point for signed-in users; sensitive actions still require the verified admin role.
+    $("#openAdmin").hidden=!user;$("#openAdminFooter").hidden=!user;
     $("#signOutButton").hidden=!user;
-    if(user)$("#authStatus").textContent="Signed in as "+(user.email||"account")+(admin?" · Admin access verified.":" · Standard account. Admin panel is restricted.");
+    const notice=$("#adminAccessNotice");
+    if(notice){
+      notice.hidden=!user;
+      notice.textContent=!user?"Sign in to view account tools.":admin?"Administrator access verified.":"You are signed in, but this account does not have the administrator role. The panel is visible, while protected database/API actions remain locked.";
+      notice.dataset.state=admin?"authorized":user?"restricted":"signed-out";
+    }
+    if(user)$("#authStatus").textContent="Signed in as "+(user.email||"account")+(admin?" · Admin access verified.":adminRoleError?" · Could not verify admin role: "+adminRoleError:" · Signed in; administrator role not found.");
   }
   async function refresh(userIn){
-    user=userIn||null;admin=false;
+    const checkId=++authCheckId;
+    user=userIn||null;admin=false;adminRoleError="";
     if(user&&client){
-      const {data,error}=await client.from("user_roles").select("role").eq("user_id",user.id).eq("role","admin").maybeSingle();
-      if(!error&&data&&data.role==="admin")admin=true;
+      try{
+        const {data,error}=await client.from("user_roles").select("role").eq("user_id",user.id).eq("role","admin").maybeSingle();
+        if(checkId!==authCheckId)return;
+        if(error)adminRoleError=error.message||"role lookup failed";
+        else if(data&&data.role==="admin")admin=true;
+      }catch(error){if(checkId!==authCheckId)return;adminRoleError=error?.message||"role lookup failed";}
     }
+    if(checkId!==authCheckId)return;
     updateUI();
-    if (admin) loadAdminScripts();
-    if(!admin&&!$("#adminBackdrop").hidden)$("#adminBackdrop").hidden=true;
+    if(admin)loadAdminScripts();
+    if(!user&&!$("#adminBackdrop").hidden)$("#adminBackdrop").hidden=true;
   }
   async function loadAdminScripts() {
     const host = $("#adminScriptList");
