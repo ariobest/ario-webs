@@ -359,3 +359,38 @@ footer .brand>span{color:var(--ink)}
   .admin-content{padding:18px 14px}
   .admin-script-row .text-action{flex:1 1 auto}
 }
+
+
+/* Requested polish: larger header logo, monochrome default, account/security overlays */
+:root[data-theme="mono"],:root[data-theme="dark"]{--page:#050505;--surface:rgba(12,12,12,.88);--surface-2:rgba(255,255,255,.055);--ink:#fff;--muted:#c4c4ca;--line:rgba(255,255,255,.12);--accent:#fff;--accent-strong:#fff;--glow:rgba(255,255,255,.08);--hero-glow:rgba(255,255,255,.14);color-scheme:dark}
+body{background:radial-gradient(ellipse at 50% -15%,rgba(255,255,255,.09),transparent 48%),var(--page)}
+.brand-logo{width:58px!important;height:58px!important;object-fit:contain;filter:drop-shadow(0 0 24px rgba(255,255,255,.18))!important}
+.brand{gap:12px}.brand>span{font-size:12px;letter-spacing:.12em}
+.hero{padding-top:86px!important}.hero:before{background:radial-gradient(ellipse at 50% 8%,rgba(255,255,255,.12) 0%,rgba(255,255,255,.045) 28%,transparent 70%)}
+.hero-brand-mark{display:none!important}.nav .profile-button{border-radius:999px}
+.access-denied-backdrop,.profile-backdrop{position:fixed;inset:0;z-index:2000;display:grid;place-items:center;padding:20px;background:rgba(0,0,0,.82);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px)}
+.access-denied-backdrop[hidden],.profile-backdrop[hidden]{display:none!important}
+.access-denied-card,.profile-modal{position:relative;width:min(560px,100%);padding:clamp(26px,5vw,46px);border:1px solid rgba(255,255,255,.15);border-radius:30px;background:linear-gradient(145deg,rgba(24,24,24,.96),rgba(5,5,5,.98));color:#fff;text-align:center;box-shadow:0 40px 140px rgba(0,0,0,.72),inset 0 1px rgba(255,255,255,.08);overflow:hidden;animation:denied-enter .65s cubic-bezier(.2,.8,.2,1) both}
+.access-denied-card:before{content:"";position:absolute;inset:-45% -20% auto;height:230px;background:radial-gradient(ellipse,rgba(255,255,255,.13),transparent 68%);pointer-events:none}
+.denied-orbit{position:relative;display:grid;place-items:center;width:88px;height:88px;margin:0 auto 22px;border:1px solid rgba(255,255,255,.24);border-radius:50%;background:rgba(255,255,255,.04);box-shadow:0 0 0 9px rgba(255,255,255,.025),0 0 55px rgba(255,255,255,.08);animation:denied-pulse 2.8s ease-in-out infinite}
+.denied-orbit:before,.denied-orbit:after{content:"";position:absolute;inset:-10px;border:1px solid rgba(255,255,255,.1);border-radius:50%;animation:denied-ring 3s ease-out infinite}
+.denied-orbit:after{animation-delay:1.5s}.denied-orbit span{font-size:48px;font-weight:300;line-height:1;color:#fff}
+.denied-eyebrow{position:relative;display:flex;justify-content:center;align-items:center;gap:9px;font-size:10px;font-weight:800;letter-spacing:.24em;color:#bdbdc4}
+.denied-eyebrow .status-dot{background:#fff;box-shadow:0 0 12px #fff}
+.access-denied-card h1{position:relative;margin:16px 0 12px;font:800 clamp(28px,6vw,42px)/1.05 'Space Grotesk',sans-serif;letter-spacing:-.06em}
+.access-denied-card p{position:relative;margin:0 auto 22px;max-width:420px;color:#b8b8c0;font-size:13px;line-height:1.8}
+.denied-account{position:relative;margin:0 auto 18px;padding:10px 13px;max-width:100%;border:1px solid rgba(255,255,255,.09);border-radius:12px;color:#888891;font-size:10px;letter-spacing:.08em;overflow-wrap:anywhere}
+.denied-home-button{position:relative;display:flex;justify-content:center;align-items:center;gap:12px;width:100%;padding:15px 18px;border:1px solid #fff;border-radius:999px;background:#fff;color:#050505;text-decoration:none;font-size:12px;font-weight:850;letter-spacing:.08em;transition:transform .2s,box-shadow .2s}
+.denied-home-button:hover{transform:translateY(-2px);box-shadow:0 10px 36px rgba(255,255,255,.18)}
+.denied-switch-button{margin-top:12px;padding:10px 15px;border:0;border-radius:999px;background:transparent;color:#aaa;font-size:12px}.denied-switch-button:hover{color:#fff;background:rgba(255,255,255,.06)}
+@keyframes denied-enter{from{opacity:0;transform:translateY(18px) scale(.97);filter:blur(8px)}to{opacity:1;transform:translateY(0) scale(1);filter:blur(0)}}
+@keyframes denied-pulse{0%,100%{transform:scale(1);box-shadow:0 0 0 9px rgba(255,255,255,.025),0 0 35px rgba(255,255,255,.05)}50%{transform:scale(1.04);box-shadow:0 0 0 13px rgba(255,255,255,.02),0 0 55px rgba(255,255,255,.13)}}
+@keyframes denied-ring{0%{transform:scale(.82);opacity:.65}100%{transform:scale(1.45);opacity:0}}
+.profile-modal{text-align:left;max-height:min(86vh,720px);overflow:auto;animation:denied-enter .35s ease both}
+.profile-head{display:flex;align-items:center;gap:15px;padding-bottom:22px;border-bottom:1px solid var(--line)}
+.profile-head>div:nth-child(2){min-width:0;flex:1}.profile-head h2{margin:5px 0;font:700 26px 'Space Grotesk',sans-serif}.profile-head p{margin:0;color:var(--muted);font-size:12px}
+.profile-avatar{display:grid;place-items:center;flex:0 0 60px;width:60px;height:60px;border:1px solid rgba(255,255,255,.22);border-radius:20px;background:linear-gradient(145deg,#fff,#777);color:#050505;font-size:24px;font-weight:850;box-shadow:0 8px 35px rgba(255,255,255,.1)}
+.profile-details{display:grid;gap:10px;margin:22px 0}.profile-detail{display:grid;grid-template-columns:minmax(95px,.7fr) minmax(0,1.5fr) auto;align-items:center;gap:12px;padding:13px 14px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.025)}
+.profile-detail span{color:var(--muted);font-size:11px}.profile-detail strong{font-size:12px;overflow-wrap:anywhere}.profile-actions{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}.profile-modal .saved-note{margin-bottom:0}
+@media(max-width:580px){.brand-logo{width:43px!important;height:43px!important}.brand>span{font-size:10px}.hero{padding-top:65px!important}.profile-modal{padding:20px}.profile-detail{grid-template-columns:1fr;gap:6px}.profile-detail button{justify-self:start}.profile-head{gap:10px}.profile-avatar{width:48px;height:48px;flex-basis:48px;border-radius:15px}.access-denied-card{border-radius:24px}}
+@media(prefers-reduced-motion:reduce){.access-denied-card,.profile-modal,.denied-orbit,.denied-orbit:before,.denied-orbit:after{animation:none!important}}
