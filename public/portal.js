@@ -9,7 +9,7 @@
   const showToast = (msg, kind = "info") => { const t=$("#toast"); if(t){t.textContent=msg;t.dataset.kind=kind;t.classList.add("show");clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove("show"),3200);} };
   const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const themes = [
-    ["summer","Summer","Warm and sunny","#f5b942","#e59b1a","#101a2b","#162238","#22314c","#a9c0e5"],
+    ["summer","Summer","Warm and ario","#f5b942","#e59b1a","#101a2b","#162238","#22314c","#a9c0e5"],
     ["light","Light","Clean and bright","#4778ed","#315bd1","#f7f9fc","#ffffff","#eaf0fa","#43516b"],
     ["dark","Midnight","Deep navy","#9aabff","#687cf0","#080d18","#101827","#172235","#93a2bb"],
     ["winter","Winter","Frosted blue","#8ee2ff","#48b6e6","#071827","#10283b","#17374e","#a2c4d6"],
@@ -39,18 +39,18 @@
     root.setProperty("--muted",t.muted);root.setProperty("--glow",t.strong+"22");root.setProperty("--hero-glow",t.accent+"22");
     const label=$("#themeLabel");if(label)label.textContent=t.name.toUpperCase()+" EDITION";
     const meta=$('meta[name="theme-color"]');if(meta)meta.content=t.page;
-    try{localStorage.setItem("sunnyScripts.theme.v1",JSON.stringify(t.id));}catch{}
+    try{localStorage.setItem("arioScripts.theme.v1",JSON.stringify(t.id));}catch{}
     $$("#themeGrid [data-theme-choice]").forEach(b=>{b.classList.toggle("selected",b.dataset.themeChoice===id);b.setAttribute("aria-pressed",String(b.dataset.themeChoice===id));});
-    if (broadcast) document.dispatchEvent(new CustomEvent("sunnyScripts:theme-change", { detail: { id } }));
+    if (broadcast) document.dispatchEvent(new CustomEvent("arioScripts:theme-change", { detail: { id } }));
   }
-  document.addEventListener("sunnyScripts:theme-change", event => {
+  document.addEventListener("arioScripts:theme-change", event => {
     const id = event.detail?.id;
     if (themes.some(theme => theme.id === id)) setTheme(id, false);
   });
   function renderThemes() {
     const host=$("#themeGrid");if(!host)return;
     host.innerHTML=themes.map(t=>'<button type="button" class="theme-choice" data-theme-choice="'+t.id+'"><span class="theme-preview" style="background:linear-gradient(135deg,'+t.page+','+t.strong+');color:'+t.accent+'">✦</span><b>'+esc(t.name)+'</b><small>'+esc(t.desc)+'</small></button>').join("");
-    let current="summer";try{current=JSON.parse(localStorage.getItem("sunnyScripts.theme.v1")||'"summer"');}catch{}
+    let current="summer";try{current=JSON.parse(localStorage.getItem("arioScripts.theme.v1")||'"summer"');}catch{}
     setTheme(current);
   }
   function showAuth(which) {
@@ -110,8 +110,8 @@
         if(result.error)throw result.error;
         if(result.data.session&&result.data.user){
           await client.from("profiles").upsert({id:result.data.user.id,username:username},{onConflict:"id"});
-          await refresh(result.data.user);mode="account";updateAuthMode();$("#authStatus").textContent="Account created and signed in. Welcome to SunnyScripts!";showToast("Account created successfully.","success");
-        }else { $("#resendConfirmation").hidden=false; $("#authStatus").textContent="Account created. Check your inbox and spam folder for the SunnyScripts confirmation email.";showToast("Confirmation email requested. Check your inbox.","success"); }
+          await refresh(result.data.user);mode="account";updateAuthMode();$("#authStatus").textContent="Account created and signed in. Welcome to ARIO STUDIOS!";showToast("Account created successfully.","success");
+        }else { $("#resendConfirmation").hidden=false; $("#authStatus").textContent="Account created. Check your inbox and spam folder for the ARIO STUDIOS confirmation email.";showToast("Confirmation email requested. Check your inbox.","success"); }
       }else if(mode==="reset"){
         const result=await client.auth.resetPasswordForEmail(email,{redirectTo:window.location.origin});
         if(result.error)throw result.error;
@@ -129,12 +129,12 @@
     }catch(e){$("#authStatus").textContent=e.message||"Could not authenticate.";showToast(e.message||"Authentication failed.","error");}
     finally{authBusy=false;$("#authSubmit").disabled=mode==="account";}
   }
-  function saveSignupDraft(){try{sessionStorage.setItem("sunnyScripts.signupDraft.v1",JSON.stringify({email:$("#authEmail").value.trim(),username:$("#authUsername").value.trim()}));}catch{}}
+  function saveSignupDraft(){try{sessionStorage.setItem("arioScripts.signupDraft.v1",JSON.stringify({email:$("#authEmail").value.trim(),username:$("#authUsername").value.trim()}));}catch{}}
   function init(){
     renderThemes();
     $("#openAuth").addEventListener("click",()=>showAuth(user?"account":"signup"));
     $("#heroSignUp").addEventListener("click",event=>{event.preventDefault();showAuth("signup");});
-    try{const draft=JSON.parse(sessionStorage.getItem("sunnyScripts.signupDraft.v1")||"null");if(draft){if(draft.email)$("#authEmail").value=draft.email;if(draft.username)$("#authUsername").value=draft.username;}}catch{}
+    try{const draft=JSON.parse(sessionStorage.getItem("arioScripts.signupDraft.v1")||"null");if(draft){if(draft.email)$("#authEmail").value=draft.email;if(draft.username)$("#authUsername").value=draft.username;}}catch{}
     $("#authEmail").addEventListener("input",saveSignupDraft);$("#authUsername").addEventListener("input",saveSignupDraft);
     $("#closeAuth").addEventListener("click",closeAuth);
     $("#authBackdrop").addEventListener("click",e=>{if(e.target===$("#authBackdrop"))closeAuth();});
@@ -245,7 +245,7 @@
       }
       host.innerHTML = '<p class="saved-note">Loading media…</p>';
       try {
-        const { data, error } = await client.storage.from("sunny-media").list("", {
+        const { data, error } = await client.storage.from("ario-media").list("", {
           limit: 100, sortBy: { column: "created_at", order: "desc" }
         });
         if (error) throw error;
@@ -256,7 +256,7 @@
         }
         host.innerHTML = files.map(file => {
           const path = file.name;
-          const publicUrl = client.storage.from("sunny-media").getPublicUrl(path).data.publicUrl;
+          const publicUrl = client.storage.from("ario-media").getPublicUrl(path).data.publicUrl;
           const mime = file.metadata?.mimetype || "";
           const image = mime.startsWith("image/") || /\.(png|jpe?g|webp|gif|svg)$/i.test(path);
           const video = mime.startsWith("video/") || /\.(mp4|webm)$/i.test(path);
@@ -268,7 +268,7 @@
         if (status) status.textContent = "Loaded " + files.length + " file(s).";
       } catch (error) {
         host.innerHTML = '<p class="saved-note">Could not load media: ' + esc(error.message || "Storage request failed") + '</p>';
-        if (status) status.textContent = "Check that the sunny-media bucket and admin storage policies exist.";
+        if (status) status.textContent = "Check that the ario-media bucket and admin storage policies exist.";
       }
     }
     async function loadSiteSettings() {
@@ -279,7 +279,7 @@
         const { data, error } = await client.from("site_settings").select("value,is_public").eq("key", "site_config").maybeSingle();
         if (error) throw error;
         const value = data?.value || {};
-        $("#settingSiteName").value = value.siteName || "SunnyScripts";
+        $("#settingSiteName").value = value.siteName || "ARIO STUDIOS";
         $("#settingTagline").value = value.tagline || "";
         $("#settingAnnouncement").value = value.announcement || "";
         $("#settingAnnouncementEnabled").checked = Boolean(value.announcementEnabled);
@@ -325,7 +325,7 @@
         const label = $("#mediaLabel").value.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
         const filename = file.name.replace(/[^a-zA-Z0-9._-]+/g, "-");
         const path = Date.now() + (label ? "-" + label : "") + "-" + filename;
-        const { error } = await client.storage.from("sunny-media").upload(path, file, {
+        const { error } = await client.storage.from("ario-media").upload(path, file, {
           cacheControl: "3600", upsert: false, contentType: file.type
         });
         if (error) throw error;
@@ -341,13 +341,13 @@
       const copy = event.target.closest("[data-media-copy]");
       const remove = event.target.closest("[data-media-delete]");
       if (copy && client) {
-        const url = client.storage.from("sunny-media").getPublicUrl(copy.dataset.mediaCopy).data.publicUrl;
+        const url = client.storage.from("ario-media").getPublicUrl(copy.dataset.mediaCopy).data.publicUrl;
         try { await navigator.clipboard.writeText(url); showToast("Public media URL copied.", "success"); }
         catch { window.prompt("Copy public media URL:", url); }
       } else if (remove && client && admin) {
         if (!confirm("Delete this media file? Any page using its URL will stop displaying it.")) return;
         remove.disabled = true;
-        const { error } = await client.storage.from("sunny-media").remove([remove.dataset.mediaDelete]);
+        const { error } = await client.storage.from("ario-media").remove([remove.dataset.mediaDelete]);
         if (error) { showToast(error.message || "Could not delete media.", "error"); remove.disabled = false; return; }
         showToast("Media deleted.", "success"); await loadMedia();
       }
@@ -358,7 +358,7 @@
       event.preventDefault();
       if (!admin || !client || !user) { showToast("Administrator access required.", "error"); return; }
       const value = {
-        siteName: $("#settingSiteName").value.trim() || "SunnyScripts",
+        siteName: $("#settingSiteName").value.trim() || "ARIO STUDIOS",
         tagline: $("#settingTagline").value.trim(),
         announcement: $("#settingAnnouncement").value.trim(),
         announcementEnabled: $("#settingAnnouncementEnabled").checked,
