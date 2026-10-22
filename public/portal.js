@@ -50,7 +50,7 @@
   function renderThemes() {
     const host=$("#themeGrid");if(!host)return;
     host.innerHTML=themes.map(t=>'<button type="button" class="theme-choice" data-theme-choice="'+t.id+'"><span class="theme-preview" style="background:linear-gradient(135deg,'+t.page+','+t.strong+');color:'+t.accent+'">✦</span><b>'+esc(t.name)+'</b><small>'+esc(t.desc)+'</small></button>').join("");
-    let current="mono";try{current=JSON.parse(localStorage.getItem("voidDevelopment.theme.v1")||'"mono"');}catch{}
+    let current="mono";try{const saved=JSON.parse(localStorage.getItem("voidDevelopment.theme.v1")||'"mono"');current=themes.some(theme=>theme.id===saved)?saved:"mono";}catch{current="mono";}
     setTheme(current);
   }
   function showAuth(which) {
@@ -82,6 +82,7 @@
   }
   function updateUI(){
     $("#openAuth").textContent=user?(admin?"Admin account ▾":"My account ▾"):"Sign up / Log in";
+    $("#openProfile").hidden=!user;
     // Admin navigation is shown only after the Supabase role check succeeds.
     $("#openAdmin").hidden=!admin;$("#openAdminFooter").hidden=!admin;
     $("#signOutButton").hidden=!user;
@@ -115,8 +116,11 @@
         showAuth("login");
         $("#authStatus").textContent="Sign in with an administrator account to open the admin panel.";
       }else{
-        history.replaceState({}, "", "/");
-        showToast("Access denied. This account does not have the administrator role.", "error");
+        $("#adminBackdrop").hidden=true;
+        document.body.classList.remove("modal-open");
+        $("#deniedAccountLabel").textContent=(user.email||"SIGNED IN ACCOUNT")+" · MEMBER ACCESS";
+        $("#accessDeniedBackdrop").hidden=false;
+        document.body.classList.add("modal-open");
       }
     }
     if(!user&&!$("#adminBackdrop").hidden)$("#adminBackdrop").hidden=true;
@@ -170,10 +174,40 @@
     }catch(e){$("#authStatus").textContent=e.message||"Could not authenticate.";showToast(e.message||"Authentication failed.","error");}
     finally{authBusy=false;$("#authSubmit").disabled=mode==="account";}
   }
+
+  async function openProfile(){
+    if(!user){showAuth("login");return;}
+    $("#profileBackdrop").hidden=false;document.body.classList.add("modal-open");
+    const meta=user.user_metadata||{};
+    let username=String(meta.username||meta.name||"").trim();
+    $("#profileUsername").textContent=username||"Not set";
+    $("#profileEmail").textContent=user.email||"Not provided";
+    $("#profileRole").textContent=admin?"Administrator":"Member";
+    $("#profileJoined").textContent=user.created_at?new Date(user.created_at).toLocaleDateString(undefined,{year:"numeric",month:"short",day:"numeric"}):"Unavailable";
+    $("#profileUserId").textContent=user.id||"Unavailable";
+    $("#profileAvatar").textContent=(username||user.email||"V").trim().charAt(0).toUpperCase();
+    $("#profileSubtitle").textContent=admin?"Administrator profile":"Member profile";
+    $("#profileStatus").textContent="Loaded from your signed-in Supabase session.";
+    if(client&&user.id){
+      try{
+        const {data,error}=await client.from("profiles").select("username").eq("id",user.id).maybeSingle();
+        if(!error&&data&&data.username){username=String(data.username);$("#profileUsername").textContent=username;$("#profileAvatar").textContent=username.charAt(0).toUpperCase();}
+      }catch{}
+    }
+  }
+  function closeProfile(){ $("#profileBackdrop").hidden=true;document.body.classList.remove("modal-open");}
   function saveSignupDraft(){try{sessionStorage.setItem("arioScripts.signupDraft.v1",JSON.stringify({email:$("#authEmail").value.trim(),username:$("#authUsername").value.trim()}));}catch{}}
   function init(){
     renderThemes();
     $("#openAuth").addEventListener("click",()=>showAuth(user?"account":"signup"));
+    $("#openProfile").addEventListener("click",openProfile);
+    $("#closeProfile").addEventListener("click",closeProfile);
+    $("#profileBackdrop").addEventListener("click",e=>{if(e.target===$("#profileBackdrop"))closeProfile();});
+    $("#profileManageAccount").addEventListener("click",()=>{closeProfile();showAuth("account");});
+    $("#profileSignOut").addEventListener("click",async()=>{if(!client)return;const {error}=await client.auth.signOut();if(error){$("#profileStatus").textContent=error.message;return;}closeProfile();await refresh(null);mode="login";updateAuthMode();showToast("Signed out.","success");});
+    $("#copyProfileId").addEventListener("click",async()=>{if(!user||!user.id)return;try{await navigator.clipboard.writeText(user.id);showToast("User ID copied.","success");}catch{window.prompt("Copy your user ID:",user.id);}});
+    $("#deniedSwitchAccount").addEventListener("click",async()=>{if(client){const {error}=await client.auth.signOut();if(error){showToast(error.message||"Could not sign out.","error");return;}}$("#accessDeniedBackdrop").hidden=true;document.body.classList.remove("modal-open");await refresh(null);mode="login";showAuth("login");$("#authStatus").textContent="Sign in with an administrator account to continue.";});
+
     $("#heroSignUp").addEventListener("click",event=>{event.preventDefault();showAuth("signup");});
     try{const draft=JSON.parse(sessionStorage.getItem("arioScripts.signupDraft.v1")||"null");if(draft){if(draft.email)$("#authEmail").value=draft.email;if(draft.username)$("#authUsername").value=draft.username;}}catch{}
     $("#authEmail").addEventListener("input",saveSignupDraft);$("#authUsername").addEventListener("input",saveSignupDraft);
