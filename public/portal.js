@@ -587,10 +587,11 @@
           name,
           slug,
           category: "Utility",
-          description: "Published from the VOID DEVELOPMENT Script Protector.",
+          description: "Protected draft created from the VOID DEVELOPMENT Script Protector.",
           link: null,
           content: source,
-          status: "published",
+          status: "draft",
+          release_status: "active",
           owner_id: user.id,
           updated_at: new Date().toISOString()
         };
@@ -790,7 +791,7 @@
         $("#newScriptSlug").value = data.slug || "";
         $("#newScriptSlug").dataset.touched = "true";
         $("#newScriptCategory").value = data.category || "Utility";
-        $("#newScriptStatus").value = data.status || "draft";\n        if($("#newScriptReleaseStatus"))$("#newScriptReleaseStatus").value=data.release_status||"active";\n        if($("#newScriptBannerUrl"))$("#newScriptBannerUrl").value=data.banner_url||"";\n        if($("#newScriptShowcaseUrl"))$("#newScriptShowcaseUrl").value=data.showcase_url||"";
+        $("#newScriptStatus").value = data.status || "draft";\n        if($("#newScriptReleaseStatus"))$("#newScriptReleaseStatus").value=data.release_status||"active";\n        if($("#newScriptBannerUrl"))$("#newScriptBannerUrl").value=data.banner_url||"";\n        if($("#newScriptShowcaseUrl"))$("#newScriptShowcaseUrl").value=data.showcase_url||"";\n        if($("#newScriptReleaseStatus"))$("#newScriptReleaseStatus").value=data.release_status||"active";\n        if($("#newScriptBannerUrl"))$("#newScriptBannerUrl").value=data.banner_url||"";\n        if($("#newScriptShowcaseUrl"))$("#newScriptShowcaseUrl").value=data.showcase_url||"";
         $("#newScriptDescription").value = data.description || "";
         $("#newScriptLink").value = data.link || "";
         $("#newScriptContent").value = data.content || "";
