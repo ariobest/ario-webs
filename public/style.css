@@ -556,3 +556,13 @@ option{background:#080808!important;color:#fff!important}
 .void-profile-modal .void-card{background:#ffffff08;border-color:#ffffff18;color:#fff}
 .void-profile-modal .void-card input,.void-profile-modal .void-card textarea{background:#050505;color:#fff;border-color:#ffffff20}
 @media(max-width:650px){.void-profile-modal{padding:22px 16px;border-radius:20px;max-height:calc(100dvh - 24px)}.void-profile-modal .void-profile-layout{grid-template-columns:minmax(0,1fr)}.void-profile-modal .void-profile-close{right:12px;top:12px}}
+
+/* Clearer admin tab spacing and alignment */
+#adminBackdrop .admin-tabs{gap:10px;padding:16px clamp(16px,2.8vw,30px);border-bottom:1px solid var(--line);background:color-mix(in srgb,var(--surface) 92%,transparent)}
+#adminBackdrop .admin-tabs .admin-tab{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 14px;min-height:42px;border:1px solid transparent;border-radius:12px;line-height:1.25;white-space:nowrap}
+#adminBackdrop .admin-tabs .admin-tab:hover{border-color:var(--line);background:var(--surface-2)}
+#adminBackdrop .admin-tabs .admin-tab.active{border-color:var(--line);background:var(--surface-2);box-shadow:inset 0 1px #ffffff0b}
+#adminBackdrop .admin-tabs::-webkit-scrollbar{height:5px}
+#adminBackdrop .admin-tabs::-webkit-scrollbar-thumb{background:var(--line);border-radius:99px}
+@media(min-width:1000px){#adminBackdrop .admin-tabs{flex-wrap:wrap;overflow:visible;white-space:normal}#adminBackdrop .admin-tabs .admin-tab{white-space:nowrap}}
+@media(max-width:700px){#adminBackdrop .admin-tabs{flex-wrap:nowrap;overflow-x:auto;gap:8px;padding:12px}#adminBackdrop .admin-tabs .admin-tab{padding:10px 12px;min-height:40px}}
