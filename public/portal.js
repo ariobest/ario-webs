@@ -301,7 +301,7 @@
       }
       host.innerHTML = '<p class="saved-note">Loading media…</p>';
       try {
-        const { data, error } = await client.storage.from("ario-media").list("", {
+        const { data, error } = await client.storage.from("void-files").list("", {
           limit: 100, sortBy: { column: "created_at", order: "desc" }
         });
         if (error) throw error;
@@ -312,7 +312,7 @@
         }
         host.innerHTML = files.map(file => {
           const path = file.name;
-          const publicUrl = client.storage.from("ario-media").getPublicUrl(path).data.publicUrl;
+          const publicUrl = client.storage.from("void-files").getPublicUrl(path).data.publicUrl;
           const mime = file.metadata?.mimetype || "";
           const image = mime.startsWith("image/") || /\.(png|jpe?g|webp|gif|svg)$/i.test(path);
           const video = mime.startsWith("video/") || /\.(mp4|webm)$/i.test(path);
@@ -324,7 +324,7 @@
         if (status) status.textContent = "Loaded " + files.length + " file(s).";
       } catch (error) {
         host.innerHTML = '<p class="saved-note">Could not load media: ' + esc(error.message || "Storage request failed") + '</p>';
-        if (status) status.textContent = "Check that the ario-media bucket and admin storage policies exist.";
+        if (status) status.textContent = "Check that the void-files bucket and admin storage policies exist.";
       }
     }
     async function loadAdminOverview() {
@@ -388,22 +388,74 @@
       modal.classList.remove("is-minimized");
       modal.classList.toggle("is-focused");
     });
+    $("#importProtectorFile").addEventListener("click", () => $("#protectorFile").click());
+    $("#protectorFile").addEventListener("change", async event => {
+      const file = event.target.files?.[0];
+      if (!file) return;
+      if (file.size > 200000) { $("#protectorStatus").textContent = "Lua source must be 200,000 bytes or smaller."; return; }
+      try {
+        $("#protectorSource").value = await file.text();
+        $("#protectorStatus").textContent = "Imported " + file.name + ". Save the source in Scripts first if you want to deliver it through the protected loader.";
+      } catch (error) { $("#protectorStatus").textContent = error.message || "Could not read the Lua file."; }
+    });
+    $("#clearProtector").addEventListener("click", () => {
+      $("#protectorSource").value = "";
+      $("#protectorFile").value = "";
+      $("#protectedLoaderOutput").value = "";
+      $("#protectorStatus").textContent = "Protector cleared.";
+    });
+    $("#generateProtectedLoader").addEventListener("click", () => {
+      if (!admin) { showToast("Administrator access required.", "error"); return; }
+      const slug = $("#protectorSlug").value.trim().toLowerCase();
+      const key = $("#protectorKey").value.trim();
+      if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) {
+        $("#protectorStatus").textContent = "Enter a valid published script slug using lowercase letters, numbers and hyphens.";
+        $("#protectorSlug").focus(); return;
+      }
+      if (!key) { $("#protectorStatus").textContent = "Paste an access key created for this script in the Access keys tab."; $("#protectorKey").focus(); return; }
+      const keyLiteral = JSON.stringify(key);
+      $("#protectedLoaderOutput").value = [
+        'local HttpService = game:GetService("HttpService")',
+        "local KEY = " + keyLiteral,
+        'local URL = "https://arioscripts.cyou/script/" .. ' + JSON.stringify(slug) + ' .. "?key=" .. HttpService:UrlEncode(KEY)',
+        'local source = game:HttpGet(URL)',
+        'assert(type(source) == "string" and #source > 0, "Protected script could not be loaded")',
+        'loadstring(source)()'
+      ].join("\n");
+      $("#protectorStatus").textContent = "Loader generated. Confirm this slug is published and the key belongs to it. This is access control, not unbreakable obfuscation.";
+    });
+    $("#copyProtectedLoader").addEventListener("click", async () => {
+      const output = $("#protectedLoaderOutput").value;
+      if (!output) { $("#protectorStatus").textContent = "Generate the loader first."; return; }
+      try { await navigator.clipboard.writeText(output); showToast("Protected loader copied.", "success"); }
+      catch { window.prompt("Copy protected loader:", output); }
+    });
     $("#mediaUploadForm").addEventListener("submit", async event => {
       event.preventDefault();
       if (!admin || !client) { showToast("Administrator access required.", "error"); return; }
       const input = $("#mediaFile"), file = input.files?.[0];
       if (!file) { $("#mediaStatus").textContent = "Choose a file first."; return; }
-      if (file.size > 10 * 1024 * 1024) { $("#mediaStatus").textContent = "Files must be 10 MB or smaller."; return; }
-      const allowed = ["image/png","image/jpeg","image/webp","image/gif","image/svg+xml","video/mp4","video/webm","audio/mpeg","audio/ogg"];
-      if (!allowed.includes(file.type)) { $("#mediaStatus").textContent = "This file type is not allowed."; return; }
+      if (file.size > 25 * 1024 * 1024) { $("#mediaStatus").textContent = "Files must be 25 MB or smaller."; return; }
+      const extension = file.name.split(".").pop()?.toLowerCase() || "";
+      const contentTypes = {
+        png:"image/png",jpg:"image/jpeg",jpeg:"image/jpeg",webp:"image/webp",gif:"image/gif",svg:"image/svg+xml",
+        mp4:"video/mp4",webm:"video/webm",mp3:"audio/mpeg",ogg:"audio/ogg",
+        lua:"text/plain",luau:"text/plain",txt:"text/plain",json:"application/json",pdf:"application/pdf",
+        zip:"application/zip",md:"text/markdown",csv:"text/csv"
+      };
+      const uploadType = file.type || contentTypes[extension] || "";
+      if (!contentTypes[extension] || (file.type && file.type !== contentTypes[extension] && !(["lua","luau","txt","md","csv"].includes(extension) && file.type === "text/plain"))) {
+        $("#mediaStatus").textContent = "Allowed: images, Lua/Luau, text, JSON, PDF, ZIP, audio and video files.";
+        return;
+      }
       const button = $("#uploadMediaButton"); button.disabled = true;
       $("#mediaStatus").textContent = "Uploading " + file.name + "…";
       try {
         const label = $("#mediaLabel").value.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
         const filename = file.name.replace(/[^a-zA-Z0-9._-]+/g, "-");
         const path = Date.now() + (label ? "-" + label : "") + "-" + filename;
-        const { error } = await client.storage.from("ario-media").upload(path, file, {
-          cacheControl: "3600", upsert: false, contentType: file.type
+        const { error } = await client.storage.from("void-files").upload(path, file, {
+          cacheControl: "3600", upsert: false, contentType: uploadType
         });
         if (error) throw error;
         $("#mediaStatus").textContent = "Uploaded successfully.";
@@ -418,13 +470,13 @@
       const copy = event.target.closest("[data-media-copy]");
       const remove = event.target.closest("[data-media-delete]");
       if (copy && client) {
-        const url = client.storage.from("ario-media").getPublicUrl(copy.dataset.mediaCopy).data.publicUrl;
+        const url = client.storage.from("void-files").getPublicUrl(copy.dataset.mediaCopy).data.publicUrl;
         try { await navigator.clipboard.writeText(url); showToast("Public media URL copied.", "success"); }
         catch { window.prompt("Copy public media URL:", url); }
       } else if (remove && client && admin) {
         if (!confirm("Delete this media file? Any page using its URL will stop displaying it.")) return;
         remove.disabled = true;
-        const { error } = await client.storage.from("ario-media").remove([remove.dataset.mediaDelete]);
+        const { error } = await client.storage.from("void-files").remove([remove.dataset.mediaDelete]);
         if (error) { showToast(error.message || "Could not delete media.", "error"); remove.disabled = false; return; }
         showToast("Media deleted.", "success"); await loadMedia();
       }
