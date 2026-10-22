@@ -299,3 +299,13 @@ footer .brand>span{color:var(--ink)}
 .footer-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.footer-admin{cursor:pointer}.footer-admin:hover{color:var(--ink)}
 
 .cookie-privacy-link{padding:0;border:0;background:none;color:var(--muted);text-decoration:underline;text-underline-offset:3px;cursor:pointer;font:inherit;font-size:12px}.cookie-privacy-details{max-width:560px;margin-top:10px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}.cookie-privacy-details p{margin:0 0 8px;color:var(--muted);font-size:12px;line-height:1.6}.cookie-privacy-details p:last-child{margin-bottom:0}
+
+/* Center the supplied brand mark across the full hero, with the spotlight behind it. */
+.hero{position:relative;padding-top:132px}
+.hero:before{content:"";position:absolute;z-index:0;top:0;left:0;right:0;height:390px;pointer-events:none;background:radial-gradient(ellipse at 50% 8%,rgba(255,255,255,.13) 0%,rgba(255,255,255,.055) 28%,transparent 70%)}
+.hero-copy{position:static}
+.hero-copy>:not(.hero-brand-mark){position:relative;z-index:2}
+.hero-brand-mark{position:absolute;top:28px;left:50%;transform:translateX(-50%);z-index:3;margin:0;white-space:nowrap}
+.hero-visual{position:relative;z-index:1}
+@media(max-width:760px){.hero{padding-top:118px}.hero:before{height:320px}.hero-brand-mark{top:24px}.hero-brand-mark img{width:46px;height:46px}}
+@media(max-width:420px){.hero{padding-top:112px}.hero-brand-mark{top:20px;gap:8px;letter-spacing:.12em}.hero-brand-mark img{width:40px;height:40px}.hero-brand-mark span{font-size:9px}}
