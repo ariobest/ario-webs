@@ -6,7 +6,7 @@
   const esc = value => String(value ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const date = value => value ? new Date(value).toLocaleString() : "—";
   let db = null, user = null, isAdmin = false, currentEditorScript = null, editorLoadedSource = "", editorVersions = [], luaEditor = null, liveChannel = null;
-  const status = (id, msg, error = false) => { const el = $("#" + id); if (el) { el.textContent = msg; el.dataset.state = error ? "error" : "ok"; } };
+  const status = (id, msg, error = false) => { const el = $("#" + id); if (el) { el.hidden = false; el.textContent = msg; el.dataset.state = error ? "error" : "ok"; } };
   const toast = msg => { const el = $("#toast"); if (el) { el.textContent = msg; el.dataset.kind = "info"; el.classList.add("show"); setTimeout(() => el.classList.remove("show"), 2600); } else console.info("[VOID]", msg); };
   const isAdminUser = async () => {
     if (!user || !db) return false;
@@ -284,7 +284,7 @@
   }
   function bindPublicNotifications() {
     const nav=$(".nav-actions");if(nav&&!$("#voidNotificationJump")){
-      const b=document.createElement("button");b.id="voidNotificationJump";b.className="secondary";b.type="button";b.textContent="Updates";b.addEventListener("click",()=>$("#voidProfileSection")?.scrollIntoView({behavior:"smooth"}));nav.insertBefore(b,$("#openProfile")||null);
+      const b=document.createElement("button");b.id="voidNotificationJump";b.className="secondary";b.type="button";b.textContent="Updates";b.addEventListener("click",()=>($("#voidPublicUpdates")||$("#voidProfileSection"))?.scrollIntoView({behavior:"smooth"}));nav.insertBefore(b,$("#openProfile")||null);
     }
   }
   async function onSession(session) {
