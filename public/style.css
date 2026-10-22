@@ -454,3 +454,32 @@ option{background:#080808!important;color:#fff!important}
 @keyframes badge-arrive{from{opacity:0;transform:translateY(5px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
 @media(max-width:760px){.brand-logo{width:44px!important;height:44px!important}}
 @media(prefers-reduced-motion:reduce){.brand-logo,.hero-brand-mark img,.void-badge,.protected-progress[data-state="loading"] span{animation:none!important}.brand-logo,.hero-brand-mark img{transition:none!important}}
+
+
+/* Custom dropdown for the verification center */
+.void-picker{position:relative;width:100%;margin:10px 0 14px;z-index:4}
+.void-picker-trigger{display:flex;align-items:center;justify-content:space-between;gap:14px;width:100%;min-height:46px;padding:12px 14px;border:1px solid var(--line);border-radius:13px;background:linear-gradient(145deg,#171717,#0b0b0b);color:#fff;text-align:left;font-size:13px;box-shadow:inset 0 1px rgba(255,255,255,.04);transition:border-color .2s,box-shadow .2s,transform .2s}
+.void-picker-trigger:hover,.void-picker.is-open .void-picker-trigger{border-color:rgba(255,255,255,.5);box-shadow:0 0 0 3px rgba(255,255,255,.05)}
+.void-picker-chevron{font-size:18px;transition:transform .2s}
+.void-picker.is-open .void-picker-chevron{transform:rotate(180deg)}
+.void-picker-menu{position:absolute;top:calc(100% + 7px);left:0;right:0;max-height:240px;overflow:auto;padding:6px;border:1px solid rgba(255,255,255,.16);border-radius:14px;background:rgba(12,12,12,.98);box-shadow:0 20px 55px #0009;backdrop-filter:blur(18px);z-index:20}
+.void-picker-option{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;padding:11px 12px;border:0;border-radius:9px;background:transparent;color:#fff;text-align:left;cursor:pointer;transition:background .18s,transform .18s}
+.void-picker-option:hover,.void-picker-option[aria-selected="true"]{background:#ffffff12;transform:translateX(2px)}
+.void-picker-option span{font-size:13px;font-weight:700;overflow-wrap:anywhere}
+.void-picker-option small{font-size:11px;color:#a1a1aa;overflow-wrap:anywhere}
+.verification-endpoints{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:18px 0}
+.verification-endpoint,.verification-test-card,.verification-sample{min-width:0;padding:17px;border:1px solid var(--line);border-radius:16px;background:linear-gradient(145deg,var(--surface),color-mix(in srgb,var(--surface-2) 65%,transparent))}
+.verification-endpoint{display:flex;flex-direction:column;gap:9px}
+.verification-endpoint code{font-size:11px;line-height:1.6;overflow-wrap:anywhere;color:var(--ink)}
+.verification-endpoint small{font-size:11px;line-height:1.6;color:var(--muted)}
+.verification-test-card,.verification-sample{margin-top:16px}
+.verification-test-card h4,.verification-sample h4{margin:0 0 7px}
+.verification-test-card>p,.verification-sample .pane-heading p{font-size:12px;color:var(--muted);line-height:1.6}
+#verificationKeyInput{width:100%;box-sizing:border-box;border:1px solid var(--line);border-radius:12px;background:var(--page);color:var(--ink);padding:12px;font-family:ui-monospace,SFMono-Regular,monospace;letter-spacing:.06em}
+#verificationTestResult[data-state="success"]{color:#a7f3d0}
+#verificationTestResult[data-state="error"]{color:#fca5a5}
+#verificationSampleCode{width:100%;max-width:100%;box-sizing:border-box;resize:vertical;background:#070707;color:#f5f5f5;border:1px solid var(--line);border-radius:12px;padding:14px;font:12px/1.65 ui-monospace,SFMono-Regular,Menlo,monospace;tab-size:4}
+#verificationApiStatus{margin:10px 0 16px}
+@media(max-width:900px){.verification-endpoints{grid-template-columns:1fr}.verification-endpoint{padding:14px}}
+@media(max-width:760px){.admin-tabs{gap:7px}.admin-tab{white-space:nowrap}.admin-content{min-width:0}.verification-test-card,.verification-sample{padding:13px}.void-picker-menu{max-height:200px}.admin-modal{width:calc(100vw - 16px)!important;max-height:calc(100dvh - 16px)!important;margin:8px!important}}
+@media(max-width:420px){.verification-endpoint code{font-size:10px}.void-picker-option{align-items:flex-start;flex-direction:column;gap:4px}#verificationSampleCode{font-size:10px}}
