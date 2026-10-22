@@ -5,7 +5,7 @@
   const $ = (s, root = document) => root.querySelector(s);
   const esc = value => String(value ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const date = value => value ? new Date(value).toLocaleString() : "—";
-  let db = null, user = null, isAdmin = false, currentEditorScript = null, editorLoadedSource = "", editorVersions = [];
+  let db = null, user = null, isAdmin = false, currentEditorScript = null, editorLoadedSource = "", editorVersions = [], luaEditor = null;
   const status = (id, msg, error = false) => { const el = $("#" + id); if (el) { el.textContent = msg; el.dataset.state = error ? "error" : "ok"; } };
   const toast = msg => { const el = $("#toast"); if (el) { el.textContent = msg; el.dataset.kind = "info"; el.classList.add("show"); setTimeout(() => el.classList.remove("show"), 2600); } else console.info("[VOID]", msg); };
   const isAdminUser = async () => {
@@ -40,6 +40,8 @@
       '<section class="admin-pane" data-pane="announcements" id="voidAnnouncementsPane" hidden><div class="pane-heading"><div><h3>Changelog & announcements</h3><p>Publish a release note or site-wide announcement to signed-in users.</p></div></div><form id="voidAnnouncementForm" class="editor-form visible-form"><label>Title<input id="voidAnnouncementTitle" required maxlength="120" placeholder="Version 2.1 is live"></label><label>Message<textarea id="voidAnnouncementBody" rows="4" required maxlength="3000" placeholder="What changed?"></textarea></label><button class="small-primary" type="submit">Publish update</button><p id="voidAnnouncementStatus" class="saved-note" role="status"></p></form><div class="void-card"><h4>Recent published updates</h4><div id="voidAnnouncementList" class="void-list"></div></div></section>'
     ];
     panes.forEach(p => content.insertAdjacentHTML("beforeend", p));
+    const luaTextarea=$("#voidLuaSource");
+    if(window.CodeMirror&&luaTextarea){luaEditor=window.CodeMirror.fromTextArea(luaTextarea,{mode:"lua",theme:"material-darker",lineNumbers:true,matchBrackets:true,indentUnit:4,tabSize:4,indentWithTabs:true,viewportMargin:Infinity});luaEditor.setSize("100%","420px");luaEditor.on("change",()=>{$("#voidEditorLines").textContent=luaEditor.getValue().split("\n").length+" lines";});}
     tabs.addEventListener("click", e => {
       const button = e.target.closest("[data-admin-tab]");
       if (!button || !tabNames.some(x => x[0] === button.dataset.adminTab)) return;
@@ -112,7 +114,7 @@
     const {data,error}=await db.from("scripts").select("id,name,slug,content,updated_at").eq("id",id).maybeSingle();
     if(error||!data){status("voidEditorStatus",error?.message||"Script not found.",true);return;}
     currentEditorScript=data; editorLoadedSource=data.content||"";
-    $("#voidLuaSource").disabled=false;$("#voidLuaSource").value=editorLoadedSource;
+    $("#voidLuaSource").disabled=false;$("#voidLuaSource").value=editorLoadedSource;if(luaEditor){luaEditor.setValue(editorLoadedSource);luaEditor.setOption("readOnly",false);luaEditor.refresh();}
     $("#voidEditorFilename").textContent=data.slug+".lua";$("#voidEditorLines").textContent=editorLoadedSource.split("\n").length+" lines";
     const q=await db.from("void_script_versions").select("id,version_label,change_note,created_at,author_id,source").eq("script_id",id).order("created_at",{ascending:false}).limit(30);
     editorVersions=q.data||[];
@@ -127,20 +129,20 @@
     root.querySelectorAll("[data-restore-version]").forEach(btn=>btn.addEventListener("click",()=>{
       const v=editorVersions.find(x=>x.id===btn.dataset.restoreVersion);if(!v)return;
       if(!confirm("Load this snapshot into the editor? The database is not changed until you click Save source."))return;
-      $("#voidLuaSource").value=v.source;$("#voidEditorLines").textContent=v.source.split("\n").length+" lines";$("#voidVersionNote").value="Restore: "+(v.version_label||"Snapshot");status("voidEditorStatus","Snapshot loaded into the editor. Save source to apply it.");
+      $("#voidLuaSource").value=v.source;if(luaEditor)luaEditor.setValue(v.source);$("#voidEditorLines").textContent=v.source.split("\n").length+" lines";$("#voidVersionNote").value="Restore: "+(v.version_label||"Snapshot");status("voidEditorStatus","Snapshot loaded into the editor. Save source to apply it.");
     }));
   }
   async function saveSnapshot() {
     if(!requireAdmin()||!currentEditorScript)return;
     const note=$("#voidVersionNote").value.trim()||"Manual snapshot";
-    const {error}=await db.from("void_script_versions").insert({script_id:currentEditorScript.id,author_id:user.id,version_label:new Date().toLocaleString(),source:$("#voidLuaSource").value,change_note:note});
+    const {error}=await db.from("void_script_versions").insert({script_id:currentEditorScript.id,author_id:user.id,version_label:new Date().toLocaleString(),source:(luaEditor?luaEditor.getValue():$("#voidLuaSource").value),change_note:note});
     if(error){status("voidEditorStatus",error.message,true);return;}
     await audit("script.snapshot","script",currentEditorScript.id,{slug:currentEditorScript.slug,note});
     await loadEditorScript(currentEditorScript.id);status("voidEditorStatus","Snapshot saved.");
   }
   async function saveSource() {
     if(!requireAdmin()||!currentEditorScript)return;
-    const source=$("#voidLuaSource").value;
+    const source=luaEditor?luaEditor.getValue():$("#voidLuaSource").value;
     if(source.length>200000){status("voidEditorStatus","Source exceeds the 200,000 character limit.",true);return;}
     if(!confirm("Save these source changes to "+currentEditorScript.slug+"? A snapshot will be created first."))return;
     const note=$("#voidVersionNote").value.trim()||"Saved from Lua Studio";
