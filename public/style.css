@@ -256,3 +256,25 @@ body{background:radial-gradient(ellipse at 50% -15%,rgba(255,255,255,.075),trans
 @media(max-width:760px){.nav{gap:10px;padding:10px 14px}.brand{gap:8px}.brand-logo{width:34px;height:34px}.brand>span{font-size:10px}.nav nav{gap:4px}.nav-link{padding:8px 9px;font-size:11px}.nav-actions{gap:6px}.nav-actions .discord-button{padding:8px 10px;font-size:11px}.hero-brand-mark{margin-bottom:20px}.hero-brand-mark img{width:48px;height:48px}.cookie-notice{left:12px;bottom:12px;width:calc(100vw - 24px);padding:15px;display:grid;gap:13px}.cookie-actions{justify-content:flex-end}.admin-tabs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.admin-tab{justify-content:flex-start;min-width:0}.admin-tab span{flex-shrink:0}}
 @media(max-width:480px){.nav{flex-wrap:wrap;justify-content:space-between}.nav nav{order:3;width:100%;justify-content:center;padding-top:7px;border-top:1px solid var(--line)}.nav-actions{margin-left:auto}.nav-actions .account-button{max-width:112px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.hero h1{font-size:clamp(40px,12vw,58px)}.cookie-actions{display:grid;grid-template-columns:1fr 1fr}.cookie-actions button{width:100%;padding:10px 8px}.admin-modal{width:calc(100vw - 16px);max-height:calc(100dvh - 16px);padding:16px}.admin-header h2{font-size:22px}.admin-tabs{grid-template-columns:repeat(2,minmax(0,1fr))}.admin-tab{padding:10px 9px;font-size:11px}.key-row{flex-wrap:wrap}.source-import{align-items:stretch}.source-import input{width:100%}}
 @media(prefers-reduced-motion:reduce){.hero-brand-mark img{filter:none}}
+
+/* VOID DEVELOPMENT — Black Void design overrides */
+:root[data-theme="mono"]{--page:#050505;--surface:#0a0a0a;--surface-2:#101010;--ink:#fff;--muted:#d4d4d8;--line:rgba(255,255,255,.10);--accent:#fff;--accent-strong:#f4f4f5;--glow:rgba(255,255,255,.06);--hero-glow:rgba(255,255,255,.14);color-scheme:dark}
+:root[data-theme="mono"] .hero{grid-template-columns:1fr;min-height:600px;text-align:center;justify-items:center;gap:0;padding:70px 0 82px}
+:root[data-theme="mono"] .hero-copy{width:min(820px,100%);display:flex;align-items:center;flex-direction:column}
+:root[data-theme="mono"] .hero-brand-mark{flex-direction:column;gap:16px;margin-bottom:28px}
+:root[data-theme="mono"] .hero-brand-mark img{width:clamp(110px,20vw,190px);height:clamp(110px,20vw,190px);object-fit:contain;filter:drop-shadow(0 0 18px rgba(255,255,255,.24)) drop-shadow(0 0 48px rgba(255,255,255,.12))}
+:root[data-theme="mono"] .hero-brand-mark span{letter-spacing:.24em;color:#fff;font-weight:700}
+:root[data-theme="mono"] .hero .eyebrow{justify-content:center}
+:root[data-theme="mono"] .hero h1{font-size:clamp(48px,8vw,86px);letter-spacing:-.06em;margin:14px 0 20px}
+:root[data-theme="mono"] .hero h1 span{color:#fff;text-shadow:0 0 35px rgba(255,255,255,.18)}
+:root[data-theme="mono"] .hero-copy>p{margin-left:auto;margin-right:auto;max-width:600px}
+:root[data-theme="mono"] .hero-actions,:root[data-theme="mono"] .hero-meta{justify-content:center}
+:root[data-theme="mono"] .hero-visual{display:none}
+:root[data-theme="mono"] .ambient{background:radial-gradient(ellipse at center,rgba(255,255,255,.12),transparent 68%);opacity:.65}
+:root[data-theme="mono"] .primary,:root[data-theme="mono"] .small-primary,:root[data-theme="mono"] .nav-button{background:#fff;color:#050505;border-color:#fff}
+:root[data-theme="mono"] .nav{background:rgba(5,5,5,.78);border-bottom:1px solid rgba(255,255,255,.10)}
+:root[data-theme="mono"] .script-card,:root[data-theme="mono"] .theme-choice,:root[data-theme="mono"] .admin-pane,:root[data-theme="mono"] .admin-modal,:root[data-theme="mono"] .auth-modal{background:rgba(12,12,12,.76);border-color:rgba(255,255,255,.11)}
+.nav-link{display:inline-flex;align-items:center;gap:7px}.nav-link span{font-size:15px;opacity:.85}
+.cookie-options{flex-basis:100%;display:flex;flex-wrap:wrap;align-items:center;gap:14px;padding-top:12px;color:var(--muted);font-size:12px}.cookie-options[hidden]{display:none}.cookie-options label{display:flex;align-items:center;gap:6px}
+footer .brand>span{color:var(--ink)}
+@media(max-width:580px){:root[data-theme="mono"] .hero{min-height:auto;padding:54px 0 64px}:root[data-theme="mono"] .hero-brand-mark img{width:120px;height:120px}:root[data-theme="mono"] .hero h1{font-size:clamp(44px,12vw,62px)}.nav nav{display:flex;gap:2px;overflow-x:auto;max-width:45vw}.nav-link{padding:8px 7px;font-size:11px}.nav-actions{gap:5px}.discord-button{display:none}}
