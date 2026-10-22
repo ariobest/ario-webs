@@ -187,7 +187,8 @@
       const duplicate = await client.from("scripts").select("id").eq("slug", slug).neq("id", id || "00000000-0000-0000-0000-000000000000").maybeSingle();
       if (duplicate.error) { showToast("Could not verify slug uniqueness. Please retry."); return; }
       if (duplicate.data) { showToast("That slug is already in use. Choose a unique slug."); $("#newScriptSlug").focus(); return; }
-      const content=$("#newScriptContent").value.trim();
+      const content=$("#newScriptContent").value;
+      if(!content.trim()){showToast("Add the Lua source before saving.");$("#newScriptContent").focus();return;}
       if(content.length>200000){showToast("Lua source is too large (200,000 characters maximum).");return;}
       const record={name,slug,category,description,link:link||null,content:content||null,status,owner_id:user.id,updated_at:new Date().toISOString()};
       let result;
