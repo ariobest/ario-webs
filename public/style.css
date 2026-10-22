@@ -286,3 +286,12 @@ footer .brand>span{color:var(--ink)}
 .script-detail-card>p{color:var(--muted);line-height:1.8;max-width:680px}
 .script-detail-meta{display:flex;flex-wrap:wrap;gap:10px;margin:22px 0}
 .script-detail-meta span{padding:7px 11px;border:1px solid var(--line);border-radius:999px;color:var(--muted);font-size:12px}
+
+.admin-overview-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:20px 0}
+.admin-overview-card{border:1px solid var(--line);border-radius:16px;background:var(--surface);padding:20px;display:grid;gap:12px}
+.admin-overview-card span{font-size:12px;color:var(--muted)}.admin-overview-card strong{font:700 32px 'Space Grotesk',sans-serif;color:var(--ink)}
+.appearance-options{display:flex;flex-wrap:wrap;gap:12px}.appearance-options .theme-choice{min-width:160px}
+.about-admin-card{padding:24px;border:1px solid var(--line);border-radius:18px;background:var(--surface);max-width:650px}
+.about-admin-card img{width:90px;height:90px;object-fit:contain;filter:drop-shadow(0 0 20px rgba(255,255,255,.18))}
+.about-admin-card h4{font:700 24px 'Space Grotesk',sans-serif;margin:16px 0 8px}.about-admin-card p{color:var(--muted);line-height:1.7}
+@media(max-width:580px){.admin-overview-grid{grid-template-columns:1fr}.admin-overview-card{padding:16px}.appearance-options{display:grid;grid-template-columns:1fr 1fr}.appearance-options .theme-choice{min-width:0}}
