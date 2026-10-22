@@ -297,3 +297,5 @@ footer .brand>span{color:var(--ink)}
 @media(max-width:580px){.admin-overview-grid{grid-template-columns:1fr}.admin-overview-card{padding:16px}.appearance-options{display:grid;grid-template-columns:1fr 1fr}.appearance-options .theme-choice{min-width:0}}
 
 .footer-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.footer-admin{cursor:pointer}.footer-admin:hover{color:var(--ink)}
+
+.cookie-privacy-link{padding:0;border:0;background:none;color:var(--muted);text-decoration:underline;text-underline-offset:3px;cursor:pointer;font:inherit;font-size:12px}.cookie-privacy-details{max-width:560px;margin-top:10px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}.cookie-privacy-details p{margin:0 0 8px;color:var(--muted);font-size:12px;line-height:1.6}.cookie-privacy-details p:last-child{margin-bottom:0}
