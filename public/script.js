@@ -1,6 +1,6 @@
 (() => {
   "use strict";
-  const LOGO_URL = "https://cdn.phototourl.com/member/2026-10-22-7c95dd20-c163-423e-94cf-4ee3e782ed21.png";
+  const LOGO_URL = "https://cdn.phototourl.com/member/2026-10-22-2137bbb7-82d5-48bb-855c-03c7361f95a8.png";
   const STORAGE = { theme: "voidDevelopment.theme.v1", scripts: "voidDevelopment.library.v1", supabase: "voidDevelopment.supabase.public.v1", favorites: "voidDevelopment.favorites.v1" };
   const DEFAULT_SUPABASE = { url: "https://cqtwmxojwwyeasstuhgb.supabase.co", key: "sb_publishable_qBPb1ltQbHNZ-fO3PFmDeg_IQj0QfNB" };
   let supabaseClient = null;
@@ -91,7 +91,7 @@
   function resetScriptForm() { $("#scriptForm").reset(); $("#editScriptId").value = ""; $("#scriptFormTitle").textContent = "Add a script"; $("#scriptForm").hidden = true; }
   function editScript(id) {
     const item = scripts.find(script => script.id === id); if (!item) return;
-    $("#editScriptId").value = item.id; $("#newScriptName").value = item.name; $("#newScriptCategory").value = item.category; $("#newScriptDescription").value = item.description; $("#newScriptLink").value = item.link || ""; $("#scriptFormTitle").textContent = "Edit script"; $("#scriptForm").hidden = false; $("#newScriptName").focus();
+    $("#editScriptId").value = item.id; $("#newScriptName").value = item.name; $("#newScriptSlug").value = item.slug || item.name.toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,""); $("#newScriptSlug").dataset.touched="false"; if($("#scriptSlugPreview"))$("#scriptSlugPreview").textContent="/script/"+$("#newScriptSlug").value; $("#newScriptCategory").value = item.category; $("#newScriptDescription").value = item.description; $("#newScriptLink").value = item.link || ""; $("#scriptFormTitle").textContent = "Edit script"; $("#scriptForm").hidden = false; $("#newScriptName").focus();
   }
   function activeSupabaseConfig() {
     const custom = safeRead(STORAGE.supabase, null);
@@ -203,11 +203,13 @@
   window.addEventListener("scroll", () => $("#backToTop").classList.toggle("visible", window.scrollY > 500), { passive: true });
   $("#newScriptBtn").addEventListener("click", () => { resetScriptForm(); $("#scriptForm").hidden = false; $("#newScriptName").focus(); });
   $("#cancelScript").addEventListener("click", resetScriptForm);
+  $("#newScriptName").addEventListener("input",()=>{const field=$("#newScriptSlug");if(!field||field.dataset.touched==="true")return;field.value=$("#newScriptName").value.toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");if($("#scriptSlugPreview"))$("#scriptSlugPreview").textContent="/script/"+(field.value||"your-script");});
+  $("#newScriptSlug").addEventListener("input",e=>{e.target.dataset.touched="true";e.target.value=e.target.value.toLowerCase().replace(/[^a-z0-9-]/g,"").replace(/-{2,}/g,"-").replace(/^-|-$/g,"");if($("#scriptSlugPreview"))$("#scriptSlugPreview").textContent="/script/"+(e.target.value||"your-script");});
   $("#scriptForm").addEventListener("submit", event => {
     event.preventDefault();
     const id = $("#editScriptId").value || (window.crypto?.randomUUID?.() || "script-" + Date.now());
-    const item = { id, name: $("#newScriptName").value.trim(), category: $("#newScriptCategory").value, description: $("#newScriptDescription").value.trim(), link: $("#newScriptLink").value.trim() };
-    if (!item.name || !item.description) return;
+    const name = $("#newScriptName").value.trim(); const slug = $("#newScriptSlug").value.trim().toLowerCase(); const item = { id, name, slug, category: $("#newScriptCategory").value, description: $("#newScriptDescription").value.trim(), link: $("#newScriptLink").value.trim() };
+    if (!item.name || !item.description || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(item.slug)) { showToast("Enter a valid slug using lowercase letters, numbers and hyphens."); return; }
     const index = scripts.findIndex(script => script.id === id);
     if (index >= 0) scripts[index] = item; else scripts.unshift(item);
     if (safeWrite(STORAGE.scripts, scripts)) { resetScriptForm(); renderScripts(); showToast("Script saved on this device."); }
@@ -329,3 +331,5 @@
   renderScripts();
   initSupabase();
 })();
+(function(){const init=()=>{const n=document.querySelector("#cookieNotice");if(!n)return;let saved=null;try{saved=localStorage.getItem("voidDevelopment.cookieChoice.v1");}catch{}if(!saved)n.hidden=false;const choose=value=>{try{localStorage.setItem("voidDevelopment.cookieChoice.v1",value);}catch{}n.hidden=true;};document.querySelector("#cookieAccept")?.addEventListener("click",()=>choose("accepted"));document.querySelector("#cookieReject")?.addEventListener("click",()=>choose("essential-only"));};if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init,{once:true});else init();})();
+document.addEventListener("click",e=>{const home=e.target.closest('[data-view="home"]');if(home){e.preventDefault();window.scrollTo({top:0,behavior:"smooth"});document.querySelectorAll("[data-view]").forEach(b=>b.classList.toggle("active",b===home));}});
