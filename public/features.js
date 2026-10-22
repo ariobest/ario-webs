@@ -5,7 +5,7 @@
   const $ = (s, root = document) => root.querySelector(s);
   const esc = value => String(value ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const date = value => value ? new Date(value).toLocaleString() : "—";
-  let db = null, user = null, isAdmin = false, currentEditorScript = null, editorLoadedSource = "", editorVersions = [], luaEditor = null, liveChannel = null;
+  let db = null, user = null, isAdmin = false, currentEditorScript = null, editorLoadedSource = "", editorVersions = [], luaEditor = null, liveChannel = null, remoteFavoriteIds = new Set();
   const status = (id, msg, error = false) => { const el = $("#" + id); if (el) { el.hidden = false; el.textContent = msg; el.dataset.state = error ? "error" : "ok"; } };
   const toast = msg => { const el = $("#toast"); if (el) { el.textContent = msg; el.dataset.kind = "info"; el.classList.add("show"); setTimeout(() => el.classList.remove("show"), 2600); } else console.info("[VOID]", msg); };
   const isAdminUser = async () => {
@@ -244,12 +244,13 @@
     if(!user||!db)return;
     const {data,error}=await db.from("void_script_favorites").select("script_id,created_at").eq("user_id",user.id).order("created_at",{ascending:false});
     if(error){$("#voidFavoriteList").innerHTML='<p class="saved-note">'+esc(error.message)+'</p>';return;}
-    const ids=(data||[]).map(x=>x.script_id);
+    const ids=(data||[]).map(x=>x.script_id);remoteFavoriteIds=new Set(ids);syncFavoriteButtons();
     if(!ids.length){$("#voidFavoriteList").innerHTML='<p class="saved-note">No saved scripts yet. Add favorites from the script library.</p>';return;}
     const q=await db.from("published_script_metadata").select("id,name,slug,description").in("id",ids);
     $("#voidFavoriteList").innerHTML=(q.data||[]).map(s=>'<article class="void-list-item"><div><b>'+esc(s.name)+'</b><small>'+esc(s.description||s.slug)+'</small></div><button class="secondary small" data-remove-favorite="'+esc(s.id)+'">Remove</button></article>').join("")||'<p class="saved-note">Favorite scripts are no longer published.</p>';
     $("#voidFavoriteList").querySelectorAll("[data-remove-favorite]").forEach(btn=>btn.addEventListener("click",async()=>{const r=await db.from("void_script_favorites").delete().eq("user_id",user.id).eq("script_id",btn.dataset.removeFavorite);if(r.error){toast(r.error.message);return;}loadFavorites();}));
   }
+  function syncFavoriteButtons(){document.querySelectorAll("#scriptGrid [data-favorite-id]").forEach(btn=>{const saved=remoteFavoriteIds.has(btn.dataset.favoriteId);btn.classList.toggle("is-favorite",saved);btn.setAttribute("aria-pressed",String(saved));btn.setAttribute("aria-label",(saved?"Remove from":"Add to")+" favorites");btn.textContent=saved?"♥":"♡";});}
   async function loadBadges() {
     if(!user||!db)return;
     const {data,error}=await db.from("void_user_badges").select("badge_key,label,description,created_at").eq("user_id",user.id).order("created_at",{ascending:false});
@@ -304,6 +305,7 @@
       const {data}=await db.auth.getSession();await onSession(data.session);
       db.auth.onAuthStateChange((_event,session)=>{setTimeout(()=>onSession(session),0);});
       loadAnnouncementsPublic();attachFavoriteTracking();
+      const grid=$("#scriptGrid");if(grid&&window.MutationObserver)new MutationObserver(()=>{if(user)syncFavoriteButtons();}).observe(grid,{childList:true,subtree:true});
     } catch(e){console.error("VOID feature initialization failed:",e);status("voidProfileStatus","Could not initialize community features.",true);}
   }
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init,{once:true});else init();
