@@ -41,9 +41,9 @@
     const meta=$('meta[name="theme-color"]');if(meta)meta.content=t.page;
     try{localStorage.setItem("voidDevelopment.theme.v1",JSON.stringify(t.id));}catch{}
     $$("#themeGrid [data-theme-choice]").forEach(b=>{b.classList.toggle("selected",b.dataset.themeChoice===id);b.setAttribute("aria-pressed",String(b.dataset.themeChoice===id));});
-    if (broadcast) document.dispatchEvent(new CustomEvent("arioScripts:theme-change", { detail: { id } }));
+    if (broadcast) document.dispatchEvent(new CustomEvent("voidDevelopment:theme-change", { detail: { id } }));
   }
-  document.addEventListener("arioScripts:theme-change", event => {
+  document.addEventListener("voidDevelopment:theme-change", event => {
     const id = event.detail?.id;
     if (themes.some(theme => theme.id === id)) setTheme(id, false);
   });
