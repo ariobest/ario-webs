@@ -424,3 +424,33 @@ body{background:radial-gradient(ellipse at 50% -15%,rgba(255,255,255,.09),transp
   :root[data-theme="mono"] .hero h1{animation:none;transition:none;transform:none}
   :root[data-theme="mono"] .hero h1:hover,:root[data-theme="mono"] .hero h1:hover span{transform:none;text-shadow:none}
 }
+
+
+/* VOID black-and-white polish */
+:root{--page:#050505;--surface:#0b0b0b;--surface-2:#121212;--ink:#fff;--muted:#b6b6bd;--line:rgba(255,255,255,.12);--accent:#fff;--accent-strong:#fff;--glow:rgba(255,255,255,.10);--hero-glow:rgba(255,255,255,.10);color-scheme:dark}
+:root[data-theme="mono"] .nav-button,:root[data-theme="mono"] .primary,:root[data-theme="mono"] .small-primary,:root[data-theme="mono"] .open-script{background:#fff!important;color:#050505!important;border-color:#fff!important}
+:root[data-theme="mono"] .secondary,:root[data-theme="mono"] .copy-btn,:root[data-theme="mono"] .icon-button{background:#fff;color:#050505;border-color:#fff}
+select,option,.editor-form select,.script-tools select{color:#fff!important;background-color:#111!important}
+option{background:#080808!important;color:#fff!important}
+.brand-logo{width:56px!important;height:56px!important;max-width:none;animation:void-logo-hue 9s linear infinite;filter:drop-shadow(0 0 10px rgba(255,255,255,.16))!important;transition:transform .45s cubic-bezier(.2,.8,.2,1),filter .4s ease!important}
+.brand:hover .brand-logo{transform:rotate(-8deg) scale(1.1)!important;filter:drop-shadow(0 0 18px rgba(255,255,255,.55))!important}
+.hero-brand-mark img{animation:void-logo-hue 9s linear infinite;transition:transform .45s ease,filter .45s ease}
+@keyframes void-logo-hue{0%,100%{filter:drop-shadow(0 0 10px rgba(255,255,255,.16)) hue-rotate(0deg)}50%{filter:drop-shadow(0 0 18px rgba(255,255,255,.36)) hue-rotate(180deg)}}
+.protector-badges{display:flex;flex-wrap:wrap;gap:7px;margin-top:13px}
+.void-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 9px;border:1px solid rgba(255,255,255,.14);border-radius:999px;background:linear-gradient(135deg,rgba(255,255,255,.08),rgba(255,255,255,.025));color:#f5f5f5;font-size:10px;font-weight:700;letter-spacing:.02em;box-shadow:inset 0 1px rgba(255,255,255,.06)}
+.void-badge svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;opacity:.92}
+.protected-progress{height:7px;margin-top:9px;overflow:hidden;border:1px solid rgba(255,255,255,.13);border-radius:999px;background:#171717;box-shadow:inset 0 1px 3px rgba(0,0,0,.8)}
+.protected-progress span{display:block;width:0;height:100%;border-radius:inherit;background:linear-gradient(90deg,#fff 0%,#d9d9d9 45%,#fff 100%);box-shadow:0 0 12px rgba(255,255,255,.35);transition:width .45s cubic-bezier(.2,.8,.2,1)}
+.protected-progress[data-state="loading"] span{background:linear-gradient(90deg,#aaa,#fff,#aaa);background-size:200% 100%;animation:progress-sheen 1.1s linear infinite}
+.protected-progress[data-state="done"] span{box-shadow:0 0 14px rgba(255,255,255,.45)}
+.protected-progress[data-state="error"] span{background:linear-gradient(90deg,#888,#fff)}
+.protected-progress-meta{display:flex;justify-content:space-between;gap:12px;margin-top:6px;color:var(--muted);font-size:10px;font-variant-numeric:tabular-nums}
+@keyframes progress-sheen{from{background-position:100% 0}to{background-position:-100% 0}}
+.editor-form input,.editor-form select,.editor-form textarea,.script-tools select,.script-tools input{transition:border-color .25s ease,background .25s ease,box-shadow .25s ease,transform .2s ease}
+.editor-form input:focus,.editor-form select:focus,.editor-form textarea:focus{border-color:rgba(255,255,255,.65);box-shadow:0 0 0 3px rgba(255,255,255,.07)}
+.admin-tab,.nav-link,.theme-choice,.script-card,.admin-script-row,.secondary,.small-primary,.primary,.nav-button{transition:all .28s cubic-bezier(.2,.75,.25,1)}
+.void-badge{animation:badge-arrive .5s both}
+.void-badge:nth-child(2){animation-delay:70ms}.void-badge:nth-child(3){animation-delay:140ms}
+@keyframes badge-arrive{from{opacity:0;transform:translateY(5px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+@media(max-width:760px){.brand-logo{width:44px!important;height:44px!important}}
+@media(prefers-reduced-motion:reduce){.brand-logo,.hero-brand-mark img,.void-badge,.protected-progress[data-state="loading"] span{animation:none!important}.brand-logo,.hero-brand-mark img{transition:none!important}}
