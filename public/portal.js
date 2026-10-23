@@ -537,7 +537,7 @@
     $("#protectorFile").addEventListener("change", async event => {
       const file = event.target.files?.[0];
       if (!file) return;
-      if (file.size > 200000) { $("#protectorStatus").textContent = "Lua source must be 200,000 bytes or smaller."; return; }
+      if (file.size > 10000 * 1024) { event.target.value = ""; $("#protectorStatus").textContent = "File is too large. Maximum file size is 10,000 KB (about 10 MB)."; return; }
       try {
         $("#protectorSource").value = await file.text();
         const guessedName = file.name.replace(/\\.(lua|luau|txt)$/i, "");
@@ -577,7 +577,7 @@
       if (!name) { $("#protectorStatus").textContent = "Enter a script name."; $("#protectorName").focus(); return; }
       if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) { $("#protectorStatus").textContent = "Use a valid slug with lowercase letters, numbers and hyphens."; $("#protectorSlug").focus(); return; }
       if (!source.trim()) { $("#protectorStatus").textContent = "Paste or import Lua/Luau source first."; $("#protectorSource").focus(); return; }
-      if (new TextEncoder().encode(source).length > 200000) { $("#protectorStatus").textContent = "Lua source must be 200,000 bytes or smaller."; return; }
+      if (new TextEncoder().encode(source).length > 10000 * 1024) { $("#protectorStatus").textContent = "Lua source is too large. Maximum size is 10,000 KB (about 10 MB)."; return; }
       const status = $("#protectorStatus");
       const createButton = $("#generateProtectedLoader");
       createButton.disabled = true;
