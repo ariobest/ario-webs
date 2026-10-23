@@ -21,10 +21,10 @@ async function checkKey(key:string,slug:string){
  if(grant.revoked_at)return{error:"This key has been revoked. Request a new key.",code:"KEY_REVOKED",status:403 as const,protected:true};
  if(grant.expires_at&&Date.parse(grant.expires_at)<=Date.now())return{error:"This key has expired. Request a new key.",code:"KEY_EXPIRED",status:401 as const,protected:true};
  if(grant.max_uses!==null&&grant.use_count>=grant.max_uses)return{error:"This key has reached its usage limit.",code:"KEY_LIMIT_REACHED",status:403 as const,protected:true};
- const {data:script,error:se}=await db.from("scripts").select("id,name,slug,status,content").eq("id",grant.script_id).maybeSingle();
+ const {data:script,error:se}=await db.from("scripts").select("id,name,slug,status,content").eq("slug",slug).maybeSingle();
  if(se){console.error("script lookup failed",se);return{error:"Key service could not check the script. Please try again.",code:"BACKEND_ERROR",status:500 as const,protected:true}}
  if(!script)return{error:"The script authorized by this key no longer exists.",code:"SCRIPT_NOT_FOUND",status:404 as const,protected:true};
- if(script.slug!==slug)return{error:"This key is not authorized for the requested script.",code:"WRONG_SCRIPT",status:403 as const,protected:true};
+ // Keys are global: any active key can authorize any published script slug.
  if(script.status!=="published")return{error:"This script is not published.",code:"SCRIPT_UNPUBLISHED",status:403 as const,protected:true};
  return{grant,script};
 }
