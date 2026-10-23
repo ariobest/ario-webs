@@ -1,6 +1,6 @@
 (() => {
   "use strict";
-  const LOGO_URL = "https://cdn.phototourl.com/member/2026-10-22-2137bbb7-82d5-48bb-855c-03c7361f95a8.png";
+  const LOGO_URL = "https://cqtwmxojwwyeasstuhgb.supabase.co/storage/v1/object/public/void-files/1792744606438-void-logo-icon.png";
   const STORAGE = { theme: "voidDevelopment.theme.v1", scripts: "voidDevelopment.library.v1", supabase: "voidDevelopment.supabase.public.v1", favorites: "voidDevelopment.favorites.v1" };
   const DEFAULT_SUPABASE = { url: "https://cqtwmxojwwyeasstuhgb.supabase.co", key: "sb_publishable_qBPb1ltQbHNZ-fO3PFmDeg_IQj0QfNB" };
   let supabaseClient = null;

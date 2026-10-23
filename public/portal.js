@@ -26,6 +26,11 @@
     ["gold","Gold","Premium gold","#f5d782","#d9a82e","#201a0b","#302710","#453719","#d5c69a"],
     ["slate","Slate","Minimal graphite","#b8c5d6","#8194ad","#111820","#1b2632","#273646","#afbbc9"],
     ["mono","Black Void","Black canvas, white spotlight","#ffffff","#f4f4f5","#050505","#0a0a0a","#101010","#d4d4d8"],
+    ["pink","Pink Void","Dark rose spotlight","#ff8bc8","#e95aa8","#10070e","#190c16","#261020","#c4a9ba"],
+    ["purple","Purple Void","Dark violet glow","#c59aff","#9763e8","#0b0713","#130d20","#1e1430","#b6a7cb"],
+    ["blue","Blue Void","Midnight blue spotlight","#8ccaff","#468fe0","#050b14","#091421","#101f31","#a2b7ce"],
+    ["red","Red Void","Dark crimson glow","#ff9292","#e64d5a","#100707","#190b0b","#271313","#c5a5a5"],
+    ["green","Emerald Void","Dark emerald glow","#91f4b3","#39b96a","#06100b","#0b1910","#11251a","#a2c5af"],
     ["candy","Candy","Playful pastel","#ffb5d2","#e779b0","#241529","#35203b","#4a2b50","#d9b8dc"],
     ["sakura","Sakura","Cherry blossom","#ffc1d1","#e884a2","#21141d","#30202b","#44303e","#d5b7c8"],
     ["arctic","Arctic","Ice and silver","#c1efff","#70bde8","#101d2a","#192b3b","#263f52","#b0c8d8"]
