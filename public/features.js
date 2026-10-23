@@ -20,7 +20,7 @@
   };
   const tabNames = [
     ["analytics","▥","Analytics"],["activity","◷","Live activity"],["lua-editor","⌘","Lua Studio"],
-    ["community-admin","♙","Community"],["security-log","⛨","Audit log"],["announcements","▤","Updates"]
+    ["community-admin","♙","Community"],["security-log","⛨","Audit log"],["announcements","▤","Updates"],["roadmap","▤","Roadmap"]
   ];
   function addAdminFeatures() {
     const tabs = $("#adminTabs"), content = $("#adminContent");
@@ -37,7 +37,8 @@
       '<section class="admin-pane" data-pane="lua-editor" id="voidEditorPane" hidden><div class="pane-heading"><div><h3>Lua Studio</h3><p>Admin-only editor with saved snapshots, notes, and safe rollback.</p></div></div><label>Script to edit<select id="voidEditorSelect"><option value="">Loading scripts…</option></select></label><label>Version note<input id="voidVersionNote" maxlength="160" placeholder="Describe what changed"></label><div class="void-editor-meta"><span id="voidEditorFilename">Choose a script</span><span id="voidEditorLines">0 lines</span></div><textarea id="voidLuaSource" class="void-lua-source" spellcheck="false" autocapitalize="off" autocomplete="off" placeholder="Select a script to edit Lua / Luau source…" disabled></textarea><div class="form-actions"><button type="button" class="secondary small" id="voidReloadSource">Reload</button><button type="button" class="secondary small" id="voidSaveSnapshot">Save snapshot</button><button type="button" class="small-primary" id="voidSaveSource">Save source</button></div><div class="void-card"><h4>Version history</h4><div id="voidVersionList" class="void-list"></div></div><p id="voidEditorStatus" class="saved-note">Select a script to begin.</p></section>',
       '<section class="admin-pane" data-pane="community-admin" id="voidCommunityAdminPane" hidden><div class="pane-heading"><div><h3>Community & badges</h3><p>Review profile totals and award profile badges to members.</p></div><button class="secondary small" id="voidRefreshCommunity">Refresh</button></div><div class="void-stat-grid"><article><span>Profiles</span><strong id="voidMemberCount">—</strong></article><article><span>Favorites</span><strong id="voidFavoriteCount">—</strong></article><article><span>Badges awarded</span><strong id="voidBadgeCount">—</strong></article></div><form id="voidBadgeForm" class="editor-form visible-form"><h4>Award a badge</h4><label>Member user ID<input id="voidBadgeUser" required placeholder="Supabase user UUID" autocomplete="off"></label><label>Badge name<input id="voidBadgeLabel" required maxlength="60" placeholder="Community Builder"></label><label>Badge key<input id="voidBadgeKey" required maxlength="50" pattern="[a-z0-9-]+" placeholder="community-builder"></label><label>Description<input id="voidBadgeDescription" maxlength="180" placeholder="Why this badge was awarded"></label><button class="small-primary" type="submit">Award badge</button><p id="voidBadgeStatus" class="saved-note" role="status"></p></form><p id="voidCommunityAdminStatus" class="saved-note"></p></section>',
       '<section class="admin-pane" data-pane="security-log" id="voidAuditPane" hidden><div class="pane-heading"><div><h3>Security & audit log</h3><p>Admin action history. Client-written events are useful operational records, not tamper-proof forensic evidence.</p></div><button class="secondary small" id="voidRefreshAudit">Refresh</button></div><div id="voidAuditList" class="void-list"></div><p id="voidAuditStatus" class="saved-note"></p></section>',
-      '<section class="admin-pane" data-pane="announcements" id="voidAnnouncementsPane" hidden><div class="pane-heading"><div><h3>Changelog & announcements</h3><p>Publish a release note or site-wide announcement to signed-in users.</p></div></div><form id="voidAnnouncementForm" class="editor-form visible-form"><label>Title<input id="voidAnnouncementTitle" required maxlength="120" placeholder="Version 2.1 is live"></label><label>Message<textarea id="voidAnnouncementBody" rows="4" required maxlength="3000" placeholder="What changed?"></textarea></label><button class="small-primary" type="submit">Publish update</button><p id="voidAnnouncementStatus" class="saved-note" role="status"></p></form><div class="void-card"><h4>Recent published updates</h4><div id="voidAnnouncementList" class="void-list"></div></div></section>'
+      '<section class="admin-pane" data-pane="announcements" id="voidAnnouncementsPane" hidden><div class="pane-heading"><div><h3>Changelog & announcements</h3><p>Publish a release note or site-wide announcement to signed-in users.</p></div></div><form id="voidAnnouncementForm" class="editor-form visible-form"><label>Title<input id="voidAnnouncementTitle" required maxlength="120" placeholder="Version 2.1 is live"></label><label>Message<textarea id="voidAnnouncementBody" rows="4" required maxlength="3000" placeholder="What changed?"></textarea></label><button class="small-primary" type="submit">Publish update</button><p id="voidAnnouncementStatus" class="saved-note" role="status"></p></form><div class="void-card"><h4>Recent published updates</h4><div id="voidAnnouncementList" class="void-list"></div></div></section>',
+      '<section class="admin-pane" data-pane="roadmap" id="voidRoadmapPane" hidden><div class="pane-heading"><div><h3>Script roadmap</h3><p>Manage game coverage, release milestones, and public progress. Changes sync through Supabase.</p></div><button class="secondary small" type="button" id="voidRefreshRoadmap">Refresh</button></div><form id="voidRoadmapForm" class="editor-form visible-form"><input type="hidden" id="voidRoadmapEditId"><label>Feature or game name<input id="voidRoadmapTitle" required maxlength="120" placeholder="MM2 loader support"></label><label>Game / area<input id="voidRoadmapGame" maxlength="120" placeholder="Murder Mystery 2, UI library, etc."></label><label>Notes<textarea id="voidRoadmapNotes" rows="3" maxlength="1200" placeholder="What is included and what remains?"></textarea></label><div class="void-pro-fields"><label>Progress %<input id="voidRoadmapProgress" type="number" min="0" max="100" step="1" value="0" required></label><label>Status<select id="voidRoadmapStatus"><option value="planned">Planned</option><option value="working">In progress</option><option value="testing">Testing</option><option value="released">Released</option></select></label><label>Sort order<input id="voidRoadmapSort" type="number" min="0" max="9999" step="1" value="0"></label></div><label class="setting-check"><input id="voidRoadmapPublic" type="checkbox" checked> Show on public roadmap</label><div class="form-actions"><button type="button" class="secondary small" id="voidRoadmapCancel">Clear form</button><button class="small-primary" type="submit">Save roadmap item</button></div><p id="voidRoadmapAdminStatus" class="saved-note" role="status">Roadmap changes are saved to the existing Supabase project.</p></form><div id="voidRoadmapAdminList" class="void-list"></div></section>'
     ];
     panes.forEach(p => content.insertAdjacentHTML("beforeend", p));
     const luaTextarea=$("#voidLuaSource");
@@ -55,6 +56,7 @@
       if (button.dataset.adminTab === "community-admin") loadCommunityAdmin();
       if (button.dataset.adminTab === "security-log") loadAudit();
       if (button.dataset.adminTab === "announcements") loadAnnouncements();
+      if (button.dataset.adminTab === "roadmap") loadRoadmapAdmin();
     });
     $("#voidRefreshAnalytics").addEventListener("click", loadAnalytics);
     $("#voidRefreshActivity").addEventListener("click", loadActivity);
@@ -67,6 +69,10 @@
     $("#voidSaveSource").addEventListener("click", saveSource);
     $("#voidBadgeForm").addEventListener("submit", awardBadge);
     $("#voidAnnouncementForm").addEventListener("submit", publishAnnouncement);
+    $("#voidRoadmapForm").addEventListener("submit", saveRoadmapItem);
+    $("#voidRefreshRoadmap").addEventListener("click", loadRoadmapAdmin);
+    $("#voidRoadmapCancel").addEventListener("click", resetRoadmapForm);
+    $("#voidRoadmapAdminList").addEventListener("click", handleRoadmapAdminClick);
     loadAnnouncementsPublic();
   }
   function requireAdmin() { if (!db || !user || !isAdmin) { toast("Sign in as an administrator to use this feature."); return false; } return true; }
@@ -208,6 +214,40 @@
     }
     $("#voidPublicUpdateList").innerHTML=data.map(a=>'<article class="void-list-item"><div><b>'+esc(a.title)+'</b><small>'+esc(a.body)+'</small></div><time>'+esc(date(a.published_at||a.created_at))+'</time></article>').join("");
   }
+  async function loadRoadmapPublic() {
+    const host=$("#publicRoadmapGrid");if(!host||!db)return;
+    const {data,error}=await db.from("void_roadmap_items").select("id,title,game_name,notes,progress,status,sort_order,updated_at").eq("is_public",true).order("sort_order",{ascending:true}).order("created_at",{ascending:false});
+    if(error){host.innerHTML='<p class="saved-note">The public roadmap is temporarily unavailable.</p>';status("publicRoadmapStatus","Roadmap data could not be loaded.",true);console.warn("VOID roadmap read failed:",error.message);return;}
+    host.innerHTML=(data||[]).map(item=>'<article class="roadmap-card"><div class="roadmap-card-head"><span class="roadmap-status roadmap-'+esc(item.status)+'">'+esc(({planned:"Planned",working:"In progress",testing:"Testing",released:"Released"})[item.status]||"Planned")+'</span><span class="roadmap-progress-label">'+Math.max(0,Math.min(100,Number(item.progress)||0))+'%</span></div><h3>'+esc(item.title)+'</h3>'+(item.game_name?'<p class="roadmap-game">'+esc(item.game_name)+'</p>':'')+'<p>'+esc(item.notes||"Details will be shared as development continues.")+'</p><div class="roadmap-progress" role="progressbar" aria-label="'+esc(item.title)+' progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+Math.max(0,Math.min(100,Number(item.progress)||0))+'"><span style="width:'+Math.max(0,Math.min(100,Number(item.progress)||0))+'%"></span></div></article>').join("")||'<p class="saved-note">No public roadmap items yet. Check back for upcoming games and features.</p>';
+    status("publicRoadmapStatus",(data||[]).length+" roadmap items loaded.");
+  }
+  async function loadRoadmapAdmin() {
+    if(!requireAdmin())return;
+    status("voidRoadmapAdminStatus","Loading roadmap items…");
+    const {data,error}=await db.from("void_roadmap_items").select("id,title,game_name,notes,progress,status,is_public,sort_order,updated_at").order("sort_order",{ascending:true}).order("created_at",{ascending:false});
+    if(error){status("voidRoadmapAdminStatus","Could not load roadmap: "+error.message,true);return;}
+    const host=$("#voidRoadmapAdminList");
+    host.innerHTML=(data||[]).map(item=>'<article class="void-list-item roadmap-admin-row"><div><b>'+esc(item.title)+'</b><small>'+esc(item.game_name||"No game specified")+' · '+esc(({planned:"Planned",working:"In progress",testing:"Testing",released:"Released"})[item.status]||item.status)+' · '+Number(item.progress||0)+'% · '+(item.is_public?"Public":"Hidden")+'</small><small>'+esc(item.notes||"No notes")+'</small></div><div class="roadmap-admin-actions"><button type="button" class="text-action" data-roadmap-edit="'+esc(item.id)+'">Edit</button><button type="button" class="text-action danger" data-roadmap-delete="'+esc(item.id)+'">Delete</button></div></article>').join("")||'<p class="saved-note">No roadmap items yet. Add the first one above.</p>';
+    host.dataset.roadmapItems=JSON.stringify(data||[]);
+    status("voidRoadmapAdminStatus","Loaded "+(data||[]).length+" roadmap items.");
+  }
+  async function saveRoadmapItem(event) {
+    event.preventDefault();if(!requireAdmin())return;
+    const id=$("#voidRoadmapEditId").value;
+    const record={title:$("#voidRoadmapTitle").value.trim(),game_name:$("#voidRoadmapGame").value.trim(),notes:$("#voidRoadmapNotes").value.trim(),progress:Math.max(0,Math.min(100,Number($("#voidRoadmapProgress").value)||0)),status:$("#voidRoadmapStatus").value,is_public:$("#voidRoadmapPublic").checked,sort_order:Math.max(0,Math.min(9999,Number($("#voidRoadmapSort").value)||0)),updated_at:new Date().toISOString()};
+    if(!record.title){status("voidRoadmapAdminStatus","Add a title first.",true);return;}
+    const result=id?await db.from("void_roadmap_items").update(record).eq("id",id).select("id").maybeSingle():await db.from("void_roadmap_items").insert({...record,created_by:user.id}).select("id").single();
+    if(result.error){status("voidRoadmapAdminStatus","Save failed: "+result.error.message,true);return;}
+    await audit(id?"roadmap.updated":"roadmap.created","roadmap",result.data?.id||id,{title:record.title,status:record.status,progress:record.progress,is_public:record.is_public});
+    resetRoadmapForm();await loadRoadmapAdmin();await loadRoadmapPublic();
+  }
+  function resetRoadmapForm(){const form=$("#voidRoadmapForm");if(!form)return;form.reset();$("#voidRoadmapEditId").value="";$("#voidRoadmapProgress").value="0";$("#voidRoadmapSort").value="0";$("#voidRoadmapPublic").checked=true;const submit=form.querySelector('button[type="submit"]');if(submit)submit.textContent="Save roadmap item";}
+  function handleRoadmapAdminClick(event){
+    const edit=event.target.closest("[data-roadmap-edit]"),del=event.target.closest("[data-roadmap-delete]");
+    const rows=JSON.parse($("#voidRoadmapAdminList")?.dataset.roadmapItems||"[]");
+    if(edit){const item=rows.find(x=>x.id===edit.dataset.roadmapEdit);if(!item)return;$("#voidRoadmapEditId").value=item.id;$("#voidRoadmapTitle").value=item.title||"";$("#voidRoadmapGame").value=item.game_name||"";$("#voidRoadmapNotes").value=item.notes||"";$("#voidRoadmapProgress").value=Number(item.progress)||0;$("#voidRoadmapStatus").value=item.status||"planned";$("#voidRoadmapPublic").checked=Boolean(item.is_public);$("#voidRoadmapSort").value=Number(item.sort_order)||0;$("#voidRoadmapForm").querySelector('button[type="submit"]').textContent="Update roadmap item";$("#voidRoadmapForm").scrollIntoView({behavior:"smooth",block:"start"});}
+    if(del&&requireAdmin()&&window.confirm("Delete this roadmap item?")){db.from("void_roadmap_items").delete().eq("id",del.dataset.roadmapDelete).then(async result=>{if(result.error){status("voidRoadmapAdminStatus",result.error.message,true);return;}await audit("roadmap.deleted","roadmap",del.dataset.roadmapDelete);await loadRoadmapAdmin();await loadRoadmapPublic();});}
+  }
   function addProfileArea() {
     if($("#voidProfileSection"))return;
     const section=document.createElement("section");section.id="voidProfileSection";section.className="profile-modal void-profile-modal";section.setAttribute("role","dialog");section.setAttribute("aria-modal","true");section.setAttribute("aria-labelledby","voidProfileTitle");
@@ -308,7 +348,7 @@
       db=window.supabase.createClient(PROJECT_URL,PUBLIC_KEY);
       const {data}=await db.auth.getSession();await onSession(data.session);
       db.auth.onAuthStateChange((_event,session)=>{setTimeout(()=>onSession(session),0);});
-      loadAnnouncementsPublic();attachFavoriteTracking();
+      loadAnnouncementsPublic();loadRoadmapPublic();attachFavoriteTracking();
       const grid=$("#scriptGrid");if(grid&&window.MutationObserver)new MutationObserver(()=>{if(user)syncFavoriteButtons();}).observe(grid,{childList:true,subtree:false});
     } catch(e){console.error("VOID feature initialization failed:",e);status("voidProfileStatus","Could not initialize community features.",true);}
   }

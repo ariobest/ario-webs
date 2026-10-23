@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en" data-theme="mono">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#050505">
+  <title>Lua Studio — VOID DEVELOPMENT</title>
+  <link rel="icon" href="https://cqtwmxojwwyeasstuhgb.supabase.co/storage/v1/object/public/void-files/1792744606438-void-logo-icon.png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/material-darker.min.css">
+  <link rel="stylesheet" href="/editor.css?v=20261023platform1">
+</head>
+<body>
+  <header class="editor-nav">
+    <a class="editor-brand" href="/"><img src="https://cqtwmxojwwyeasstuhgb.supabase.co/storage/v1/object/public/void-files/1792744606438-void-logo-icon.png" alt=""><span>VOID <b>DEVELOPMENT</b><small>Lua Studio</small></span></a>
+    <div class="editor-nav-actions"><span class="editor-safe-label"><i></i> Local editor · no code execution</span><a href="/">← Back to website</a></div>
+  </header>
+  <main class="editor-main">
+    <section class="editor-intro"><span class="eyebrow">CREATOR TOOLKIT / LUA & LUAU</span><h1>Write. Review. <span>Refine.</span></h1><p>A lightweight editor for drafting Lua/Luau text. Your work stays in this browser until you copy or download it.</p></section>
+    <section class="editor-workspace" aria-label="Lua code editor">
+      <div class="editor-toolbar"><div class="file-label"><span class="file-icon">⌘</span><div><b id="editorFilename">untitled.lua</b><small id="editorMeta">Lua / Luau source</small></div></div><div class="editor-actions"><button type="button" id="editorNew">New</button><button type="button" id="editorImport">Import</button><button type="button" id="editorCopy">Copy all</button><button type="button" id="editorDownload" class="editor-primary">Download .lua</button><input id="editorFileInput" type="file" accept=".lua,.luau,.txt,text/plain" hidden></div></div>
+      <textarea id="luaSource" spellcheck="false" autocapitalize="off" autocomplete="off" aria-label="Lua source editor">-- Welcome to VOID DEVELOPMENT Lua Studio
+-- Draft and review Lua / Luau code here.
+-- This editor does not execute code.
+
+local function greet(name)
+    return "Hello, " .. name .. "!"
+end
+
+print(greet("Void Developer"))
+</textarea>
+      <footer class="editor-statusbar"><span id="editorStatus" role="status">Ready</span><span id="editorCursor">Ln 1, Col 1</span><span id="editorStats">1 line · 0 chars</span></footer>
+    </section>
+    <p class="editor-note"><b>Safety note:</b> Review scripts before running them in any environment. Never paste passwords, private keys, or other secrets into code that you plan to publish.</p>
+  </main>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/lua/lua.min.js"></script>
+  <script src="/editor.js?v=20261023platform1"></script>
+</body>
+</html>
