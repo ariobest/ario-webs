@@ -26,7 +26,7 @@
   let scripts = safeRead(STORAGE.scripts, []);
   if (!Array.isArray(scripts)) scripts = [];
   scripts = scripts.filter(item => !DEMO_NAMES.has(String(item?.name || "").toLowerCase()) && !DEMO_NAMES.has(String(item?.slug || "").toLowerCase()));
-  const validThemes = ["summer","light","dark","winter","autumn","spring","ocean","sunset","lavender","rose","forest","mint","cyber","crimson","gold","slate","mono","candy","sakura","arctic"];
+  const validThemes = ["summer","light","dark","winter","autumn","spring","ocean","sunset","lavender","rose","forest","mint","cyber","crimson","gold","slate","mono","pink","purple","blue","red","green","candy","sakura","arctic"];
   let favorites = new Set(safeRead(STORAGE.favorites, []));
   let showFavorites = false;
   let currentTheme = safeRead(STORAGE.theme, "mono");
@@ -36,9 +36,9 @@
     if (!validThemes.includes(theme)) return;
     currentTheme = theme;
     document.documentElement.dataset.theme = theme;
-    const themeNames = { summer:"SUMMER EDITION",light:"LIGHT EDITION",dark:"MIDNIGHT EDITION",winter:"WINTER EDITION",autumn:"AUTUMN EDITION",spring:"SPRING EDITION",ocean:"OCEAN EDITION",sunset:"SUNSET EDITION",lavender:"LAVENDER EDITION",rose:"ROSE EDITION",forest:"FOREST EDITION",mint:"MINT EDITION",cyber:"CYBER EDITION",crimson:"CRIMSON EDITION",gold:"GOLD EDITION",slate:"SLATE EDITION",mono:"BLACK VOID",candy:"CANDY EDITION",sakura:"SAKURA EDITION",arctic:"ARCTIC EDITION" };
+    const themeNames = { summer:"SUMMER EDITION",light:"LIGHT EDITION",dark:"MIDNIGHT EDITION",winter:"WINTER EDITION",autumn:"AUTUMN EDITION",spring:"SPRING EDITION",ocean:"OCEAN EDITION",sunset:"SUNSET EDITION",lavender:"LAVENDER EDITION",rose:"ROSE EDITION",forest:"FOREST EDITION",mint:"MINT EDITION",cyber:"CYBER EDITION",crimson:"CRIMSON EDITION",gold:"GOLD EDITION",slate:"SLATE EDITION",mono:"BLACK VOID",pink:"PINK VOID",purple:"PURPLE VOID",blue:"BLUE VOID",red:"RED VOID",green:"EMERALD VOID",candy:"CANDY EDITION",sakura:"SAKURA EDITION",arctic:"ARCTIC EDITION" };
     $("#themeLabel").textContent = themeNames[theme];
-    const colors = { summer:"#101a2b",light:"#f7f9fc",dark:"#0a1020",winter:"#071827",autumn:"#1b120f",spring:"#0e1c19",ocean:"#071c2a",sunset:"#21101f",lavender:"#181326",rose:"#24111d",forest:"#0b1c15",mint:"#0a1e1b",cyber:"#071318",crimson:"#200e12",gold:"#201a0b",slate:"#111820",mono:"#050505",candy:"#241529",sakura:"#21141d",arctic:"#101d2a" };
+    const colors = { summer:"#101a2b",light:"#f7f9fc",dark:"#0a1020",winter:"#071827",autumn:"#1b120f",spring:"#0e1c19",ocean:"#071c2a",sunset:"#21101f",lavender:"#181326",rose:"#24111d",forest:"#0b1c15",mint:"#0a1e1b",cyber:"#071318",crimson:"#200e12",gold:"#201a0b",slate:"#111820",mono:"#050505",pink:"#10070e",purple:"#0b0713",blue:"#050b14",red:"#100707",green:"#06100b",candy:"#241529",sakura:"#21141d",arctic:"#101d2a" };
     $('meta[name="theme-color"]').content = colors[theme];
     safeWrite(STORAGE.theme, theme);
     $$("[data-public-theme]").forEach(button => { const selected = button.dataset.publicTheme === theme; button.classList.toggle("selected", selected); button.setAttribute("aria-pressed", String(selected)); });
@@ -96,13 +96,14 @@
   function renderScripts() {
     const query = ($("#scriptSearch").value || "").trim().toLowerCase();
     const category = $("#categoryFilter").value;
+    const release = $("#releaseFilter")?.value || "all";
     const sort = $("#sortScripts").value;
-    let filtered = scripts.filter(item => (category === "all" || item.category === category) && (!showFavorites || favorites.has(item.id)) && [item.name, item.category, item.description].some(value => String(value || "").toLowerCase().includes(query)));
+    let filtered = scripts.filter(item => (category === "all" || item.category === category) && (release === "all" || (item.release_status || "active") === release) && (!showFavorites || favorites.has(item.id)) && [item.name, item.category, item.description].some(value => String(value || "").toLowerCase().includes(query)));
     filtered = filtered.slice().sort((a, b) => sort === "az" ? a.name.localeCompare(b.name) : sort === "za" ? b.name.localeCompare(a.name) : scripts.indexOf(a) - scripts.indexOf(b));
     $("#favoritesToggle").classList.toggle("active", showFavorites);
     $("#favoritesToggle").setAttribute("aria-pressed", String(showFavorites));
     $("#favoritesToggle").textContent = showFavorites ? "♥ Favorites" : "♡ Favorites";
-    $("#scriptGrid").innerHTML = filtered.map((item, index) => `<article class="script-card" id="script-${escapeHTML(item.slug || item.id)}" style="--card-index:${index}"><div class="script-card-top"><span class="script-icon">${item.category === "Utility" ? "⌁" : item.category === "Tools" ? "⌘" : "✧"}</span><span class="pill">${escapeHTML(item.category)}</span><button class="favorite-btn ${favorites.has(item.id) ? "is-favorite" : ""}" data-favorite-id="${escapeHTML(item.id)}" type="button" aria-label="${favorites.has(item.id) ? "Remove from" : "Add to"} favorites" aria-pressed="${favorites.has(item.id)}">${favorites.has(item.id) ? "♥" : "♡"}</button><details class="script-more"><summary aria-label="More script options" title="More options">•••</summary><div class="script-more-menu"><button type="button" data-copy-link="${escapeHTML(item.slug || item.id)}">Copy script link</button><button type="button" data-copy-name="${escapeHTML(item.name)}">Copy script name</button></div></details></div><h3>${escapeHTML(item.name)}</h3><p>${escapeHTML(item.description)}</p><div class="script-card-actions"><button class="copy-btn" data-copy-loader="${escapeHTML(item.slug || item.id)}" type="button">Get key <span>↗</span></button><a class="open-script" href="/?view=scripts&amp;script=${encodeURIComponent(item.slug || item.id)}">View details ↗</a>${item.link ? `<a class="open-script" href="${escapeHTML(item.link)}" target="_blank" rel="noopener noreferrer">Project ↗</a>` : ""}</div></article>`).join("");
+    $("#scriptGrid").innerHTML = filtered.map((item, index) => `<article class="script-card" id="script-${escapeHTML(item.slug || item.id)}" style="--card-index:${index}"><div class="script-card-top"><span class="script-icon">${item.category === "Utility" ? "⌁" : item.category === "Tools" ? "⌘" : "✧"}</span><span class="pill">${escapeHTML(item.category)}</span><span class="script-release-status status-${escapeHTML(item.release_status || "active")}">${escapeHTML(({active:"Working",patched:"Patched",working_on:"Updating"})[item.release_status || "active"] || "Working")}</span><button class="favorite-btn ${favorites.has(item.id) ? "is-favorite" : ""}" data-favorite-id="${escapeHTML(item.id)}" type="button" aria-label="${favorites.has(item.id) ? "Remove from" : "Add to"} favorites" aria-pressed="${favorites.has(item.id)}">${favorites.has(item.id) ? "♥" : "♡"}</button><details class="script-more"><summary aria-label="More script options" title="More options">•••</summary><div class="script-more-menu"><button type="button" data-copy-link="${escapeHTML(item.slug || item.id)}">Copy script link</button><button type="button" data-copy-name="${escapeHTML(item.name)}">Copy script name</button></div></details></div><h3>${escapeHTML(item.name)}</h3><p>${escapeHTML(item.description)}</p><div class="script-card-actions"><button class="copy-btn" data-copy-loader="${escapeHTML(item.slug || item.id)}" type="button">Get key <span>↗</span></button><a class="open-script" href="/?view=scripts&amp;script=${encodeURIComponent(item.slug || item.id)}">View details ↗</a>${item.link ? `<a class="open-script" href="${escapeHTML(item.link)}" target="_blank" rel="noopener noreferrer">Project ↗</a>` : ""}</div></article>`).join("");
     $("#emptyState").textContent = showFavorites && filtered.length === 0 ? "No favorites yet — tap the heart on a script to save it." : "No scripts match that search.";
     $("#emptyState").hidden = filtered.length !== 0;
     if (requestedScript) renderScriptDetail(requestedScript);
@@ -254,9 +255,10 @@
   $$(".admin-tab").forEach(button => button.addEventListener("click", () => selectAdminTab(button.dataset.adminTab)));
   $$("[data-theme-choice]").forEach(button => button.addEventListener("click", () => applyTheme(button.dataset.themeChoice, true)));
   function setPage(view, updateAddress = true) {
-    const page = ["home", "scripts", "themes", "about"].includes(view) ? view : "home";
+    const page = ["home", "scripts", "roadmap", "themes", "about"].includes(view) ? view : "home";
     $("#hero").hidden = page !== "home";
     $("#scripts").hidden = page !== "scripts";
+    $("#roadmap").hidden = page !== "roadmap";
     $("#themes").hidden = page !== "themes";
     $("#about").hidden = page !== "about";
     $(".mobile-nav-link[data-view]").forEach(link => {
@@ -295,11 +297,12 @@
   $$("[data-scroll-scripts]").forEach(button => button.addEventListener("click", () => setPage("scripts")));
   window.addEventListener("popstate", () => {
     const route = location.pathname.replace(/\/+$/, "") || "/";
-    const fromPath = route === "/scripts" ? "scripts" : route === "/themes" ? "themes" : route === "/about" ? "about" : "home";
+    const fromPath = route === "/scripts" ? "scripts" : route === "/roadmap" ? "roadmap" : route === "/themes" ? "themes" : route === "/about" ? "about" : "home";
     setPage(new URLSearchParams(location.search).get("view") || fromPath, false);
   });
   $("#scriptSearch").addEventListener("input", renderScripts);
   $("#categoryFilter").addEventListener("change", renderScripts);
+  $("#releaseFilter")?.addEventListener("change", renderScripts);
   $("#sortScripts").addEventListener("change", renderScripts);
   $("#favoritesToggle").addEventListener("click", () => { showFavorites = !showFavorites; renderScripts(); });
   $("#backToTop").addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
