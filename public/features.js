@@ -20,7 +20,7 @@
   };
   const tabNames = [
     ["analytics","▥","Analytics"],["activity","◷","Live activity"],["lua-editor","⌘","Lua Studio"],
-    ["community-admin","♙","Community"],["security-log","⛨","Audit log"],["announcements","▤","Updates"],["roadmap","▤","Roadmap"]
+    ["community-admin","♙","Community"],["security-log","⛨","Audit log"],["announcements","▤","Updates"],["roadmap","▤","Roadmap"],["admin-users","♙","Users"],["admin-reports","⚑","Reports"],["admin-inbox","✉","Inbox"],["admin-backup","⇩","Backups"],["admin-site","◉","Site control"]
   ];
   function addAdminFeatures() {
     const tabs = $("#adminTabs"), content = $("#adminContent");
@@ -38,7 +38,12 @@
       '<section class="admin-pane" data-pane="community-admin" id="voidCommunityAdminPane" hidden><div class="pane-heading"><div><h3>Community & badges</h3><p>Review profile totals and award profile badges to members.</p></div><button class="secondary small" id="voidRefreshCommunity">Refresh</button></div><div class="void-stat-grid"><article><span>Profiles</span><strong id="voidMemberCount">—</strong></article><article><span>Favorites</span><strong id="voidFavoriteCount">—</strong></article><article><span>Badges awarded</span><strong id="voidBadgeCount">—</strong></article></div><form id="voidBadgeForm" class="editor-form visible-form"><h4>Award a badge</h4><label>Member user ID<input id="voidBadgeUser" required placeholder="Supabase user UUID" autocomplete="off"></label><label>Badge name<input id="voidBadgeLabel" required maxlength="60" placeholder="Community Builder"></label><label>Badge key<input id="voidBadgeKey" required maxlength="50" pattern="[a-z0-9-]+" placeholder="community-builder"></label><label>Description<input id="voidBadgeDescription" maxlength="180" placeholder="Why this badge was awarded"></label><button class="small-primary" type="submit">Award badge</button><p id="voidBadgeStatus" class="saved-note" role="status"></p></form><p id="voidCommunityAdminStatus" class="saved-note"></p></section>',
       '<section class="admin-pane" data-pane="security-log" id="voidAuditPane" hidden><div class="pane-heading"><div><h3>Security & audit log</h3><p>Admin action history. Client-written events are useful operational records, not tamper-proof forensic evidence.</p></div><button class="secondary small" id="voidRefreshAudit">Refresh</button></div><div id="voidAuditList" class="void-list"></div><p id="voidAuditStatus" class="saved-note"></p></section>',
       '<section class="admin-pane" data-pane="announcements" id="voidAnnouncementsPane" hidden><div class="pane-heading"><div><h3>Changelog & announcements</h3><p>Publish a release note or site-wide announcement to signed-in users.</p></div></div><form id="voidAnnouncementForm" class="editor-form visible-form"><label>Title<input id="voidAnnouncementTitle" required maxlength="120" placeholder="Version 2.1 is live"></label><label>Message<textarea id="voidAnnouncementBody" rows="4" required maxlength="3000" placeholder="What changed?"></textarea></label><button class="small-primary" type="submit">Publish update</button><p id="voidAnnouncementStatus" class="saved-note" role="status"></p></form><div class="void-card"><h4>Recent published updates</h4><div id="voidAnnouncementList" class="void-list"></div></div></section>',
-      '<section class="admin-pane" data-pane="roadmap" id="voidRoadmapPane" hidden><div class="pane-heading"><div><h3>Script roadmap</h3><p>Manage game coverage, release milestones, and public progress. Changes sync through Supabase.</p></div><button class="secondary small" type="button" id="voidRefreshRoadmap">Refresh</button></div><form id="voidRoadmapForm" class="editor-form visible-form"><input type="hidden" id="voidRoadmapEditId"><label>Feature or game name<input id="voidRoadmapTitle" required maxlength="120" placeholder="MM2 loader support"></label><label>Game / area<input id="voidRoadmapGame" maxlength="120" placeholder="Murder Mystery 2, UI library, etc."></label><label>Notes<textarea id="voidRoadmapNotes" rows="3" maxlength="1200" placeholder="What is included and what remains?"></textarea></label><div class="void-pro-fields"><label>Progress %<input id="voidRoadmapProgress" type="number" min="0" max="100" step="1" value="0" required></label><label>Status<select id="voidRoadmapStatus"><option value="planned">Planned</option><option value="working">In progress</option><option value="testing">Testing</option><option value="released">Released</option></select></label><label>Sort order<input id="voidRoadmapSort" type="number" min="0" max="9999" step="1" value="0"></label></div><label class="setting-check"><input id="voidRoadmapPublic" type="checkbox" checked> Show on public roadmap</label><div class="form-actions"><button type="button" class="secondary small" id="voidRoadmapCancel">Clear form</button><button class="small-primary" type="submit">Save roadmap item</button></div><p id="voidRoadmapAdminStatus" class="saved-note" role="status">Roadmap changes are saved to the existing Supabase project.</p></form><div id="voidRoadmapAdminList" class="void-list"></div></section>'
+      '<section class="admin-pane" data-pane="roadmap" id="voidRoadmapPane" hidden><div class="pane-heading"><div><h3>Script roadmap</h3><p>Manage game coverage, release milestones, and public progress. Changes sync through Supabase.</p></div><button class="secondary small" type="button" id="voidRefreshRoadmap">Refresh</button></div><form id="voidRoadmapForm" class="editor-form visible-form"><input type="hidden" id="voidRoadmapEditId"><label>Feature or game name<input id="voidRoadmapTitle" required maxlength="120" placeholder="MM2 loader support"></label><label>Game / area<input id="voidRoadmapGame" maxlength="120" placeholder="Murder Mystery 2, UI library, etc."></label><label>Notes<textarea id="voidRoadmapNotes" rows="3" maxlength="1200" placeholder="What is included and what remains?"></textarea></label><div class="void-pro-fields"><label>Progress %<input id="voidRoadmapProgress" type="number" min="0" max="100" step="1" value="0" required></label><label>Status<select id="voidRoadmapStatus"><option value="planned">Planned</option><option value="working">In progress</option><option value="testing">Testing</option><option value="released">Released</option></select></label><label>Sort order<input id="voidRoadmapSort" type="number" min="0" max="9999" step="1" value="0"></label></div><label class="setting-check"><input id="voidRoadmapPublic" type="checkbox" checked> Show on public roadmap</label><div class="form-actions"><button type="button" class="secondary small" id="voidRoadmapCancel">Clear form</button><button class="small-primary" type="submit">Save roadmap item</button></div><p id="voidRoadmapAdminStatus" class="saved-note" role="status">Roadmap changes are saved to the existing Supabase project.</p></form><div id="voidRoadmapAdminList" class="void-list"></div></section>',
+      '<section class="admin-pane" data-pane="admin-users" hidden><div class="pane-heading"><div><h3>User management</h3><p>Review existing profiles and manage account restrictions. Admin-role promotion is intentionally not available here.</p></div><button class="secondary small" id="voidRefreshUsers" type="button">Refresh</button></div><label>Search users<input id="voidUserSearch" type="search" placeholder="Username or user UUID"></label><div id="voidAdminUsersList" class="void-list"></div><p id="voidAdminUsersStatus" class="saved-note" role="status"></p></section>',
+      '<section class="admin-pane" data-pane="admin-reports" hidden><div class="pane-heading"><div><h3>Reports & moderation</h3><p>Review user-submitted script reports and record moderation outcomes.</p></div><button class="secondary small" id="voidRefreshReports" type="button">Refresh</button></div><div class="void-pro-fields"><label>Filter status<select id="voidReportFilter"><option value="open">Open</option><option value="reviewing">Reviewing</option><option value="resolved">Resolved</option><option value="dismissed">Dismissed</option><option value="all">All reports</option></select></label></div><div id="voidReportsList" class="void-list"></div><p id="voidReportsStatus" class="saved-note" role="status"></p></section>',
+      '<section class="admin-pane" data-pane="admin-inbox" hidden><div class="pane-heading"><div><h3>Admin notifications</h3><p>Broadcasts and account-specific notices stored in the existing notification system.</p></div><button class="secondary small" id="voidRefreshAdminInbox" type="button">Refresh</button></div><form id="voidAdminNoticeForm" class="editor-form visible-form"><label>Title<input id="voidAdminNoticeTitle" required maxlength="140" placeholder="Maintenance scheduled"></label><label>Message<textarea id="voidAdminNoticeBody" rows="3" maxlength="2000" placeholder="Write a clear update for your users"></textarea></label><label>Type<select id="voidAdminNoticeKind"><option value="info">Information</option><option value="warning">Warning</option><option value="success">Success</option><option value="release">Release</option></select></label><label>Optional link<input id="voidAdminNoticeLink" type="url" maxlength="500" placeholder="https://voiddev.bond/updates"></label><button class="small-primary" type="submit">Send site-wide notification</button><p id="voidAdminNoticeStatus" class="saved-note" role="status"></p></form><div id="voidAdminInboxList" class="void-list"></div><p id="voidAdminInboxStatus" class="saved-note" role="status"></p></section>',
+      '<section class="admin-pane" data-pane="admin-backup" hidden><div class="pane-heading"><div><h3>Export & backups</h3><p>Download a timestamped JSON export of records the signed-in admin can read. This is not a full Supabase database or Storage backup.</p></div></div><div class="void-card"><h4>Data export</h4><p>Includes scripts, profiles, script events, audit history, notifications, reports, and site settings when permitted. Each table is capped at 5,000 rows.</p><button class="small-primary" id="voidDownloadBackup" type="button">Download JSON backup</button><p id="voidBackupStatus" class="saved-note" role="status">Export runs in your browser using your existing admin session.</p></div><div class="void-card"><h4>Backup safety</h4><p>Store the downloaded file securely. It may contain private script source and account identifiers. For disaster recovery, also use Supabase database backup / point-in-time recovery and Storage backup options.</p></div></section>',
+      '<section class="admin-pane" data-pane="admin-site" hidden><div class="pane-heading"><div><h3>Site control</h3><p>Manage the public maintenance notice and inspect the current public-facing state.</p></div><button class="secondary small" id="voidReloadAdminSite" type="button">Reload</button></div><form id="voidMaintenanceForm" class="editor-form visible-form"><label class="setting-check"><input id="voidMaintenanceEnabled" type="checkbox"> Enable maintenance notice for visitors</label><label>Visitor message<textarea id="voidMaintenanceMessage" rows="3" maxlength="500">VOID DEVELOPMENT is undergoing scheduled maintenance. Please check back soon.</textarea></label><p class="security-note">This toggle displays a public maintenance notice; it is not a server-side access lock and must not be used as a security boundary.</p><button class="small-primary" type="submit">Save maintenance settings</button><p id="voidMaintenanceStatus" class="saved-note" role="status"></p></form></section>'
     ];
     panes.forEach(p => content.insertAdjacentHTML("beforeend", p));
     const luaTextarea=$("#voidLuaSource");
@@ -57,6 +62,10 @@
       if (button.dataset.adminTab === "security-log") loadAudit();
       if (button.dataset.adminTab === "announcements") loadAnnouncements();
       if (button.dataset.adminTab === "roadmap") loadRoadmapAdmin();
+      if (button.dataset.adminTab === "admin-users") loadAdminUsers();
+      if (button.dataset.adminTab === "admin-reports") loadAdminReports();
+      if (button.dataset.adminTab === "admin-inbox") loadAdminInbox();
+      if (button.dataset.adminTab === "admin-site") loadAdminSiteSettings();
     });
     $("#voidRefreshAnalytics").addEventListener("click", loadAnalytics);
     $("#voidRefreshActivity").addEventListener("click", loadActivity);
@@ -73,6 +82,15 @@
     $("#voidRefreshRoadmap").addEventListener("click", loadRoadmapAdmin);
     $("#voidRoadmapCancel").addEventListener("click", resetRoadmapForm);
     $("#voidRoadmapAdminList").addEventListener("click", handleRoadmapAdminClick);
+    $("#voidRefreshUsers").addEventListener("click", loadAdminUsers);
+    $("#voidUserSearch").addEventListener("input", renderAdminUsers);
+    $("#voidRefreshReports").addEventListener("click", loadAdminReports);
+    $("#voidReportFilter").addEventListener("change", loadAdminReports);
+    $("#voidRefreshAdminInbox").addEventListener("click", loadAdminInbox);
+    $("#voidAdminNoticeForm").addEventListener("submit", publishAdminNotice);
+    $("#voidDownloadBackup").addEventListener("click", downloadAdminBackup);
+    $("#voidReloadAdminSite").addEventListener("click", loadAdminSiteSettings);
+    $("#voidMaintenanceForm").addEventListener("submit", saveAdminSiteSettings);
     loadAnnouncementsPublic();
   }
   function requireAdmin() { if (!db || !user || !isAdmin) { toast("Sign in as an administrator to use this feature."); return false; } return true; }
@@ -248,6 +266,120 @@
     if(edit){const item=rows.find(x=>x.id===edit.dataset.roadmapEdit);if(!item)return;$("#voidRoadmapEditId").value=item.id;$("#voidRoadmapTitle").value=item.title||"";$("#voidRoadmapGame").value=item.game_name||"";$("#voidRoadmapNotes").value=item.notes||"";$("#voidRoadmapProgress").value=Number(item.progress)||0;$("#voidRoadmapStatus").value=item.status||"planned";$("#voidRoadmapPublic").checked=Boolean(item.is_public);$("#voidRoadmapSort").value=Number(item.sort_order)||0;$("#voidRoadmapForm").querySelector('button[type="submit"]').textContent="Update roadmap item";$("#voidRoadmapForm").scrollIntoView({behavior:"smooth",block:"start"});}
     if(del&&requireAdmin()&&window.confirm("Delete this roadmap item?")){db.from("void_roadmap_items").delete().eq("id",del.dataset.roadmapDelete).then(async result=>{if(result.error){status("voidRoadmapAdminStatus",result.error.message,true);return;}await audit("roadmap.deleted","roadmap",del.dataset.roadmapDelete);await loadRoadmapAdmin();await loadRoadmapPublic();});}
   }
+  async function loadAdminUsers() {
+    if(!requireAdmin())return;
+    status("voidAdminUsersStatus","Loading user profiles…");
+    const {data,error}=await db.from("ario_profiles").select("id,username,display_name,role,banned,verified,created_at,updated_at").order("created_at",{ascending:false}).limit(500);
+    if(error){status("voidAdminUsersStatus","Could not load profiles: "+error.message,true);return;}
+    window.voidAdminUserRows=data||[];
+    renderAdminUsers();
+    status("voidAdminUsersStatus","Loaded "+window.voidAdminUserRows.length+" profiles. Search is limited to the latest 500 profile records.");
+  }
+  function renderAdminUsers() {
+    const root=$("#voidAdminUsersList");if(!root)return;
+    const query=($("#voidUserSearch")?.value||"").trim().toLowerCase();
+    const rows=(window.voidAdminUserRows||[]).filter(x=>(x.username||"").toLowerCase().includes(query)||(x.display_name||"").toLowerCase().includes(query)||String(x.id).toLowerCase().includes(query));
+    root.innerHTML=rows.map(x=>'<article class="void-list-item"><div><b>'+esc(x.display_name||x.username||"Unnamed user")+'</b><small>@'+esc(x.username||"no-username")+' · '+esc(String(x.id))+'</small><small>Role: '+esc(x.role||"member")+' · '+(x.verified?"Verified":"Not verified")+' · '+(x.banned?"Restricted":"Active")+'</small></div><div class="roadmap-admin-actions"><button type="button" class="secondary small" data-admin-verify="'+esc(x.id)+'" data-value="'+(!x.verified)+'">'+(x.verified?"Unverify":"Verify")+'</button><button type="button" class="secondary small" data-admin-ban="'+esc(x.id)+'" data-value="'+(!x.banned)+'">'+(x.banned?"Unrestrict":"Restrict")+'</button></div></article>').join("")||'<p class="saved-note">No matching users.</p>';
+    root.querySelectorAll("[data-admin-verify],[data-admin-ban]").forEach(btn=>btn.addEventListener("click",async()=>{
+      if(!requireAdmin())return;
+      const id=btn.dataset.adminVerify||btn.dataset.adminBan;
+      const field=btn.hasAttribute("data-admin-verify")?"verified":"banned";
+      const value=btn.dataset.value==="true";
+      if(!confirm((field==="banned"?(value?"Restrict":"Remove restriction for "):(value?"Verify":"Remove verification for "))+id+"?"))return;
+      const patch={[field]:value,updated_at:new Date().toISOString()};
+      const result=await db.from("ario_profiles").update(patch).eq("id",id);
+      if(result.error){status("voidAdminUsersStatus","Update failed: "+result.error.message,true);return;}
+      await audit(field==="banned"?(value?"user.restricted":"user.unrestricted"):(value?"user.verified":"user.unverified"),"user",id,{[field]:value});
+      await loadAdminUsers();
+    }));
+  }
+  async function loadAdminReports() {
+    if(!requireAdmin())return;
+    status("voidReportsStatus","Loading reports…");
+    let query=db.from("void_script_reports").select("id,script_id,reporter_id,reason,details,status,created_at,reviewed_by,reviewed_at").order("created_at",{ascending:false}).limit(300);
+    const filter=$("#voidReportFilter").value;if(filter!=="all")query=query.eq("status",filter);
+    const {data,error}=await query;
+    if(error){status("voidReportsStatus","Could not load reports. Apply the admin migration first: "+error.message,true);return;}
+    const ids=[...new Set((data||[]).map(r=>r.script_id).filter(Boolean))];let names={};
+    if(ids.length){const scripts=await db.from("scripts").select("id,name,slug").in("id",ids);(scripts.data||[]).forEach(s=>names[s.id]=s);}
+    $("#voidReportsList").innerHTML=(data||[]).map(r=>'<article class="void-list-item"><div><b>'+esc(r.reason)+'</b><small>'+esc(names[r.script_id]?.name||"Script removed or unspecified")+' · '+esc(r.status)+' · '+esc(date(r.created_at))+'</small><small>'+esc(r.details||"No additional details")+'</small><small>Report ID: '+esc(r.id)+' · Reporter: '+esc(r.reporter_id||"unknown")+'</small></div><div class="roadmap-admin-actions"><select aria-label="Report status" data-report-status="'+esc(r.id)+'"><option value="open" '+(r.status==="open"?"selected":"")+'>Open</option><option value="reviewing" '+(r.status==="reviewing"?"selected":"")+'>Reviewing</option><option value="resolved" '+(r.status==="resolved"?"selected":"")+'>Resolved</option><option value="dismissed" '+(r.status==="dismissed"?"selected":"")+'>Dismissed</option></select><button class="secondary small" type="button" data-save-report="'+esc(r.id)+'">Save</button></div></article>').join("")||'<p class="saved-note">No reports in this queue.</p>';
+    $("#voidReportsList").querySelectorAll("[data-save-report]").forEach(btn=>btn.addEventListener("click",async()=>{
+      const id=btn.dataset.saveReport,statusValue=$("#voidReportsList [data-report-status=\""+id+"\"]")?.value;
+      if(!statusValue||!requireAdmin())return;
+      const result=await db.from("void_script_reports").update({status:statusValue,reviewed_by:user.id,reviewed_at:new Date().toISOString()}).eq("id",id);
+      if(result.error){status("voidReportsStatus",result.error.message,true);return;}
+      await audit("report.status.updated","report",id,{status:statusValue});await loadAdminReports();
+    }));
+    status("voidReportsStatus","Loaded "+(data||[]).length+" reports.");
+  }
+  async function loadAdminInbox() {
+    if(!requireAdmin())return;
+    status("voidAdminInboxStatus","Loading notifications…");
+    const {data,error}=await db.from("void_notifications").select("id,user_id,title,body,kind,link,created_at,read_at,created_by").order("created_at",{ascending:false}).limit(300);
+    if(error){status("voidAdminInboxStatus",error.message,true);return;}
+    $("#voidAdminInboxList").innerHTML=(data||[]).map(n=>'<article class="void-list-item"><div><b>'+esc(n.title)+'</b><small>'+esc(n.kind)+' · '+esc(n.user_id||"Site-wide broadcast")+' · '+esc(date(n.created_at))+'</small><small>'+esc(n.body||"")+'</small></div><span class="void-badge">'+(n.read_at?"Read":"Unread")+'</span></article>').join("")||'<p class="saved-note">No notifications yet.</p>';
+    status("voidAdminInboxStatus","Loaded "+(data||[]).length+" notification records.");
+  }
+  async function publishAdminNotice(event) {
+    event.preventDefault();if(!requireAdmin())return;
+    const title=$("#voidAdminNoticeTitle").value.trim(),body=$("#voidAdminNoticeBody").value.trim(),kind=$("#voidAdminNoticeKind").value,link=$("#voidAdminNoticeLink").value.trim();
+    if(!title){status("voidAdminNoticeStatus","A title is required.",true);return;}
+    if(link){try{const u=new URL(link);if(u.protocol!=="https:")throw new Error();}catch{status("voidAdminNoticeStatus","Link must be a valid HTTPS URL.",true);return;}}
+    const {error}=await db.from("void_notifications").insert({user_id:null,title,body,kind,link:link||null,created_by:user.id});
+    if(error){status("voidAdminNoticeStatus",error.message,true);return;}
+    await audit("notification.broadcast","notification",null,{title,kind});status("voidAdminNoticeStatus","Site-wide notification published.");event.target.reset();await loadAdminInbox();
+  }
+  async function downloadAdminBackup() {
+    if(!requireAdmin())return;
+    status("voidBackupStatus","Preparing export…");
+    const tables=[
+      ["scripts","id,name,slug,category,description,status,release_status,created_at,updated_at,view_count,content"],
+      ["ario_profiles","id,username,display_name,bio,role,banned,verified,created_at,updated_at"],
+      ["script_events","id,script_id,user_id,event_type,created_at"],
+      ["void_audit_logs","id,actor_id,action,target_type,target_id,metadata,created_at"],
+      ["void_notifications","id,user_id,title,body,kind,link,created_by,created_at,read_at"],
+      ["void_script_reports","id,script_id,reporter_id,reason,details,status,reviewed_by,reviewed_at,created_at"],
+      ["void_admin_settings","setting_key,setting_value,updated_by,updated_at"]
+    ];
+    const backup={product:"VOID DEVELOPMENT",format_version:1,created_at:new Date().toISOString(),note:"Client-side export of accessible rows, maximum 5000 per table; not a complete database/storage backup.",tables:{}};
+    const errors=[];
+    for(const [table,columns] of tables){
+      const result=await db.from(table).select(columns).limit(5000);
+      if(result.error){errors.push(table+": "+result.error.message);continue;}
+      backup.tables[table]=result.data||[];
+    }
+    const blob=new Blob([JSON.stringify(backup,null,2)],{type:"application/json"});
+    const url=URL.createObjectURL(blob),a=document.createElement("a");
+    a.href=url;a.download="void-development-backup-"+new Date().toISOString().replace(/[:.]/g,"-")+".json";document.body.append(a);a.click();a.remove();URL.revokeObjectURL(url);
+    await audit("backup.exported","backup",null,{tables:Object.keys(backup.tables),errors:errors.length});
+    status("voidBackupStatus","Export downloaded. Included "+Object.keys(backup.tables).length+" tables."+ (errors.length?" Some tables were skipped: "+errors.join(" | "):" Check the JSON note; this is not a full Supabase backup."),Boolean(errors.length));
+  }
+  async function loadAdminSiteSettings() {
+    if(!requireAdmin())return;
+    status("voidMaintenanceStatus","Loading site controls…");
+    const {data,error}=await db.from("void_admin_settings").select("setting_value").eq("setting_key","maintenance_mode").maybeSingle();
+    if(error){status("voidMaintenanceStatus","Could not load settings. Apply the admin migration first: "+error.message,true);return;}
+    const value=data?.setting_value||{enabled:false,message:"VOID DEVELOPMENT is undergoing scheduled maintenance. Please check back soon."};
+    $("#voidMaintenanceEnabled").checked=Boolean(value.enabled);$("#voidMaintenanceMessage").value=value.message||"";
+    status("voidMaintenanceStatus","Settings loaded.");
+  }
+  async function saveAdminSiteSettings(event) {
+    event.preventDefault();if(!requireAdmin())return;
+    const value={enabled:$("#voidMaintenanceEnabled").checked,message:$("#voidMaintenanceMessage").value.trim().slice(0,500)};
+    const {error}=await db.from("void_admin_settings").upsert({setting_key:"maintenance_mode",setting_value:value,updated_by:user.id,updated_at:new Date().toISOString()},{onConflict:"setting_key"});
+    if(error){status("voidMaintenanceStatus",error.message,true);return;}
+    await audit("site.maintenance.updated","setting", "maintenance_mode",value);
+    status("voidMaintenanceStatus",value.enabled?"Maintenance notice enabled for visitors.":"Maintenance notice disabled.");
+    loadPublicMaintenanceNotice();
+  }
+  async function loadPublicMaintenanceNotice() {
+    if(!db||isAdmin)return;
+    const {data,error}=await db.from("void_admin_settings").select("setting_value").eq("setting_key","maintenance_mode").maybeSingle();
+    if(error||!data?.setting_value?.enabled)return;
+    let banner=$("#voidPublicMaintenanceNotice");
+    if(!banner){banner=document.createElement("aside");banner.id="voidPublicMaintenanceNotice";banner.className="void-maintenance-notice";banner.setAttribute("role","status");document.body.prepend(banner);}
+    banner.textContent=data.setting_value.message||"VOID DEVELOPMENT is undergoing scheduled maintenance. Please check back soon.";
+  }
   function addProfileArea() {
     if($("#voidProfileSection"))return;
     const section=document.createElement("section");section.id="voidProfileSection";section.className="profile-modal void-profile-modal";section.setAttribute("role","dialog");section.setAttribute("aria-modal","true");section.setAttribute("aria-labelledby","voidProfileTitle");
@@ -340,6 +472,7 @@
     const openProfile=$("#openProfile");
     if(openProfile){openProfile.hidden=!user;openProfile.textContent=user?"Profile":"Profile";}
     if(user){loadProfile();}else if($("#voidProfileSection")){status("voidProfileStatus","Sign in to save your profile and sync favorites.");}
+    loadPublicMaintenanceNotice();
   }
   async function init() {
     addAdminFeatures();addProfileArea();bindPublicNotifications();
