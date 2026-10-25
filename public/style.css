@@ -1094,3 +1094,12 @@ body:before{content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;bac
 .nav a.nav-link{display:inline-flex;align-items:center;text-decoration:none}
 @media(max-width:900px){.roadmap-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:620px){.roadmap-grid{grid-template-columns:1fr}.roadmap-card{padding:18px}.roadmap-admin-row{align-items:flex-start}.roadmap-admin-actions{flex-wrap:wrap}#releaseFilter{max-width:100%;width:100%}}
+
+
+/* Void Admin Control Center additions */
+.void-extra-tab{white-space:nowrap}
+.void-maintenance-notice{position:relative;z-index:50;margin:14px auto;width:min(1100px,calc(100% - 28px));padding:16px 20px;border:1px solid rgba(255,255,255,.24);border-radius:18px;background:linear-gradient(135deg,rgba(255,255,255,.12),rgba(255,255,255,.035));color:#fff;box-shadow:0 14px 48px rgba(0,0,0,.25);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);font-size:14px;line-height:1.6}
+#voidAdminUsersList .roadmap-admin-actions,#voidReportsList .roadmap-admin-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+#voidReportsList select{max-width:160px;min-width:115px}
+#voidAdminUsersList .void-list-item,#voidReportsList .void-list-item{gap:14px}
+@media(max-width:640px){#voidAdminUsersList .void-list-item,#voidReportsList .void-list-item{align-items:stretch;flex-direction:column}#voidAdminUsersList .roadmap-admin-actions,#voidReportsList .roadmap-admin-actions{width:100%}#voidAdminUsersList .roadmap-admin-actions button,#voidReportsList .roadmap-admin-actions button{flex:1}.void-maintenance-notice{padding:13px 15px}}
